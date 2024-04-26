@@ -16,14 +16,22 @@ public interface DownloaderAndExtracter extends Downloader {
 		if (!dst.exists() || isRefreshDependencies()) {
 			File tmpDir = project.file(".downloads");
 			File tmpJar = new File(tmpDir, "tmp.jar");
-			File tmpDst = new File(tmpDir, dst.getName());
+			File tmpDst = new File(tmpDir, "tmp");
 
-			download(url, tmpDst);
+			if (tmpDir.exists()) {
+				FileUtils.forceDelete(tmpDir);
+			}
+			tmpDir.mkdirs();
+
+			download(
+				url,
+				tmpJar
+			);
 
 			project.copy(spec -> {
 				spec.from(project.zipTree(tmpJar), from -> {
 					from.from(pathInJar);
-					from.rename(nameInJar, dst.getName());
+					from.rename(nameInJar, "../%s".formatted(tmpDst.getName()));
 				});
 				spec.into(tmpDir);
 			});

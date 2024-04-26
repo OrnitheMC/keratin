@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.TaskAction;
 
 import net.fabricmc.stitch.util.IntermediaryUtil;
@@ -16,8 +17,10 @@ import net.ornithemc.keratin.matching.Matches;
 
 public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 
+	@Internal
 	public abstract Property<String> getFromMinecraftVersion();
 
+	@Internal
 	public abstract Property<String> getFromFromMinecraftVersion();
 
 	@TaskAction
@@ -38,16 +41,16 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 		File fromFromFile = (fromFromMinecraftVersion == null) ? null : new File(dir, "%s.tiny".formatted(fromFromMinecraftVersion));
 
 		if (!fromFile.exists()) {
-			throw new IllegalStateException("cannot update intermediary from Minecraft version " + fromMinecraftVersion + ": no mappings for it exist");
+			throw new IllegalStateException("cannot update intermediary from Minecraft " + fromMinecraftVersion + ": no mappings for it exist");
 		}
 		if (fromFromMinecraftVersion != null && !fromFromFile.exists()) {
-			throw new IllegalStateException("cannot update intermediary from Minecraft version " + fromFromMinecraftVersion + ": no mappings for it exist");
+			throw new IllegalStateException("cannot update intermediary from Minecraft " + fromFromMinecraftVersion + ": no mappings for it exist");
 		}
 
 		if (fromFromMinecraftVersion == null) {
-			getProject().getLogger().lifecycle(":updating intermediary from Minecraft version " + fromMinecraftVersion + " to " + minecraftVersion);
+			getProject().getLogger().lifecycle(":updating intermediary from Minecraft " + fromMinecraftVersion + " to " + minecraftVersion);
 		} else {
-			getProject().getLogger().lifecycle(":updating intermediary from Minecraft version " + fromFromMinecraftVersion + "/" + fromMinecraftVersion + " to " + minecraftVersion);
+			getProject().getLogger().lifecycle(":updating intermediary from Minecraft " + fromFromMinecraftVersion + "/" + fromMinecraftVersion + " to " + minecraftVersion);
 		}
 
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);

@@ -14,6 +14,8 @@ public class KeratinGradlePlugin implements Plugin<PluginAware> {
 
 	@Override
 	public void apply(PluginAware target) {
+		target.getPlugins().apply(KeratinRepositoryPlugin.class);
+
 		if (target instanceof Project project) {
 			project.getLogger().lifecycle("Keratin: " + KERATIN_VERSION);
 

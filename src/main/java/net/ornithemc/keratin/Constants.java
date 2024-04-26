@@ -16,6 +16,12 @@ public class Constants {
 		return META_URL + endpoint;
 	}
 
+	public static final String FABRIC_MAVEN_NAME = "Fabric";
+	public static final String FABRIC_MAVEN_URL = "https://maven.fabricmc.net";
+
+	public static final String VINEFLOWER_SNAPSHOTS_MAVEN_NAME = "Vineflower Snapshots";
+	public static final String VINEFLOWER_SNAPSHOTS_MAVEN_URL = "https://s01.oss.sonatype.org/content/repositories/snapshots/";
+
 	public static String calamusGen1Url(String mc, GameSide side) {
 		return MAVEN_URL + "/net/ornithemc/calamus-intermediary/" + mc + side.suffix() + "/calamus-intermediary-" + mc + side.suffix() + "-v2.jar";
 	}

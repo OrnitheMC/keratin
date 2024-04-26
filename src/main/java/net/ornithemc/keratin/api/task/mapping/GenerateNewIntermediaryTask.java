@@ -18,7 +18,7 @@ public abstract class GenerateNewIntermediaryTask extends GenerateIntermediaryTa
 	public void run() throws IOException {
 		String minecraftVersion = getMinecraftVersion().get();
 
-		getProject().getLogger().lifecycle(":generating intermediary for Minecraft version " + minecraftVersion);
+		getProject().getLogger().lifecycle(":generating intermediary for Minecraft " + minecraftVersion);
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();

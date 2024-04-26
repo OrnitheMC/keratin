@@ -3,12 +3,16 @@ package net.ornithemc.keratin.api.task;
 import java.io.File;
 
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Internal;
+import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
 public abstract class UnchheckedDownloadTask extends KeratinTask implements Downloader {
 
+	@Internal
 	public abstract Property<String> getUrl();
 
+	@OutputFile
 	public abstract Property<File> getOutput();
 
 	@TaskAction

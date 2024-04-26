@@ -34,6 +34,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Property<File> nestsBuildsCache;
 	private final Property<File> sparrowBuildsCache;
 	private final Property<File> mappingsDir;
+	private final Versioned<File> runDir;
 
 	private final Property<File> versionsManifest;
 	private final Versioned<File> versionInfos;
@@ -47,9 +48,6 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Versioned<File> intermediaryClientJar;
 	private final Versioned<File> intermediaryServerJar;
 	private final Versioned<File> intermediaryMergedJar;
-	private final Versioned<File> namedClientJar;
-	private final Versioned<File> namedServerJar;
-	private final Versioned<File> namedMergedJar;
 	private final Versioned<File> nestedIntermediaryClientJar;
 	private final Versioned<File> nestedIntermediaryServerJar;
 	private final Versioned<File> nestedIntermediaryMergedJar;
@@ -59,16 +57,27 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Versioned<File> processedIntermediaryClientJar;
 	private final Versioned<File> processedIntermediaryServerJar;
 	private final Versioned<File> processedIntermediaryMergedJar;
-	private final Versioned<File> processedNamedClientJar;
-	private final Versioned<File> processedNamedServerJar;
-	private final Versioned<File> processedNamedMergedJar;
+
+	private final Versioned<File> namedJar;
+	private final Versioned<File> processedNamedJar;
 
 	private final Versioned<File> clientIntermediaryMappings;
 	private final Versioned<File> serverIntermediaryMappings;
 	private final Versioned<File> mergedIntermediaryMappings;
-	private final Versioned<File> clientNamedMappings;
-	private final Versioned<File> serverNamedMappings;
-	private final Versioned<File> mergedNamedMappings;
+	private final Versioned<File> nestedClientIntermediaryMappings;
+	private final Versioned<File> nestedServerIntermediaryMappings;
+	private final Versioned<File> nestedMergedIntermediaryMappings;
+	private final Versioned<File> processedClientIntermediaryMappings;
+	private final Versioned<File> processedServerIntermediaryMappings;
+	private final Versioned<File> processedMergedIntermediaryMappings;
+
+	private final Versioned<File> namedMappings;
+	private final Versioned<File> processedNamedMappings;
+	private final Versioned<File> completedNamedMappings;
+	private final Versioned<File> tinyV1NamedMappings;
+	private final Versioned<File> tinyV2NamedMappings;
+	private final Versioned<File> mergedTinyV1NamedMappings;
+	private final Versioned<File> mergedTinyV2NamedMappings;
 
 	private final Versioned<File> clientNests;
 	private final Versioned<File> serverNests;
@@ -77,12 +86,16 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Versioned<File> intermediaryServerNests;
 	private final Versioned<File> intermediaryMergedNests;
 
+	private final Versioned<File> namedNests;
+
 	private final Versioned<File> clientSparrowFile;
 	private final Versioned<File> serverSparrowFile;
 	private final Versioned<File> mergedSparrowFile;
 	private final Versioned<File> intermediaryClientSparrowFile;
 	private final Versioned<File> intermediaryServerSparrowFile;
 	private final Versioned<File> intermediaryMergedSparrowFile;
+
+	private final Versioned<File> namedSparrowFile;
 
 	public OrnitheFiles(KeratinGradleExtension keratin) {
 		this.project = keratin.getProject();
@@ -104,6 +117,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.nestsBuildsCache = fileProperty(() -> this.project.file("nests-builds.json"));
 		this.sparrowBuildsCache = fileProperty(() -> this.project.file("sparrow-builds.json"));
 		this.mappingsDir = fileProperty(() -> this.project.file("mappings"));
+		this.runDir = new Versioned<>(minecraftVersion -> this.project.file("run/%s".formatted(minecraftVersion)));
 
 		this.versionsManifest = fileProperty(() -> new File(getGlobalBuildCache(), "versions-manifest.json"));
 		this.versionInfos = new Versioned<>(minecraftVersion -> new File(getVersionJsonsCache(), "%s-info.json".formatted(minecraftVersion)));
@@ -123,9 +137,6 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.intermediaryClientJar = new Versioned<>(minecraftVersion -> new File(getMappedJarsCache(), "%s-intermediary-gen%d-client.jar".formatted(minecraftVersion, getIntermediaryGen())));
 		this.intermediaryServerJar = new Versioned<>(minecraftVersion -> new File(getMappedJarsCache(), "%s-intermediary-gen%d-server.jar".formatted(minecraftVersion, getIntermediaryGen())));
 		this.intermediaryMergedJar = new Versioned<>(minecraftVersion -> new File(getMappedJarsCache(), "%s-intermediary-gen%d-merged.jar".formatted(minecraftVersion, getIntermediaryGen())));
-		this.namedClientJar = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-client.jar".formatted(minecraftVersion)));
-		this.namedServerJar = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-server.jar".formatted(minecraftVersion)));
-		this.namedMergedJar = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-merged.jar".formatted(minecraftVersion)));
 		this.nestedIntermediaryClientJar = new Versioned<>(minecraftVersion -> {
 			int build = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
 
@@ -146,9 +157,15 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		});
 		this.nestedIntermediaryMergedJar = new Versioned<>(minecraftVersion -> {
 			int build = keratin.getNestsBuild(minecraftVersion, GameSide.MERGED);
+			int clientBuild = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
+			int serverBuild = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
 
 			if (build < 1) {
-				return null;
+				if (clientBuild < 1 && serverBuild < 1) {
+					return null;
+				} else {
+					return new File(getProcessedMappingsCache(), "%s-nests+build.(%d-%d)-intermediary-gen%d-merged.jar".formatted(minecraftVersion, clientBuild, serverBuild, getIntermediaryGen()));
+				}
 			} else {
 				return new File(getProcessedJarsCache(), "%s-nests+build.%d-intermediary-gen%d-merged.jar".formatted(minecraftVersion, build, getIntermediaryGen()));
 			}
@@ -173,9 +190,15 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		});
 		this.signaturePatchedIntermediaryMergedJar = new Versioned<>(minecraftVersion -> {
 			int build = keratin.getSparrowBuild(minecraftVersion, GameSide.MERGED);
+			int clientBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
+			int serverBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
 
 			if (build < 1) {
-				return null;
+				if (clientBuild < 1 && serverBuild < 1) {
+					return null;
+				} else {
+					return new File(getProcessedMappingsCache(), "%s-sparrow+build.(%d-%d)-intermediary-gen%d-merged.jar".formatted(minecraftVersion, clientBuild, serverBuild, getIntermediaryGen()));
+				}
 			} else {
 				return new File(getProcessedJarsCache(), "%s-sparrow+build.%d-intermediary-gen%d-merged.jar".formatted(minecraftVersion, build, getIntermediaryGen()));
 			}
@@ -183,16 +206,57 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.processedIntermediaryClientJar = new Versioned<>(minecraftVersion -> new File(getProcessedJarsCache(), "%s-processed-intermediary-gen%d-client.jar".formatted(minecraftVersion, getIntermediaryGen())));
 		this.processedIntermediaryServerJar = new Versioned<>(minecraftVersion -> new File(getProcessedJarsCache(), "%s-processed-intermediary-gen%d-server.jar".formatted(minecraftVersion, getIntermediaryGen())));
 		this.processedIntermediaryMergedJar = new Versioned<>(minecraftVersion -> new File(getProcessedJarsCache(), "%s-processed-intermediary-gen%d-merged.jar".formatted(minecraftVersion, getIntermediaryGen())));
-		this.processedNamedClientJar = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-processed-named-client.jar".formatted(minecraftVersion)));
-		this.processedNamedServerJar = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-processed-named-server.jar".formatted(minecraftVersion)));
-		this.processedNamedMergedJar = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-processed-named-merged.jar".formatted(minecraftVersion)));
+
+		this.namedJar = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named.jar".formatted(minecraftVersion)));
+		this.processedNamedJar = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-processed-named.jar".formatted(minecraftVersion)));
 
 		this.clientIntermediaryMappings = new Versioned<>(minecraftVersion -> new File(getMappingsCache(), "%s-intermediary-gen%d-client.tiny".formatted(minecraftVersion, getIntermediaryGen())));
 		this.serverIntermediaryMappings = new Versioned<>(minecraftVersion -> new File(getMappingsCache(), "%s-intermediary-gen%d-server.tiny".formatted(minecraftVersion, getIntermediaryGen())));
 		this.mergedIntermediaryMappings = new Versioned<>(minecraftVersion -> new File(getMappingsCache(), "%s-intermediary-gen%d-merged.tiny".formatted(minecraftVersion, getIntermediaryGen())));
-		this.clientNamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-client.tiny".formatted(minecraftVersion)));
-		this.serverNamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-server.tiny".formatted(minecraftVersion)));
-		this.mergedNamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-merged.tiny".formatted(minecraftVersion)));
+		this.nestedClientIntermediaryMappings = new Versioned<>(minecraftVersion -> {
+			int build = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
+
+			if (build < 1) {
+				return null;
+			} else {
+				return new File(getProcessedMappingsCache(), "%s-nests+build.%d-intermediary-gen%d-client.tiny".formatted(minecraftVersion, build, getIntermediaryGen()));
+			}
+		});
+		this.nestedServerIntermediaryMappings = new Versioned<>(minecraftVersion -> {
+			int build = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
+
+			if (build < 1) {
+				return null;
+			} else {
+				return new File(getProcessedMappingsCache(), "%s-nests+build.%d-intermediary-gen%d-server.tiny".formatted(minecraftVersion, build, getIntermediaryGen()));
+			}
+		});
+		this.nestedMergedIntermediaryMappings = new Versioned<>(minecraftVersion -> {
+			int build = keratin.getNestsBuild(minecraftVersion, GameSide.MERGED);
+			int clientBuild = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
+			int serverBuild = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
+
+			if (build < 1) {
+				if (clientBuild < 1 && serverBuild < 1) {
+					return null;
+				} else {
+					return new File(getProcessedMappingsCache(), "%s-nests+build.(%d-%d)-intermediary-gen%d-merged.nest".formatted(minecraftVersion, clientBuild, serverBuild, getIntermediaryGen()));
+				}
+			} else {
+				return new File(getProcessedMappingsCache(), "%s-nests+build.%d-intermediary-gen%d-merged.tiny".formatted(minecraftVersion, build, getIntermediaryGen()));
+			}
+		});
+		this.processedClientIntermediaryMappings = new Versioned<>(minecraftVersion -> new File(getProcessedMappingsCache(), "%s-processed-intermediary-gen%d-client.tiny".formatted(minecraftVersion, getIntermediaryGen())));
+		this.processedServerIntermediaryMappings = new Versioned<>(minecraftVersion -> new File(getProcessedMappingsCache(), "%s-processed-intermediary-gen%d-server.tiny".formatted(minecraftVersion, getIntermediaryGen())));
+		this.processedMergedIntermediaryMappings = new Versioned<>(minecraftVersion -> new File(getProcessedMappingsCache(), "%s-processed-intermediary-gen%d-merged.tiny".formatted(minecraftVersion, getIntermediaryGen())));
+
+		this.namedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named.tiny".formatted(minecraftVersion)));
+		this.processedNamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-processed-named.tiny".formatted(minecraftVersion)));
+		this.completedNamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-completed.tiny".formatted(minecraftVersion)));
+		this.tinyV1NamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-tiny-v1.tiny".formatted(minecraftVersion)));
+		this.tinyV2NamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-tiny-v2.tiny".formatted(minecraftVersion)));
+		this.mergedTinyV1NamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-merged-tiny-v1.tiny".formatted(minecraftVersion)));
+		this.mergedTinyV2NamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-merged-tiny-v2.tiny".formatted(minecraftVersion)));
 
 		this.clientNests = new Versioned<>(minecraftVersion -> {
 			int build = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
@@ -241,13 +305,21 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		});
 		this.intermediaryMergedNests = new Versioned<>(minecraftVersion -> {
 			int build = keratin.getNestsBuild(minecraftVersion, GameSide.MERGED);
+			int clientBuild = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
+			int serverBuild = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
 
 			if (build < 1) {
-				return null;
+				if (clientBuild < 1 && serverBuild < 1) {
+					return null;
+				} else {
+					return new File(getNestsCache(), "%s-intermediary-gen%d-nests+build.(%d-%d)-merged.nest".formatted(minecraftVersion, getIntermediaryGen(), clientBuild, serverBuild));
+				}
 			} else {
 				return new File(getNestsCache(), "%s-intermediary-gen%d-nests+build.%d-merged.nest".formatted(minecraftVersion, getIntermediaryGen(), build));
 			}
 		});
+
+		this.namedNests = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-nests.nest".formatted(minecraftVersion)));
 
 		this.clientSparrowFile = new Versioned<>(minecraftVersion -> {
 			int build = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
@@ -255,7 +327,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 			if (build < 1) {
 				return null;
 			} else {
-				return new File(getSparrowCache(), "%s-sparrow+build.%d-client.nest".formatted(minecraftVersion, build));
+				return new File(getSparrowCache(), "%s-sparrow+build.%d-client.sigs".formatted(minecraftVersion, build));
 			}
 		});
 		this.serverSparrowFile = new Versioned<>(minecraftVersion -> {
@@ -264,7 +336,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 			if (build < 1) {
 				return null;
 			} else {
-				return new File(getSparrowCache(), "%s-sparrow+build.%d-server.nest".formatted(minecraftVersion, build));
+				return new File(getSparrowCache(), "%s-sparrow+build.%d-server.sigs".formatted(minecraftVersion, build));
 			}
 		});
 		this.mergedSparrowFile = new Versioned<>(minecraftVersion -> {
@@ -273,7 +345,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 			if (build < 1) {
 				return null;
 			} else {
-				return new File(getSparrowCache(), "%s-sparrow+build.%d-merged.nest".formatted(minecraftVersion, build));
+				return new File(getSparrowCache(), "%s-sparrow+build.%d-merged.sigs".formatted(minecraftVersion, build));
 			}
 		});
 		this.intermediaryClientSparrowFile = new Versioned<>(minecraftVersion -> {
@@ -282,7 +354,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 			if (build < 1) {
 				return null;
 			} else {
-				return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.%d-client.nest".formatted(minecraftVersion, getIntermediaryGen(), build));
+				return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.%d-client.sigs".formatted(minecraftVersion, getIntermediaryGen(), build));
 			}
 		});
 		this.intermediaryServerSparrowFile = new Versioned<>(minecraftVersion -> {
@@ -291,18 +363,26 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 			if (build < 1) {
 				return null;
 			} else {
-				return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.%d-server.nest".formatted(minecraftVersion, getIntermediaryGen(), build));
+				return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.%d-server.sigs".formatted(minecraftVersion, getIntermediaryGen(), build));
 			}
 		});
 		this.intermediaryMergedSparrowFile = new Versioned<>(minecraftVersion -> {
 			int build = keratin.getSparrowBuild(minecraftVersion, GameSide.MERGED);
+			int clientBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
+			int serverBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
 
 			if (build < 1) {
-				return null;
+				if (clientBuild < 1 && serverBuild < 1) {
+					return null;
+				} else {
+					return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.(%d-%d)-merged.sigs".formatted(minecraftVersion, getIntermediaryGen(), clientBuild, serverBuild));
+				}
 			} else {
-				return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.%d-merged.nest".formatted(minecraftVersion, getIntermediaryGen(), build));
+				return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.%d-merged.sigs".formatted(minecraftVersion, getIntermediaryGen(), build));
 			}
 		});
+
+		this.namedSparrowFile = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-sparrow.sigs".formatted(minecraftVersion)));
 	}
 
 	private Property<File> fileProperty(Callable<File> provider) {
@@ -348,34 +428,6 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		}
 
 		throw new RuntimeException("somehow Minecraft version " + minecraftVersion + " is neither client nor server!");
-	}
-
-	private File pickFileForNamespace(String minecraftVersion, String namespace, Versioned<File> official, Versioned<File> intermediary, Versioned<File> named) {
-		Versioned<File> versioned = switch (namespace) {
-			case "official"     -> official;
-			case "intermediary" -> intermediary;
-			case "named"        -> named;
-			default             -> null;
-		};
-		if (versioned == null) {
-			throw new IllegalStateException("invalid namespace " + namespace);
-		}
-
-		return versioned.get(minecraftVersion);
-	}
-
-	private File pickFileForNamespace(String namespace, File official, File intermediary, File named) {
-		File file = switch (namespace) {
-			case "official"     -> official;
-			case "intermediary" -> intermediary;
-			case "named"        -> named;
-			default             -> null;
-		};
-		if (file == null) {
-			throw new IllegalStateException("invalid namespace " + namespace);
-		}
-
-		return file;
 	}
 
 	@Override
@@ -449,6 +501,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
+	public File getRunDirectory(String minecraftVersion) {
+		return runDir.get(minecraftVersion);
+	}
+
+	@Override
 	public File getVersionsManifest() {
 		return versionsManifest.get();
 	}
@@ -513,26 +570,6 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
-	public File getNamedClientJar(String minecraftVersion) {
-		return namedClientJar.get(minecraftVersion);
-	}
-
-	@Override
-	public File getNamedServerJar(String minecraftVersion) {
-		return namedServerJar.get(minecraftVersion);
-	}
-
-	@Override
-	public File getNamedMergedJar(String minecraftVersion) {
-		return namedMergedJar.get(minecraftVersion);
-	}
-
-	@Override
-	public File getMainNamedJar(String minecraftVersion) {
-		return pickFileForPresentSides(minecraftVersion, namedClientJar, namedServerJar, namedMergedJar);
-	}
-
-	@Override
 	public File getNestedIntermediaryClientJar(String minecraftVersion) {
 		return nestedIntermediaryClientJar.get(minecraftVersion);
 	}
@@ -593,63 +630,13 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
-	public File getProcessedNamedClientJar(String minecraftVersion) {
-		return processedNamedClientJar.get(minecraftVersion);
+	public File getNamedJar(String minecraftVersion) {
+		return namedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getProcessedNamedServerJar(String minecraftVersion) {
-		return processedNamedServerJar.get(minecraftVersion);
-	}
-
-	@Override
-	public File getProcessedNamedMergedJar(String minecraftVersion) {
-		return processedNamedMergedJar.get(minecraftVersion);
-	}
-
-	@Override
-	public File getMainProcessedNamedJar(String minecraftVersion) {
-		return pickFileForPresentSides(minecraftVersion, processedNamedClientJar, processedNamedServerJar, processedNamedMergedJar);
-	}
-
-	@Override
-	public File getClientJar(String minecraftVersion, String namespace) {
-		return pickFileForNamespace(minecraftVersion, namespace, clientJar, intermediaryClientJar, namedClientJar);
-	}
-
-	@Override
-	public File getServerJar(String minecraftVersion, String namespace) {
-		return pickFileForNamespace(minecraftVersion, namespace, serverJar, intermediaryServerJar, namedServerJar);
-	}
-
-	@Override
-	public File getMergedJar(String minecraftVersion, String namespace) {
-		return pickFileForNamespace(minecraftVersion, namespace, mergedJar, intermediaryMergedJar, namedMergedJar);
-	}
-
-	@Override
-	public File getMainJar(String minecraftVersion, String namespace) {
-		return pickFileForNamespace(namespace, getMainJar(minecraftVersion), getMainIntermediaryJar(minecraftVersion), getMainNamedJar(minecraftVersion));
-	}
-
-	@Override
-	public File getProcessedClientJar(String minecraftVersion, String namespace) {
-		return pickFileForNamespace(minecraftVersion, namespace, null, processedIntermediaryClientJar, processedNamedClientJar);
-	}
-
-	@Override
-	public File getProcessedServerJar(String minecraftVersion, String namespace) {
-		return pickFileForNamespace(minecraftVersion, namespace, null, processedIntermediaryServerJar, processedNamedServerJar);
-	}
-
-	@Override
-	public File getProcessedMergedJar(String minecraftVersion, String namespace) {
-		return pickFileForNamespace(minecraftVersion, namespace, null, processedIntermediaryMergedJar, processedNamedMergedJar);
-	}
-
-	@Override
-	public File getMainProcessedJar(String minecraftVersion, String namespace) {
-		return pickFileForNamespace(namespace, null, getMainProcessedIntermediaryJar(minecraftVersion), getMainProcessedNamedJar(minecraftVersion));
+	public File getProcessedNamedJar(String minecraftVersion) {
+		return processedNamedJar.get(minecraftVersion);
 	}
 
 	@Override
@@ -668,41 +655,83 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
-	public File getClientNamedMappings(String minecraftVersion) {
-		return clientNamedMappings.get(minecraftVersion);
+	public File getMainIntermediaryMappings(String minecraftVersion) {
+		return pickFileForPresentSides(minecraftVersion, clientIntermediaryMappings, serverIntermediaryMappings, mergedIntermediaryMappings);
 	}
 
 	@Override
-	public File getServerNamedMappings(String minecraftVersion) {
-		return serverNamedMappings.get(minecraftVersion);
+	public File getNestedClientIntermediaryMappings(String minecraftVersion) {
+		return nestedIntermediaryClientJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMergedNamedMappings(String minecraftVersion) {
-		return mergedNamedMappings.get(minecraftVersion);
-	}
-
-	private File pickMappingsForTargetNamespace(String minecraftVersion, String targetNamespace, Versioned<File> intermediary, Versioned<File> named) {
-		if ("official".equals(targetNamespace)) {
-			throw new IllegalStateException("mappings for " + targetNamespace + " do not exist!");
-		}
-
-		return pickFileForNamespace(minecraftVersion, targetNamespace, null, intermediary, named);
+	public File getNestedServerIntermediaryMappings(String minecraftVersion) {
+		return nestedIntermediaryServerJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getClientMappings(String minecraftVersion, String targetNamespace) {
-		return pickMappingsForTargetNamespace(minecraftVersion, targetNamespace, clientIntermediaryMappings, clientNamedMappings);
+	public File getNestedMergedIntermediaryMappings(String minecraftVersion) {
+		return nestedIntermediaryMergedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getServerMappings(String minecraftVersion, String targetNamespace) {
-		return pickMappingsForTargetNamespace(minecraftVersion, targetNamespace, serverIntermediaryMappings, serverNamedMappings);
+	public File getMainNestedIntermediaryMappings(String minecraftVersion) {
+		return pickFileForPresentSides(minecraftVersion, nestedClientIntermediaryMappings, nestedServerIntermediaryMappings, nestedMergedIntermediaryMappings);
 	}
 
 	@Override
-	public File getMergedMappings(String minecraftVersion, String targetNamespace) {
-		return pickMappingsForTargetNamespace(minecraftVersion, targetNamespace, mergedIntermediaryMappings, mergedNamedMappings);
+	public File getProcessedClientIntermediaryMappings(String minecraftVersion) {
+		return processedClientIntermediaryMappings.get(minecraftVersion);
+	}
+
+	@Override
+	public File getProcessedServerIntermediaryMappings(String minecraftVersion) {
+		return processedServerIntermediaryMappings.get(minecraftVersion);
+	}
+
+	@Override
+	public File getProcessedMergedIntermediaryMappings(String minecraftVersion) {
+		return processedMergedIntermediaryMappings.get(minecraftVersion);
+	}
+
+	@Override
+	public File getMainProcessedIntermediaryMappings(String minecraftVersion) {
+		return pickFileForPresentSides(minecraftVersion, processedClientIntermediaryMappings, processedServerIntermediaryMappings, processedMergedIntermediaryMappings);
+	}
+
+	@Override
+	public File getNamedMappings(String minecraftVersion) {
+		return namedMappings.get(minecraftVersion);
+	}
+
+	@Override
+	public File getProcessedNamedMappings(String minecraftVersion) {
+		return processedNamedMappings.get(minecraftVersion);
+	}
+
+	@Override
+	public File getCompletedNamedMappings(String minecraftVersion) {
+		return completedNamedMappings.get(minecraftVersion);
+	}
+
+	@Override
+	public File getTinyV1NamedMappings(String minecraftVersion) {
+		return tinyV1NamedMappings.get(minecraftVersion);
+	}
+
+	@Override
+	public File getTinyV2NamedMappings(String minecraftVersion) {
+		return tinyV2NamedMappings.get(minecraftVersion);
+	}
+
+	@Override
+	public File getMergedTinyV1NamedMappings(String minecraftVersion) {
+		return mergedTinyV1NamedMappings.get(minecraftVersion);
+	}
+
+	@Override
+	public File getMergedTinyV2NamedMappings(String minecraftVersion) {
+		return mergedTinyV2NamedMappings.get(minecraftVersion);
 	}
 
 	@Override
@@ -718,6 +747,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	@Override
 	public File getMergedNests(String minecraftVersion) {
 		return mergedNests.get(minecraftVersion);
+	}
+
+	@Override
+	public File getMainNests(String minecraftVersion) {
+		return pickFileForEnvironment(minecraftVersion, clientNests, serverNests, mergedNests);
 	}
 
 	@Override
@@ -741,6 +775,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
+	public File getNamedNests(String minecraftVersion) {
+		return namedNests.get(minecraftVersion);
+	}
+
+	@Override
 	public File getClientSparrowFile(String minecraftVersion) {
 		return clientSparrowFile.get(minecraftVersion);
 	}
@@ -753,6 +792,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	@Override
 	public File getMergedSparrowFile(String minecraftVersion) {
 		return mergedSparrowFile.get(minecraftVersion);
+	}
+
+	@Override
+	public File getMainSparrowFile(String minecraftVersion) {
+		return pickFileForEnvironment(minecraftVersion, clientSparrowFile, serverSparrowFile, mergedSparrowFile);
 	}
 
 	@Override
@@ -773,5 +817,10 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	@Override
 	public File getMainIntermediarySparrowFile(String minecraftVersion) {
 		return pickFileForPresentSides(minecraftVersion, intermediaryClientSparrowFile, intermediaryServerSparrowFile, intermediaryMergedSparrowFile);
+	}
+
+	@Override
+	public File getNamedSparrowFile(String minecraftVersion) {
+		return namedSparrowFile.get(minecraftVersion);
 	}
 }

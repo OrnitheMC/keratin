@@ -132,7 +132,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			for (GameSide side : GameSide.values()) {
 				JsonElement buildJson = json.get(minecraftVersion + side.suffix());
 
-				if (buildJson.isJsonPrimitive()) {
+				if (buildJson != null && buildJson.isJsonPrimitive()) {
 					builds.put(side, buildJson.getAsInt());
 				}
 			}
@@ -154,7 +154,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			for (GameSide side : GameSide.values()) {
 				JsonElement buildJson = json.get(minecraftVersion + side.suffix());
 
-				if (buildJson.isJsonPrimitive()) {
+				if (buildJson != null && buildJson.isJsonPrimitive()) {
 					builds.put(side, buildJson.getAsInt());
 				}
 			}
@@ -169,6 +169,13 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	}
 
 	private void apply() {
+		project.getConfigurations().register(Configurations.DECOMPILE_CLASSPATH);
+		project.getConfigurations().register(Configurations.MAPPING_POET);
+
+		project.getDependencies().add(Configurations.DECOMPILE_CLASSPATH, "net.fabricmc:cfr:0.0.9");
+		project.getDependencies().add(Configurations.DECOMPILE_CLASSPATH, "org.vineflower:vineflower:1.10.1");
+		project.getDependencies().add(Configurations.MAPPING_POET, "net.fabricmc:mappingpoet:0.3.0");
+
 		TaskContainer tasks = project.getTasks();
 
 		TaskProvider<?> makeDirs = tasks.register("makeCacheDirectories", MakeCacheDirectoriesTask.class);
@@ -181,29 +188,20 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		});
 		TaskProvider<?> downloadInfo = tasks.register("downloadVersionInfo", DownloadVersionInfoTask.class, task -> {
 			task.dependsOn(downloadManifest);
-			task.getMinecraftVersion().convention(this.minecraftVersion);
-			task.getMinecraftVersion().finalizeValueOnRead();
 		});
 		TaskProvider<?> downloadDetails = tasks.register("downloadVersionDetails", DownloadVersionDetailsTask.class, task -> {
 			task.dependsOn(downloadManifest);
-			task.getMinecraftVersion().convention(this.minecraftVersion);
-			task.getMinecraftVersion().finalizeValueOnRead();
 		});
 
 		TaskProvider<?> downloadLibraries = tasks.register("downloadMinecraftLibraries", DownloadMinecraftLibrariesTask.class, task -> {
 			task.dependsOn(downloadInfo);
-			task.getMinecraftVersion().convention(this.minecraftVersion);
-			task.getMinecraftVersion().finalizeValueOnRead();
 		});
 		TaskProvider<?> downloadJars = tasks.register("downloadMinecraftJars", DownloadMinecraftJarsTask.class, task -> {
 			task.dependsOn(downloadDetails);
-			task.getMinecraftVersion().convention(this.minecraftVersion);
-			task.getMinecraftVersion().finalizeValueOnRead();
 		});
 		TaskProvider<?> mergeJars = tasks.register("mergeMinecraftJars", MergeMinecraftJarsTask.class, task -> {
-			task.dependsOn(downloadDetails, downloadJars);
-			task.getMinecraftVersion().convention(this.minecraftVersion);
-			task.getMinecraftVersion().finalizeValueOnRead();
+			task.dependsOn(downloadJars);
+			task.getNamespace().set("official");
 		});
 
 		TaskProvider<?> updateNestsBuilds = tasks.register("updateNestsBuildsCache", UpdateBuildsCacheFromMetaTask.class, task -> {
@@ -225,14 +223,10 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 		TaskProvider<?> downloadNests = tasks.register("downloadNests", DownloadNestsTask.class, task -> {
 			task.dependsOn(downloadDetails);
-			task.getMinecraftVersion().convention(this.minecraftVersion);
-			task.getMinecraftVersion().finalizeValueOnRead();
 		});
 	
 		TaskProvider<?> downloadSparrow = tasks.register("downloadSparrow", DownloadSparrowTask.class, task -> {
 			task.dependsOn(downloadDetails);
-			task.getMinecraftVersion().convention(this.minecraftVersion);
-			task.getMinecraftVersion().finalizeValueOnRead();
 		});
 
 		tasks.getByName("clean").doFirst(task -> {
@@ -301,7 +295,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	@Override
 	public int getNestsBuild(String minecraftVersion, GameSide side) {
-		return nestsBuilds.get(minecraftVersion).get(side);
+		return nestsBuilds.get(minecraftVersion).getOrDefault(side, -1);
 	}
 
 	@Override
@@ -311,7 +305,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	@Override
 	public int getSparrowBuild(String minecraftVersion, GameSide side) {
-		return sparrowBuilds.get(minecraftVersion).get(side);
+		return sparrowBuilds.get(minecraftVersion).getOrDefault(side, -1);
 	}
 
 	@Override

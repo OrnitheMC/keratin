@@ -2,20 +2,23 @@ package net.ornithemc.keratin.api.task.mapping;
 
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Internal;
 
 import net.ornithemc.keratin.api.manifest.VersionDetails;
-import net.ornithemc.keratin.api.task.KeratinTask;
+import net.ornithemc.keratin.api.task.MinecraftTask;
 
-public abstract class GenerateIntermediaryTask extends KeratinTask {
+public abstract class GenerateIntermediaryTask extends MinecraftTask {
 
-	public abstract Property<String> getMinecraftVersion();
-
+	@Internal
 	public abstract Property<String> getTargetNamespace();
 
+	@Internal
 	public abstract Property<String> getTargetPackage();
 
+	@Internal
 	public abstract ListProperty<String> getObfuscationPatterns();
 
+	@Internal
 	public abstract Property<Integer> getNameLength();
 
 	protected OptionsBuilder getOptions(VersionDetails details) {

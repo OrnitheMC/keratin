@@ -1,6 +1,7 @@
 package net.ornithemc.keratin.api.task.mapping;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.gradle.api.Action;
@@ -10,6 +11,8 @@ import net.fabricmc.tinyremapper.TinyRemapper;
 import net.fabricmc.tinyremapper.TinyUtils;
 
 import net.ornithemc.keratin.api.task.TaskAware;
+import net.ornithemc.mappingutils.MappingUtils;
+import net.ornithemc.mappingutils.io.Format;
 
 public interface Mapper extends TaskAware {
 
@@ -44,5 +47,13 @@ public interface Mapper extends TaskAware {
 			remapper.finish();
 			throw new RuntimeException("Failed to remap jar", e);
 		}
+	}
+
+	default void mapNests(File input, File output, File mappings) throws IOException {
+		MappingUtils.mapNests(input.toPath(), output.toPath(), Format.TINY_V2, mappings.toPath());
+	}
+
+	default void mapSparrow(File input, File output, File mappings) throws IOException {
+		MappingUtils.mapSignatures(input.toPath(), output.toPath(), Format.TINY_V2, mappings.toPath());
 	}
 }

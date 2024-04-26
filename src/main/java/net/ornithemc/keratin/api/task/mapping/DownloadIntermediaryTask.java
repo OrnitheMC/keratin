@@ -2,37 +2,33 @@ package net.ornithemc.keratin.api.task.mapping;
 
 import java.io.File;
 
-import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.TaskAction;
 
-import net.fabricmc.stitch.commands.CommandSplitTiny;
+import net.fabricmc.stitch.commands.tinyv2.CommandSplitTinyV2;
 
 import net.ornithemc.keratin.Constants;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
-import net.ornithemc.keratin.api.task.KeratinTask;
+import net.ornithemc.keratin.api.task.MinecraftTask;
 
-public abstract class DownloadIntermediaryTask extends KeratinTask implements DownloaderAndExtracter {
-
-	public abstract Property<String> getMinecraftVersion();
-
-	public abstract Property<Integer> getIntermediaryGen();
+public abstract class DownloadIntermediaryTask extends MinecraftTask implements DownloaderAndExtracter {
 
 	@TaskAction
 	public void run() throws Exception {
 		String minecraftVersion = getMinecraftVersion().get();
-		int intermediaryGen = getIntermediaryGen().get();
+
+		getProject().getLogger().lifecycle(":downloading intermediary for Minecraft " + minecraftVersion);
+
+		KeratinGradleExtension keratin = getExtension();
+		OrnitheFilesAPI files = keratin.getFiles();
+
+		int intermediaryGen = keratin.getIntermediaryGen().get();
 
 		if (intermediaryGen == 1) {
 			throw new IllegalStateException("gen1 intermediary is not supported at this time");
 		}
-
-		getProject().getLogger().lifecycle(":downloading intermediary gen" + intermediaryGen + " for Minecraft version " + minecraftVersion);
-
-		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
 
 		downloadAndExtract(
 			Constants.calamusGen2Url(minecraftVersion, intermediaryGen),
@@ -51,7 +47,7 @@ public abstract class DownloadIntermediaryTask extends KeratinTask implements Do
 			boolean genServer = (details.server() && (!server.exists() || isRefreshDependencies()));
 
 			if (genClient || genServer) {
-				new CommandSplitTiny().run(new String[] {
+				new CommandSplitTinyV2().run(new String[] {
 					merged.getAbsolutePath(),
 					details.client() ? client.getAbsolutePath() : "-",
 					details.server() ? server.getAbsolutePath() : "-"

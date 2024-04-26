@@ -49,7 +49,7 @@ public interface Downloader extends TaskAware {
 			download.dest(output);
 			download.overwrite(true);
 
-			download.execute();
+			download.execute().join();
 		}
 	}
 }

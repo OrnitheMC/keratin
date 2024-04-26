@@ -10,6 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Internal;
+import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
 import com.google.gson.JsonArray;
@@ -21,15 +23,18 @@ import net.ornithemc.keratin.api.task.KeratinTask;
 
 public abstract class UpdateBuildsCacheFromMetaTask extends KeratinTask {
 
+	@Internal
 	public abstract Property<String> getMetaUrl();
 
+	@Internal
 	public abstract Property<String> getMetaEndpoint();
 
+	@OutputFile
 	public abstract Property<File> getCacheFile();
 
 	@TaskAction
 	public void run() throws IOException {
-		getProject().getLogger().lifecycle(":updating builds cache: " + getCacheFile().get().getName());
+		getProject().getLogger().lifecycle(":updating builds cache " + getCacheFile().get().getName());
 
 		String metaUrl = getMetaUrl().get() + getMetaEndpoint().get();
 		File cacheFile = getCacheFile().get();

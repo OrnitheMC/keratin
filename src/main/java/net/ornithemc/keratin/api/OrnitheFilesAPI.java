@@ -33,6 +33,8 @@ public interface OrnitheFilesAPI {
 
 	File getMappingsDirectory();
 
+	File getRunDirectory(String minecraftVersion);
+
 	File getVersionsManifest();
 
 	File getVersionInfo(String minecraftVersion);
@@ -56,14 +58,6 @@ public interface OrnitheFilesAPI {
 	File getIntermediaryMergedJar(String minecraftVersion);
 
 	File getMainIntermediaryJar(String minecraftVersion);
-
-	File getNamedClientJar(String minecraftVersion);
-
-	File getNamedServerJar(String minecraftVersion);
-
-	File getNamedMergedJar(String minecraftVersion);
-
-	File getMainNamedJar(String minecraftVersion);
 
 	File getNestedIntermediaryClientJar(String minecraftVersion);
 
@@ -89,29 +83,9 @@ public interface OrnitheFilesAPI {
 
 	File getMainProcessedIntermediaryJar(String minecraftVersion);
 
-	File getProcessedNamedClientJar(String minecraftVersion);
+	File getNamedJar(String minecraftVersion);
 
-	File getProcessedNamedServerJar(String minecraftVersion);
-
-	File getProcessedNamedMergedJar(String minecraftVersion);
-
-	File getMainProcessedNamedJar(String minecraftVersion);
-
-	File getClientJar(String minecraftVersion, String namespace);
-
-	File getServerJar(String minecraftVersion, String namespace);
-
-	File getMergedJar(String minecraftVersion, String namespace);
-
-	File getMainJar(String minecraftVersion, String namespace);
-
-	File getProcessedClientJar(String minecraftVersion, String namespace);
-
-	File getProcessedServerJar(String minecraftVersion, String namespace);
-
-	File getProcessedMergedJar(String minecraftVersion, String namespace);
-
-	File getMainProcessedJar(String minecraftVersion, String namespace);
+	File getProcessedNamedJar(String minecraftVersion);
 
 	File getClientIntermediaryMappings(String minecraftVersion);
 
@@ -119,23 +93,45 @@ public interface OrnitheFilesAPI {
 
 	File getMergedIntermediaryMappings(String minecraftVersion);
 
-	File getClientNamedMappings(String minecraftVersion);
+	File getMainIntermediaryMappings(String minecraftVersion);
 
-	File getServerNamedMappings(String minecraftVersion);
+	File getNestedClientIntermediaryMappings(String minecraftVersion);
 
-	File getMergedNamedMappings(String minecraftVersion);
+	File getNestedServerIntermediaryMappings(String minecraftVersion);
 
-	File getClientMappings(String minecraftVersion, String targetNamespace);
+	File getNestedMergedIntermediaryMappings(String minecraftVersion);
 
-	File getServerMappings(String minecraftVersion, String targetNamespace);
+	File getMainNestedIntermediaryMappings(String minecraftVersion);
 
-	File getMergedMappings(String minecraftVersion, String targetNamespace);
+	File getProcessedClientIntermediaryMappings(String minecraftVersion);
+
+	File getProcessedServerIntermediaryMappings(String minecraftVersion);
+
+	File getProcessedMergedIntermediaryMappings(String minecraftVersion);
+
+	File getMainProcessedIntermediaryMappings(String minecraftVersion);
+
+	File getNamedMappings(String minecraftVersion);
+
+	File getProcessedNamedMappings(String minecraftVersion);
+
+	File getCompletedNamedMappings(String minecraftVersion);
+
+	File getTinyV1NamedMappings(String minecraftVersion);
+
+	File getTinyV2NamedMappings(String minecraftVersion);
+
+	File getMergedTinyV1NamedMappings(String minecraftVersion);
+
+	File getMergedTinyV2NamedMappings(String minecraftVersion);
 
 	File getClientNests(String minecraftVersion);
 
 	File getServerNests(String minecraftVersion);
 
 	File getMergedNests(String minecraftVersion);
+
+	File getMainNests(String minecraftVersion);
 
 	File getIntermediaryClientNests(String minecraftVersion);
 
@@ -145,11 +141,15 @@ public interface OrnitheFilesAPI {
 
 	File getMainIntermediaryNests(String minecraftVersion);
 
+	File getNamedNests(String minecraftVersion);
+
 	File getClientSparrowFile(String minecraftVersion);
 
 	File getServerSparrowFile(String minecraftVersion);
 
 	File getMergedSparrowFile(String minecraftVersion);
+
+	File getMainSparrowFile(String minecraftVersion);
 
 	File getIntermediaryClientSparrowFile(String minecraftVersion);
 
@@ -158,5 +158,7 @@ public interface OrnitheFilesAPI {
 	File getIntermediaryMergedSparrowFile(String minecraftVersion);
 
 	File getMainIntermediarySparrowFile(String minecraftVersion);
+
+	File getNamedSparrowFile(String minecraftVersion);
 
 }

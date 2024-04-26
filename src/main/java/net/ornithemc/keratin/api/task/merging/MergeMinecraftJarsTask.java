@@ -2,35 +2,45 @@ package net.ornithemc.keratin.api.task.merging;
 
 import java.io.IOException;
 
-import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.TaskAction;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
-import net.ornithemc.keratin.api.task.KeratinTask;
 
-public abstract class MergeMinecraftJarsTask extends KeratinTask implements Merger {
-
-	public abstract Property<String> getMinecraftVersion();
+public abstract class MergeMinecraftJarsTask extends MergeTask {
 
 	@TaskAction
 	public void run() throws IOException {
 		String minecraftVersion = getMinecraftVersion().get();
+		String namespace = getNamespace().get();
 
-		getProject().getLogger().lifecycle(":merging official jars for Minecraft version " + minecraftVersion);
+		validateNamespace(namespace);
 
 		KeratinGradleExtension keratin = getExtension();
+		OrnitheFilesAPI files = keratin.getFiles();
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.sharedMappings() && details.client() && details.server()) {
-			OrnitheFilesAPI files = keratin.getFiles();
+		if (!details.client() && !details.server()) {
+			throw new IllegalStateException("cannot merge Minecraft " + minecraftVersion + ": both client and server jars must be available");
+		}
 
+		getProject().getLogger().lifecycle(":merging " + namespace + " jars for Minecraft " + minecraftVersion);
+
+		boolean official = "official".equals(namespace);
+
+		if (official == details.sharedMappings()) {
 			mergeJars(
-				files.getClientJar(minecraftVersion),
-				files.getServerJar(minecraftVersion),
-				files.getMergedJar(minecraftVersion)
+				official ? files.getClientJar(minecraftVersion) : files.getIntermediaryClientJar(minecraftVersion),
+				official ? files.getServerJar(minecraftVersion) : files.getIntermediaryServerJar(minecraftVersion),
+				official ? files.getMergedJar(minecraftVersion) : files.getIntermediaryMergedJar(minecraftVersion)
 			);
+		}
+	}
+
+	private static void validateNamespace(String namespace) {
+		if (!"official".equals(namespace) && !"intermediary".equals(namespace)) {
+			throw new IllegalStateException("cannot merge Minecraft jars in the " + namespace + " namespace");
 		}
 	}
 }
