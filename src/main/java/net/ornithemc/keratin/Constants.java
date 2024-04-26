@@ -12,6 +12,9 @@ public class Constants {
 	public static final String MAVEN_NAME = "Ornithe";
 	public static final String MAVEN_URL = "https://maven.ornithemc.net/releases";
 	public static final String META_URL = "https://meta.ornithemc.net";
+	public static String metaUrl(String endpoint) {
+		return META_URL + endpoint;
+	}
 
 	public static String calamusGen1Url(String mc, GameSide side) {
 		return MAVEN_URL + "/net/ornithemc/calamus-intermediary/" + mc + side.suffix() + "/calamus-intermediary-" + mc + side.suffix() + "-v2.jar";

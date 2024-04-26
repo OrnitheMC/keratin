@@ -34,19 +34,19 @@ public interface Downloader extends TaskAware {
 		return sb.toString().equals(sha1);
 	}
 
-	default void download(String url, File dst) throws Exception {
-		download(url, "", dst);
+	default void download(String url, File output) throws Exception {
+		download(url, "", output);
 	}
 
-	default void download(String url, String sha1, File dst) throws Exception {
+	default void download(String url, String sha1, File output) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		Project project = keratin.getProject();
 
-		if (!dst.exists() || isRefreshDependencies() || !validateChecksum(dst, sha1)) {
+		if (!output.exists() || isRefreshDependencies() || !validateChecksum(output, sha1)) {
 			DownloadAction download = new DownloadAction(project, (Task) this);
 
 			download.src(new URL(url));
-			download.dest(dst);
+			download.dest(output);
 			download.overwrite(true);
 
 			download.execute();

@@ -9,22 +9,25 @@ import net.ornithemc.keratin.manifest.VersionDetails;
 
 public abstract class MapMinecraftTask extends KeratinTask implements Mapper, Merger {
 
+	public abstract Property<String> getMinecraftVersion();
+
 	public abstract Property<String> getSourceNamespace();
 
 	public abstract Property<String> getTargetNamespace();
 
 	@TaskAction
 	public void run() throws Exception {
+		String minecraftVersion = getMinecraftVersion().get();
 		String srcNs = getSourceNamespace().get();
 		String dstNs = getTargetNamespace().get();
 
 		validateNamespaces(srcNs, dstNs);
 
-		getProject().getLogger().lifecycle(":mapping Minecraft from " + srcNs + " to " + dstNs);
+		getProject().getLogger().lifecycle(":mapping Minecraft version " + minecraftVersion + " from " + srcNs + " to " + dstNs);
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails();
+		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
 		boolean fromOfficial = "official".equals(srcNs);
 
@@ -32,8 +35,8 @@ public abstract class MapMinecraftTask extends KeratinTask implements Mapper, Me
 			mapJar(
 				files.getMergedJar(srcNs),
 				files.getMergedJar(dstNs),
-				files.getMergedMappings(dstNs),
-				files.getLibraries(),
+				files.getMergedMappings(minecraftVersion, dstNs),
+				files.getLibraries(minecraftVersion),
 				srcNs,
 				dstNs
 			);
@@ -42,8 +45,8 @@ public abstract class MapMinecraftTask extends KeratinTask implements Mapper, Me
 				mapJar(
 					files.getClientJar(srcNs),
 					files.getClientJar(dstNs),
-					files.getClientMappings(dstNs),
-					files.getLibraries(),
+					files.getClientMappings(minecraftVersion, dstNs),
+					files.getLibraries(minecraftVersion),
 					srcNs,
 					dstNs
 				);
@@ -52,8 +55,8 @@ public abstract class MapMinecraftTask extends KeratinTask implements Mapper, Me
 				mapJar(
 					files.getServerJar(srcNs),
 					files.getServerJar(dstNs),
-					files.getServerMappings(dstNs),
-					files.getLibraries(),
+					files.getServerMappings(minecraftVersion, dstNs),
+					files.getLibraries(minecraftVersion),
 					srcNs,
 					dstNs
 				);

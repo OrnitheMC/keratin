@@ -11,4 +11,8 @@ public record VersionsManifest(List<Entry> versions) {
 	public Optional<Entry> find(String version) {
 		return versions.stream().filter(e -> e.id.equals(version)).findFirst();
 	}
+
+	public Entry findOrThrow(String version) {
+		return find(version).orElseThrow();
+	}
 }

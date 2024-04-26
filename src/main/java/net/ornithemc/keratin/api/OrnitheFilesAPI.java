@@ -27,134 +27,134 @@ public interface OrnitheFilesAPI {
 
 	File getSparrowDir();
 
-	File getVersionsManifest();
-
-	File getVersionInfo();
-
-	File getVersionDetails();
-
-	List<File> getLibraries();
-
 	File getNestsBuildsCache();
 
 	File getSparrowBuildsCache();
 
-	File getClientJar();
+	File getVersionsManifest();
 
-	File getServerJar();
+	File getVersionInfo(String minecraftVersion);
 
-	File getMergedJar();
+	File getVersionDetails(String minecraftVersion);
 
-	File getMainJar();
+	List<File> getLibraries(String minecraftVersion);
 
-	File getIntermediaryClientJar();
+	File getClientJar(String minecraftVersion);
 
-	File getIntermediaryServerJar();
+	File getServerJar(String minecraftVersion);
 
-	File getIntermediaryMergedJar();
+	File getMergedJar(String minecraftVersion);
 
-	File getMainIntermediaryJar();
+	File getMainJar(String minecraftVersion);
 
-	File getNamedClientJar();
+	File getIntermediaryClientJar(String minecraftVersion);
 
-	File getNamedServerJar();
+	File getIntermediaryServerJar(String minecraftVersion);
 
-	File getNamedMergedJar();
+	File getIntermediaryMergedJar(String minecraftVersion);
 
-	File getMainNamedJar();
+	File getMainIntermediaryJar(String minecraftVersion);
 
-	File getNestedIntermediaryClientJar();
+	File getNamedClientJar(String minecraftVersion);
 
-	File getNestedIntermediaryServerJar();
+	File getNamedServerJar(String minecraftVersion);
 
-	File getNestedIntermediaryMergedJar();
+	File getNamedMergedJar(String minecraftVersion);
 
-	File getMainNestedIntermediaryJar();
+	File getMainNamedJar(String minecraftVersion);
 
-	File getSignaturePatchedIntermediaryClientJar();
+	File getNestedIntermediaryClientJar(String minecraftVersion);
 
-	File getSignaturePatchedIntermediaryServerJar();
+	File getNestedIntermediaryServerJar(String minecraftVersion);
 
-	File getSignaturePatchedIntermediaryMergedJar();
+	File getNestedIntermediaryMergedJar(String minecraftVersion);
 
-	File getMainSignaturePatchedIntermediaryJar();
+	File getMainNestedIntermediaryJar(String minecraftVersion);
 
-	File getProcessedIntermediaryClientJar();
+	File getSignaturePatchedIntermediaryClientJar(String minecraftVersion);
 
-	File getProcessedIntermediaryServerJar();
+	File getSignaturePatchedIntermediaryServerJar(String minecraftVersion);
 
-	File getProcessedIntermediaryMergedJar();
+	File getSignaturePatchedIntermediaryMergedJar(String minecraftVersion);
 
-	File getMainProcessedIntermediaryJar();
+	File getMainSignaturePatchedIntermediaryJar(String minecraftVersion);
 
-	File getProcessedNamedClientJar();
+	File getProcessedIntermediaryClientJar(String minecraftVersion);
 
-	File getProcessedNamedServerJar();
+	File getProcessedIntermediaryServerJar(String minecraftVersion);
 
-	File getProcessedNamedMergedJar();
+	File getProcessedIntermediaryMergedJar(String minecraftVersion);
 
-	File getMainProcessedNamedJar();
+	File getMainProcessedIntermediaryJar(String minecraftVersion);
 
-	File getClientJar(String namespace);
+	File getProcessedNamedClientJar(String minecraftVersion);
 
-	File getServerJar(String namespace);
+	File getProcessedNamedServerJar(String minecraftVersion);
 
-	File getMergedJar(String namespace);
+	File getProcessedNamedMergedJar(String minecraftVersion);
 
-	File getMainJar(String namespace);
+	File getMainProcessedNamedJar(String minecraftVersion);
 
-	File getProcessedClientJar(String namespace);
+	File getClientJar(String minecraftVersion, String namespace);
 
-	File getProcessedServerJar(String namespace);
+	File getServerJar(String minecraftVersion, String namespace);
 
-	File getProcessedMergedJar(String namespace);
+	File getMergedJar(String minecraftVersion, String namespace);
 
-	File getMainProcessedJar(String namespace);
+	File getMainJar(String minecraftVersion, String namespace);
 
-	File getClientIntermediaryMappings();
+	File getProcessedClientJar(String minecraftVersion, String namespace);
 
-	File getServerIntermediaryMappings();
+	File getProcessedServerJar(String minecraftVersion, String namespace);
 
-	File getMergedIntermediaryMappings();
+	File getProcessedMergedJar(String minecraftVersion, String namespace);
 
-	File getClientNamedMappings();
+	File getMainProcessedJar(String minecraftVersion, String namespace);
 
-	File getServerNamedMappings();
+	File getClientIntermediaryMappings(String minecraftVersion);
 
-	File getMergedNamedMappings();
+	File getServerIntermediaryMappings(String minecraftVersion);
 
-	File getClientMappings(String targetNamespace);
+	File getMergedIntermediaryMappings(String minecraftVersion);
 
-	File getServerMappings(String targetNamespace);
+	File getClientNamedMappings(String minecraftVersion);
 
-	File getMergedMappings(String targetNamespace);
+	File getServerNamedMappings(String minecraftVersion);
 
-	File getClientNests();
+	File getMergedNamedMappings(String minecraftVersion);
 
-	File getServerNests();
+	File getClientMappings(String minecraftVersion, String targetNamespace);
 
-	File getMergedNests();
+	File getServerMappings(String minecraftVersion, String targetNamespace);
 
-	File getIntermediaryClientNests();
+	File getMergedMappings(String minecraftVersion, String targetNamespace);
 
-	File getIntermediaryServerNests();
+	File getClientNests(String minecraftVersion);
 
-	File getIntermediaryMergedNests();
+	File getServerNests(String minecraftVersion);
 
-	File getMainIntermediaryNests();
+	File getMergedNests(String minecraftVersion);
 
-	File getClientSparrowFile();
+	File getIntermediaryClientNests(String minecraftVersion);
 
-	File getServerSparrowFile();
+	File getIntermediaryServerNests(String minecraftVersion);
 
-	File getMergedSparrowFile();
+	File getIntermediaryMergedNests(String minecraftVersion);
 
-	File getIntermediaryClientSparrowFile();
+	File getMainIntermediaryNests(String minecraftVersion);
 
-	File getIntermediaryServerSparrowFile();
+	File getClientSparrowFile(String minecraftVersion);
 
-	File getIntermediaryMergedSparrowFile();
+	File getServerSparrowFile(String minecraftVersion);
 
-	File getMainIntermediarySparrowFile();
+	File getMergedSparrowFile(String minecraftVersion);
+
+	File getIntermediaryClientSparrowFile(String minecraftVersion);
+
+	File getIntermediaryServerSparrowFile(String minecraftVersion);
+
+	File getIntermediaryMergedSparrowFile(String minecraftVersion);
+
+	File getMainIntermediarySparrowFile(String minecraftVersion);
 
 }
