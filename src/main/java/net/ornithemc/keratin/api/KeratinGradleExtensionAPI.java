@@ -1,5 +1,6 @@
 package net.ornithemc.keratin.api;
 
+import java.io.File;
 import java.util.Map;
 
 import org.gradle.api.provider.Property;
@@ -25,11 +26,7 @@ public interface KeratinGradleExtensionAPI {
 
 	VersionsManifest getVersionsManifest();
 
-	VersionInfo getMainVersionInfo();
-
 	VersionInfo getVersionInfo(String minecraftVersion);
-
-	VersionDetails getMainVersionDetails();
 
 	VersionDetails getVersionDetails(String minecraftVersion);
 
@@ -40,5 +37,7 @@ public interface KeratinGradleExtensionAPI {
 	Map<GameSide, Integer> getSparrowBuilds(String minecraftVersion);
 
 	int getSparrowBuild(String minecraftVersion, GameSide side);
+
+	Property<File> getMatchesDirectory();
 
 }

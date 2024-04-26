@@ -5,31 +5,33 @@ import java.util.List;
 
 public interface OrnitheFilesAPI {
 
-	File getGlobalCacheDir();
+	File getGlobalBuildCache();
 
-	File getLocalCacheDir();
+	File getLocalBuildCache();
 
-	File getVersionJsonsDir();
+	File getVersionJsonsCache();
 
-	File getGameJarsDir();
+	File getGameJarsCache();
 
-	File getMappedJarsDir();
+	File getMappedJarsCache();
 
-	File getProcessedJarsDir();
+	File getProcessedJarsCache();
 
-	File getLibrariesDir();
+	File getLibrariesCache();
 
-	File getMappingsDir();
+	File getMappingsCache();
 
-	File getProcessedMappingsDir();
+	File getProcessedMappingsCache();
 
-	File getNestsDir();
+	File getNestsCache();
 
-	File getSparrowDir();
+	File getSparrowCache();
 
 	File getNestsBuildsCache();
 
 	File getSparrowBuildsCache();
+
+	File getMappingsDirectory();
 
 	File getVersionsManifest();
 

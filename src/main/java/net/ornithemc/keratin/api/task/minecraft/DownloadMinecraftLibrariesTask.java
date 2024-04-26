@@ -23,7 +23,7 @@ public abstract class DownloadMinecraftLibrariesTask extends KeratinTask impleme
 		KeratinGradleExtension keratin = getExtension();
 		VersionInfo info = keratin.getVersionInfo(minecraftVersion);
 		OrnitheFiles files = keratin.getFiles();
-		File dir = keratin.getFiles().getLibrariesDir();
+		File dir = keratin.getFiles().getLibrariesCache();
 
 		downloadMinecraftLibraries(
 			dir,

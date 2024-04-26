@@ -26,6 +26,7 @@ import net.ornithemc.keratin.api.KeratinGradleExtensionAPI;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.manifest.VersionInfo;
 import net.ornithemc.keratin.api.manifest.VersionsManifest;
+import net.ornithemc.keratin.api.task.MakeCacheDirectoriesTask;
 import net.ornithemc.keratin.api.task.manifest.DownloadVersionDetailsTask;
 import net.ornithemc.keratin.api.task.manifest.DownloadVersionInfoTask;
 import net.ornithemc.keratin.api.task.manifest.DownloadVersionsManifestTask;
@@ -38,6 +39,7 @@ import net.ornithemc.keratin.api.task.processing.DownloadNestsTask;
 import net.ornithemc.keratin.api.task.processing.DownloadSparrowTask;
 import net.ornithemc.keratin.api.task.processing.ProcessMinecraftTask;
 import net.ornithemc.keratin.api.task.processing.UpdateBuildsCacheFromMetaTask;
+import net.ornithemc.keratin.matching.Matches;
 import net.ornithemc.keratin.util.Versioned;
 
 public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
@@ -62,6 +64,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private final Versioned<VersionDetails> versionDetails;
 	private final Versioned<Map<GameSide, Integer>> nestsBuilds;
 	private final Versioned<Map<GameSide, Integer>> sparrowBuilds;
+	private final Property<File> matchesDir;
 
 	public KeratinGradleExtension(Project project) {
 		this.project = project;
@@ -128,7 +131,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 			return details;
 		});
-
 		this.nestsBuilds = new Versioned<>(minecraftVersion -> {
 			File file = this.files.getNestsBuildsCache();
 
@@ -173,6 +175,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 			return builds;
 		});
+		this.matchesDir = this.project.getObjects().property(File.class);
+		this.matchesDir.convention(this.project.provider(() -> this.project.file("matches")));
+		this.matchesDir.finalizeValueOnRead();
 
 		this.apply();
 	}
@@ -180,7 +185,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private void apply() {
 		TaskContainer tasks = project.getTasks();
 
+		TaskProvider<?> makeDirs = tasks.register("makeCacheDirectories", MakeCacheDirectoriesTask.class);
 		TaskProvider<?> downloadManifest = tasks.register("downloadVersionsManifest", DownloadVersionsManifestTask.class, task -> {
+			task.dependsOn(makeDirs);
 			task.getUrl().convention(Constants.VERSIONS_MANIFEST_URL);
 			task.getUrl().finalizeValueOnRead();
 			task.getOutput().convention(project.provider(() -> files.getVersionsManifest()));
@@ -262,7 +269,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		});
 
 		tasks.getByName("clean").doFirst(task -> {
-			project.delete(files.getLocalCacheDir());
+			project.delete(files.getLocalBuildCache());
 		});
 	}
 
@@ -306,18 +313,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	}
 
 	@Override
-	public VersionInfo getMainVersionInfo() {
-		return getVersionInfo(getMainMinecraftVersion().get());
-	}
-
-	@Override
 	public VersionInfo getVersionInfo(String minecraftVersion) {
 		return versionInfos.get(minecraftVersion);
-	}
-
-	@Override
-	public VersionDetails getMainVersionDetails() {
-		return getVersionDetails(getMainMinecraftVersion().get());
 	}
 
 	@Override
@@ -343,5 +340,65 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	@Override
 	public int getSparrowBuild(String minecraftVersion, GameSide side) {
 		return sparrowBuilds.get(minecraftVersion).get(side);
+	}
+
+	@Override
+	public Property<File> getMatchesDirectory() {
+		return matchesDir;
+	}
+
+	public Matches findMatches(String sideA, String versionA, String sideB, String versionB) {
+		File dir = matchesDir.get();
+
+		File file;
+		boolean inverted;
+
+		file = findMatches(dir, sideA, versionA, sideB, versionB);
+		inverted = false;
+
+		if (file == null) {
+			file = findMatches(dir, sideB, versionB, sideA, versionA);
+			inverted = false;
+		}
+
+		if (file == null) {
+			throw new RuntimeException("no matches from %s %s to %s %s could be found".formatted(sideA, versionA, sideB, versionB));
+		}
+
+		return new Matches(file, inverted);
+	}
+
+	private File findMatches(File dir, String sideA, String versionA, String sideB, String versionB) {
+		String name;
+
+		if (sideA.equals(sideB)) {
+			dir = new File(dir, sideA);
+			name = "%s#%s.match".formatted(versionA, versionB);
+		} else {
+			dir = new File(dir, "cross");
+			name = "%s-%s#%s-%s.match".formatted(sideA, versionA, sideB, versionB);
+		}
+
+		return findMatches(dir, name);
+	}
+
+	static File findMatches(File dir, String name) {
+		if (dir.isDirectory()) {
+			File file = new File(dir, name);
+
+			if (file.isFile() && file.exists()) {
+				return file;
+			}
+
+			for (File f : dir.listFiles()) {
+				file = findMatches(f, name);
+
+				if (file != null) {
+					return file;
+				}
+			}
+		}
+
+		return null;
 	}
 }
