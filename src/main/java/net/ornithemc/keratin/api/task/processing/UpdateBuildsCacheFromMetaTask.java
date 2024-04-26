@@ -1,4 +1,4 @@
-package net.ornithemc.keratin.api.task;
+package net.ornithemc.keratin.api.task.processing;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,6 +17,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.task.KeratinTask;
 
 public abstract class UpdateBuildsCacheFromMetaTask extends KeratinTask {
 

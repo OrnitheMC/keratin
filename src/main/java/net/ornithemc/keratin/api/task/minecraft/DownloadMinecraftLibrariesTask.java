@@ -1,4 +1,4 @@
-package net.ornithemc.keratin.api.task;
+package net.ornithemc.keratin.api.task.minecraft;
 
 import java.io.File;
 
@@ -7,7 +7,8 @@ import org.gradle.api.tasks.TaskAction;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.OrnitheFiles;
-import net.ornithemc.keratin.manifest.VersionInfo;
+import net.ornithemc.keratin.api.manifest.VersionInfo;
+import net.ornithemc.keratin.api.task.KeratinTask;
 
 public abstract class DownloadMinecraftLibrariesTask extends KeratinTask implements MinecraftLibrariesDownloader {
 

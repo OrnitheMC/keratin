@@ -1,9 +1,10 @@
-package net.ornithemc.keratin.api.task;
+package net.ornithemc.keratin.api.task.minecraft;
 
 import java.io.File;
 
-import net.ornithemc.keratin.manifest.VersionDetails;
-import net.ornithemc.keratin.manifest.VersionDetails.Download;
+import net.ornithemc.keratin.api.manifest.VersionDetails;
+import net.ornithemc.keratin.api.manifest.VersionDetails.Download;
+import net.ornithemc.keratin.api.task.Downloader;
 
 public interface MinecraftJarsDownloader extends Downloader {
 

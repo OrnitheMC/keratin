@@ -1,8 +1,9 @@
-package net.ornithemc.keratin.api.task;
+package net.ornithemc.keratin.api.task.processing;
 
 import java.io.File;
 import java.io.IOException;
 
+import net.ornithemc.keratin.api.task.TaskAware;
 import net.ornithemc.nester.NesterException;
 
 public interface Nester extends TaskAware {

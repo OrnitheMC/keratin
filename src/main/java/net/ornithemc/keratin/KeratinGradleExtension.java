@@ -23,21 +23,21 @@ import com.google.gson.JsonObject;
 
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.KeratinGradleExtensionAPI;
-import net.ornithemc.keratin.api.task.DownloadIntermediaryTask;
-import net.ornithemc.keratin.api.task.DownloadMinecraftJarsTask;
-import net.ornithemc.keratin.api.task.DownloadMinecraftLibrariesTask;
-import net.ornithemc.keratin.api.task.DownloadNestsTask;
-import net.ornithemc.keratin.api.task.DownloadSparrowTask;
-import net.ornithemc.keratin.api.task.DownloadVersionDetailsTask;
-import net.ornithemc.keratin.api.task.DownloadVersionInfoTask;
-import net.ornithemc.keratin.api.task.DownloadVersionsManifestTask;
-import net.ornithemc.keratin.api.task.MapMinecraftTask;
-import net.ornithemc.keratin.api.task.MergeMinecraftJarsTask;
-import net.ornithemc.keratin.api.task.ProcessMinecraftTask;
-import net.ornithemc.keratin.api.task.UpdateBuildsCacheFromMetaTask;
-import net.ornithemc.keratin.manifest.VersionDetails;
-import net.ornithemc.keratin.manifest.VersionInfo;
-import net.ornithemc.keratin.manifest.VersionsManifest;
+import net.ornithemc.keratin.api.manifest.VersionDetails;
+import net.ornithemc.keratin.api.manifest.VersionInfo;
+import net.ornithemc.keratin.api.manifest.VersionsManifest;
+import net.ornithemc.keratin.api.task.manifest.DownloadVersionDetailsTask;
+import net.ornithemc.keratin.api.task.manifest.DownloadVersionInfoTask;
+import net.ornithemc.keratin.api.task.manifest.DownloadVersionsManifestTask;
+import net.ornithemc.keratin.api.task.mapping.DownloadIntermediaryTask;
+import net.ornithemc.keratin.api.task.mapping.MapMinecraftTask;
+import net.ornithemc.keratin.api.task.merging.MergeMinecraftJarsTask;
+import net.ornithemc.keratin.api.task.minecraft.DownloadMinecraftJarsTask;
+import net.ornithemc.keratin.api.task.minecraft.DownloadMinecraftLibrariesTask;
+import net.ornithemc.keratin.api.task.processing.DownloadNestsTask;
+import net.ornithemc.keratin.api.task.processing.DownloadSparrowTask;
+import net.ornithemc.keratin.api.task.processing.ProcessMinecraftTask;
+import net.ornithemc.keratin.api.task.processing.UpdateBuildsCacheFromMetaTask;
 import net.ornithemc.keratin.util.Versioned;
 
 public class KeratinGradleExtension implements KeratinGradleExtensionAPI {

@@ -10,7 +10,7 @@ import org.gradle.api.provider.Property;
 
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.manifest.VersionDetails;
+import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.util.Versioned;
 
 public class OrnitheFiles implements OrnitheFilesAPI {

@@ -1,4 +1,4 @@
-package net.ornithemc.keratin.api.task;
+package net.ornithemc.keratin.api.task.mapping;
 
 import java.io.File;
 import java.util.List;
@@ -8,6 +8,7 @@ import org.gradle.api.Action;
 import net.fabricmc.tinyremapper.OutputConsumerPath;
 import net.fabricmc.tinyremapper.TinyRemapper;
 import net.fabricmc.tinyremapper.TinyUtils;
+import net.ornithemc.keratin.api.task.TaskAware;
 
 public interface Mapper extends TaskAware {
 

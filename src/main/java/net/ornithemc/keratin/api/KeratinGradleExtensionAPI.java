@@ -5,9 +5,9 @@ import java.util.Map;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 
-import net.ornithemc.keratin.manifest.VersionDetails;
-import net.ornithemc.keratin.manifest.VersionInfo;
-import net.ornithemc.keratin.manifest.VersionsManifest;
+import net.ornithemc.keratin.api.manifest.VersionDetails;
+import net.ornithemc.keratin.api.manifest.VersionInfo;
+import net.ornithemc.keratin.api.manifest.VersionsManifest;
 
 public interface KeratinGradleExtensionAPI {
 

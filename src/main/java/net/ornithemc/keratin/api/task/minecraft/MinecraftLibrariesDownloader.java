@@ -1,11 +1,12 @@
-package net.ornithemc.keratin.api.task;
+package net.ornithemc.keratin.api.task.minecraft;
 
 import java.io.File;
 import java.util.function.Consumer;
 
-import net.ornithemc.keratin.manifest.VersionInfo;
-import net.ornithemc.keratin.manifest.VersionInfo.Library;
-import net.ornithemc.keratin.manifest.VersionInfo.Library.Downloads.Artifact;
+import net.ornithemc.keratin.api.manifest.VersionInfo;
+import net.ornithemc.keratin.api.manifest.VersionInfo.Library;
+import net.ornithemc.keratin.api.manifest.VersionInfo.Library.Downloads.Artifact;
+import net.ornithemc.keratin.api.task.Downloader;
 
 public interface MinecraftLibrariesDownloader extends Downloader {
 

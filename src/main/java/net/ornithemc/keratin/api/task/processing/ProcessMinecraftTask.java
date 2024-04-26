@@ -1,4 +1,4 @@
-package net.ornithemc.keratin.api.task;
+package net.ornithemc.keratin.api.task.processing;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +10,7 @@ import com.google.common.io.Files;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.api.task.KeratinTask;
 
 public abstract class ProcessMinecraftTask extends KeratinTask implements Nester, SignaturePatcher {
 

@@ -1,11 +1,12 @@
-package net.ornithemc.keratin.api.task;
+package net.ornithemc.keratin.api.task.minecraft;
 
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.TaskAction;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.manifest.VersionDetails;
+import net.ornithemc.keratin.api.manifest.VersionDetails;
+import net.ornithemc.keratin.api.task.KeratinTask;
 
 public abstract class DownloadMinecraftJarsTask extends KeratinTask implements MinecraftJarsDownloader {
 

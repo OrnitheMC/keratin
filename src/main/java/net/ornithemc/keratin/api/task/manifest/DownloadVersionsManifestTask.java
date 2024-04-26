@@ -1,4 +1,4 @@
-package net.ornithemc.keratin.api.task;
+package net.ornithemc.keratin.api.task.manifest;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +8,8 @@ import org.apache.commons.io.FileUtils;
 
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.TaskAction;
+
+import net.ornithemc.keratin.api.task.KeratinTask;
 
 public abstract class DownloadVersionsManifestTask extends KeratinTask {
 

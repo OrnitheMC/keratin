@@ -1,4 +1,4 @@
-package net.ornithemc.keratin.manifest;
+package net.ornithemc.keratin.api.manifest;
 
 import java.util.List;
 import java.util.Optional;

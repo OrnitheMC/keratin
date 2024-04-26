@@ -1,4 +1,4 @@
-package net.ornithemc.keratin.api.task;
+package net.ornithemc.keratin.api.task.mapping;
 
 import java.io.File;
 
@@ -10,7 +10,9 @@ import net.fabricmc.stitch.commands.CommandSplitTiny;
 import net.ornithemc.keratin.Constants;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.manifest.VersionDetails;
+import net.ornithemc.keratin.api.manifest.VersionDetails;
+import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
+import net.ornithemc.keratin.api.task.KeratinTask;
 
 public abstract class DownloadIntermediaryTask extends KeratinTask implements DownloaderAndExtracter {
 

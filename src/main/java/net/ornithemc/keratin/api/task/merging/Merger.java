@@ -1,9 +1,10 @@
-package net.ornithemc.keratin.api.task;
+package net.ornithemc.keratin.api.task.merging;
 
 import java.io.File;
 import java.io.IOException;
 
 import net.fabricmc.stitch.merge.JarMerger;
+import net.ornithemc.keratin.api.task.TaskAware;
 
 public interface Merger extends TaskAware {
 
