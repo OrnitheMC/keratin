@@ -275,8 +275,18 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	}
 
 	@Override
+	public VersionInfo getVersionInfo() {
+		return getVersionInfo(minecraftVersion.get());
+	}
+
+	@Override
 	public VersionInfo getVersionInfo(String minecraftVersion) {
 		return versionInfos.get(minecraftVersion);
+	}
+
+	@Override
+	public VersionDetails getVersionDetails() {
+		return getVersionDetails(minecraftVersion.get());
 	}
 
 	@Override

@@ -23,7 +23,11 @@ public interface KeratinGradleExtensionAPI {
 
 	VersionsManifest getVersionsManifest();
 
+	VersionInfo getVersionInfo();
+
 	VersionInfo getVersionInfo(String minecraftVersion);
+
+	VersionDetails getVersionDetails();
 
 	VersionDetails getVersionDetails(String minecraftVersion);
 
