@@ -4,15 +4,12 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
 import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 
@@ -30,14 +27,11 @@ import net.ornithemc.keratin.api.task.MakeCacheDirectoriesTask;
 import net.ornithemc.keratin.api.task.manifest.DownloadVersionDetailsTask;
 import net.ornithemc.keratin.api.task.manifest.DownloadVersionInfoTask;
 import net.ornithemc.keratin.api.task.manifest.DownloadVersionsManifestTask;
-import net.ornithemc.keratin.api.task.mapping.DownloadIntermediaryTask;
-import net.ornithemc.keratin.api.task.mapping.MapMinecraftTask;
 import net.ornithemc.keratin.api.task.merging.MergeMinecraftJarsTask;
 import net.ornithemc.keratin.api.task.minecraft.DownloadMinecraftJarsTask;
 import net.ornithemc.keratin.api.task.minecraft.DownloadMinecraftLibrariesTask;
 import net.ornithemc.keratin.api.task.processing.DownloadNestsTask;
 import net.ornithemc.keratin.api.task.processing.DownloadSparrowTask;
-import net.ornithemc.keratin.api.task.processing.ProcessMinecraftTask;
 import net.ornithemc.keratin.api.task.processing.UpdateBuildsCacheFromMetaTask;
 import net.ornithemc.keratin.matching.Matches;
 import net.ornithemc.keratin.util.Versioned;
@@ -55,8 +49,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	private final Property<String> globalCacheDir;
 	private final Property<String> localCacheDir;
-	private final Property<String> mainMinecraftVersion;
-	private final SetProperty<String> minecraftVersions;
+	private final Property<String> minecraftVersion;
 	private final Property<Integer> intermediaryGen;
 
 	private final Property<VersionsManifest> versionsManifest;
@@ -77,18 +70,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.localCacheDir.convention(Constants.ORNITHE_LOCAL_CACHE_DIR);
 		this.localCacheDir.finalizeValueOnRead();
 
-		this.mainMinecraftVersion = this.project.getObjects().property(String.class);
-		this.mainMinecraftVersion.convention(this.project.provider(() -> {
+		this.minecraftVersion = this.project.getObjects().property(String.class);
+		this.minecraftVersion.convention(this.project.provider(() -> {
 			throw new IllegalStateException("main Minecraft version is not set!");
 		}));
-		this.mainMinecraftVersion.finalizeValueOnRead();
-		this.minecraftVersions = this.project.getObjects().setProperty(String.class);
-		this.minecraftVersions.convention(this.project.provider(() -> {
-			Set<String> versions = new LinkedHashSet<>();
-			versions.add(this.mainMinecraftVersion.get());
-			return versions;
-		}));
-		this.minecraftVersions.finalizeValueOnRead();
+		this.minecraftVersion.finalizeValueOnRead();
 		this.intermediaryGen = this.project.getObjects().property(Integer.class);
 		this.intermediaryGen.convention(1);
 		this.intermediaryGen.finalizeValueOnRead();
@@ -195,42 +181,29 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		});
 		TaskProvider<?> downloadInfo = tasks.register("downloadVersionInfo", DownloadVersionInfoTask.class, task -> {
 			task.dependsOn(downloadManifest);
-			task.getMinecraftVersion().convention(this.mainMinecraftVersion);
+			task.getMinecraftVersion().convention(this.minecraftVersion);
 			task.getMinecraftVersion().finalizeValueOnRead();
 		});
 		TaskProvider<?> downloadDetails = tasks.register("downloadVersionDetails", DownloadVersionDetailsTask.class, task -> {
 			task.dependsOn(downloadManifest);
-			task.getMinecraftVersion().convention(this.mainMinecraftVersion);
+			task.getMinecraftVersion().convention(this.minecraftVersion);
 			task.getMinecraftVersion().finalizeValueOnRead();
 		});
 
 		TaskProvider<?> downloadLibraries = tasks.register("downloadMinecraftLibraries", DownloadMinecraftLibrariesTask.class, task -> {
 			task.dependsOn(downloadInfo);
-			task.getMinecraftVersion().convention(this.mainMinecraftVersion);
+			task.getMinecraftVersion().convention(this.minecraftVersion);
 			task.getMinecraftVersion().finalizeValueOnRead();
 		});
 		TaskProvider<?> downloadJars = tasks.register("downloadMinecraftJars", DownloadMinecraftJarsTask.class, task -> {
 			task.dependsOn(downloadDetails);
-			task.getMinecraftVersion().convention(this.mainMinecraftVersion);
+			task.getMinecraftVersion().convention(this.minecraftVersion);
 			task.getMinecraftVersion().finalizeValueOnRead();
 		});
 		TaskProvider<?> mergeJars = tasks.register("mergeMinecraftJars", MergeMinecraftJarsTask.class, task -> {
 			task.dependsOn(downloadDetails, downloadJars);
-			task.getMinecraftVersion().convention(this.mainMinecraftVersion);
+			task.getMinecraftVersion().convention(this.minecraftVersion);
 			task.getMinecraftVersion().finalizeValueOnRead();
-		});
-
-		TaskProvider<?> downloadIntermediary = tasks.register("downloadIntermediary", DownloadIntermediaryTask.class, task -> {
-			task.dependsOn(downloadDetails);
-			task.getMinecraftVersion().convention(this.mainMinecraftVersion);
-			task.getMinecraftVersion().finalizeValueOnRead();
-			task.getIntermediaryGen().convention(this.intermediaryGen);
-			task.getIntermediaryGen().finalizeValueOnRead();
-		});
-		TaskProvider<?> mapMcToIntermediary = tasks.register("mapMinecraftToIntermediary", MapMinecraftTask.class, task -> {
-			task.dependsOn(downloadLibraries, downloadIntermediary, mergeJars);
-			task.getSourceNamespace().set("official");
-			task.getTargetNamespace().set("intermediary");
 		});
 
 		TaskProvider<?> updateNestsBuilds = tasks.register("updateNestsBuildsCache", UpdateBuildsCacheFromMetaTask.class, task -> {
@@ -252,19 +225,13 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 		TaskProvider<?> downloadNests = tasks.register("downloadNests", DownloadNestsTask.class, task -> {
 			task.dependsOn(downloadDetails);
-			task.getMinecraftVersion().convention(this.mainMinecraftVersion);
+			task.getMinecraftVersion().convention(this.minecraftVersion);
 			task.getMinecraftVersion().finalizeValueOnRead();
 		});
 	
 		TaskProvider<?> downloadSparrow = tasks.register("downloadSparrow", DownloadSparrowTask.class, task -> {
 			task.dependsOn(downloadDetails);
-			task.getMinecraftVersion().convention(this.mainMinecraftVersion);
-			task.getMinecraftVersion().finalizeValueOnRead();
-		});
-
-		TaskProvider<?> processMc = tasks.register("processMinecraft", ProcessMinecraftTask.class, task -> {
-			task.dependsOn(mapMcToIntermediary, downloadNests, downloadSparrow);
-			task.getMinecraftVersion().convention(this.mainMinecraftVersion);
+			task.getMinecraftVersion().convention(this.minecraftVersion);
 			task.getMinecraftVersion().finalizeValueOnRead();
 		});
 
@@ -288,13 +255,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	}
 
 	@Override
-	public Property<String> getMainMinecraftVersion() {
-		return mainMinecraftVersion;
-	}
-
-	@Override
-	public SetProperty<String> getMinecraftVersions() {
-		return minecraftVersions;
+	public Property<String> getMinecraftVersion() {
+		return minecraftVersion;
 	}
 
 	@Override

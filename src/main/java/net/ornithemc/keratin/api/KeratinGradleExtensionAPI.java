@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Map;
 
 import org.gradle.api.provider.Property;
-import org.gradle.api.provider.SetProperty;
 
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.manifest.VersionInfo;
@@ -16,9 +15,7 @@ public interface KeratinGradleExtensionAPI {
 
 	Property<String> getLocalCacheDir();
 
-	Property<String> getMainMinecraftVersion();
-
-	SetProperty<String> getMinecraftVersions();
+	Property<String> getMinecraftVersion();
 
 	Property<Integer> getIntermediaryGen();
 
