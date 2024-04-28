@@ -21,7 +21,6 @@ public abstract class DecompileMinecraftWithVineflowerTask extends DecompileTask
 
 		decompile("CFR", javaexec -> {
 			javaexec.getMainClass().set("org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler");
-			javaexec.getMainClass().set("org.benf.cfr.reader.Main");
 			javaexec.getArgs().add(jar.getAbsolutePath());
 			javaexec.getArgs().add(src.getAbsolutePath());
 		});
