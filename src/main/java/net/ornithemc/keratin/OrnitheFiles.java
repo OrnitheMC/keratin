@@ -102,7 +102,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.keratin = keratin;
 
 		this.globalBuildCache = fileProperty(() -> new File(this.project.getGradle().getGradleUserHomeDir(), "caches/%s".formatted(keratin.getGlobalCacheDir().get())));
-		this.localBuildCache = fileProperty(() -> new File(this.project.getGradle().getGradleHomeDir(), keratin.getLocalCacheDir().get()));
+		this.localBuildCache = fileProperty(() -> new File(this.project.file(".gradle"), keratin.getLocalCacheDir().get()));
 
 		this.versionJsonsCache = fileProperty(() -> new File(getGlobalBuildCache(), "version-jsons"));
 		this.gameJarsCache = fileProperty(() -> new File(getGlobalBuildCache(), "game-jars"));
