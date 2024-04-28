@@ -170,11 +170,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	private void apply() {
 		project.getConfigurations().register(Configurations.DECOMPILE_CLASSPATH);
-		project.getConfigurations().register(Configurations.MAPPING_POET);
 
 		project.getDependencies().add(Configurations.DECOMPILE_CLASSPATH, "net.fabricmc:cfr:0.0.9");
 		project.getDependencies().add(Configurations.DECOMPILE_CLASSPATH, "org.vineflower:vineflower:1.10.1");
-		project.getDependencies().add(Configurations.MAPPING_POET, "net.fabricmc:mappingpoet:0.3.0");
 
 		TaskContainer tasks = project.getTasks();
 
