@@ -23,6 +23,10 @@ repositories {
 		url = 'https://maven.fabricmc.net'
 	}
 	maven {
+		name = 'Quilt'
+		url = 'https://maven.quiltmc.org/repository/release'
+	}
+	maven {
 		name = 'Ornithe'
 		url = 'https://maven.ornithemc.net/releases'
 	}
