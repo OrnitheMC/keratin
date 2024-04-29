@@ -1,7 +1,6 @@
 package net.ornithemc.keratin.api;
 
 import java.io.File;
-import java.util.Map;
 
 import org.gradle.api.provider.Property;
 
@@ -19,6 +18,8 @@ public interface KeratinGradleExtensionAPI {
 
 	Property<Integer> getIntermediaryGen();
 
+	void tasks(TaskSelection selection);
+
 	OrnitheFilesAPI getFiles();
 
 	VersionsManifest getVersionsManifest();
@@ -31,11 +32,7 @@ public interface KeratinGradleExtensionAPI {
 
 	VersionDetails getVersionDetails(String minecraftVersion);
 
-	Map<GameSide, Integer> getNestsBuilds(String minecraftVersion);
-
 	int getNestsBuild(String minecraftVersion, GameSide side);
-
-	Map<GameSide, Integer> getSparrowBuilds(String minecraftVersion);
 
 	int getSparrowBuild(String minecraftVersion, GameSide side);
 

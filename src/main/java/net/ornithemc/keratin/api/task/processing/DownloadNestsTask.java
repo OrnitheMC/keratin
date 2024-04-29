@@ -24,41 +24,49 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 		OrnitheFilesAPI files = keratin.getFiles();
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.sharedMappings()) {
-			File output = files.getMergedNests(minecraftVersion);
+		String pathInJar = "nests/mappings.nest";
 
-			if (output != null) {
+		if (details.sharedMappings()) {
+			int build = keratin.getNestsBuild(minecraftVersion, GameSide.MERGED);
+
+			if (build > 0) {
+				File output = files.getMergedNests(minecraftVersion);
+
 				downloadAndExtract(
 					Constants.nestsUrl(
 						minecraftVersion,
 						GameSide.MERGED,
-						keratin.getNestsBuild(minecraftVersion, GameSide.MERGED)),
-					"nests/mappings.nest",
+						build),
+					pathInJar,
 					output
 				);
 			}
 		} else {
-			File client = files.getClientNests(minecraftVersion);
-			File server = files.getServerNests(minecraftVersion);
+			int clientBuild = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
+			int serverBuild = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
 
-			if (details.client() && client != null) {
+			if (details.client() && clientBuild > 0) {
+				File output = files.getClientNests(minecraftVersion);
+
 				downloadAndExtract(
 					Constants.nestsUrl(
 						minecraftVersion,
 						GameSide.CLIENT,
-						keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT)),
-					"nests/mappings.nest",
-					client
+						clientBuild),
+					pathInJar,
+					output
 				);
 			}
-			if (details.server() && server != null) {
+			if (details.server() && serverBuild > 0) {
+				File output = files.getServerNests(minecraftVersion);
+
 				downloadAndExtract(
 					Constants.nestsUrl(
 						minecraftVersion,
 						GameSide.SERVER,
-						keratin.getNestsBuild(minecraftVersion, GameSide.SERVER)),
-					"nests/mappings.nest",
-					server
+						serverBuild),
+					pathInJar,
+					output
 				);
 			}
 		}

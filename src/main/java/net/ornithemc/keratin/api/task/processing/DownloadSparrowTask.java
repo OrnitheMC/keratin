@@ -24,41 +24,49 @@ public abstract class DownloadSparrowTask extends MinecraftTask implements Downl
 		OrnitheFilesAPI files = keratin.getFiles();
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.sharedMappings()) {
-			File output = files.getMergedSparrowFile(minecraftVersion);
+		String pathInJar = "signatures/mappings.sigs";
 
-			if (output != null) {
+		if (details.sharedMappings()) {
+			int build = keratin.getSparrowBuild(minecraftVersion, GameSide.MERGED);
+
+			if (build > 0) {
+				File output = files.getMergedSparrowFile(minecraftVersion);
+
 				downloadAndExtract(
 					Constants.sparrowUrl(
 						minecraftVersion,
 						GameSide.MERGED,
-						keratin.getSparrowBuild(minecraftVersion, GameSide.MERGED)),
-					"signatures/mappings.sigs",
+						build),
+					pathInJar,
 					output
 				);
 			}
 		} else {
-			File client = files.getClientSparrowFile(minecraftVersion);
-			File server = files.getServerSparrowFile(minecraftVersion);
+			int clientBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
+			int serverBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
 
-			if (details.client() && client != null) {
+			if (details.client() && clientBuild > 0) {
+				File output = files.getClientSparrowFile(minecraftVersion);
+
 				downloadAndExtract(
 					Constants.sparrowUrl(
 						minecraftVersion,
 						GameSide.CLIENT,
-						keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT)),
-					"signatures/mappings.sigs",
-					client
+						clientBuild),
+					pathInJar,
+					output
 				);
 			}
-			if (details.server() && server != null) {
+			if (details.server() && serverBuild > 0) {
+				File output = files.getServerSparrowFile(minecraftVersion);
+
 				downloadAndExtract(
 					Constants.sparrowUrl(
 						minecraftVersion,
 						GameSide.SERVER,
-						keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER)),
-					"signatures/mappings.sigs",
-					server
+						serverBuild),
+					pathInJar,
+					output
 				);
 			}
 		}

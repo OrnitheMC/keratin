@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.gradle.api.tasks.TaskAction;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 
@@ -26,21 +27,27 @@ public abstract class MapSparrowTask extends MappingTask {
 
 		boolean fromOfficial = "official".equals(srcNs);
 
+		int mergedBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.MERGED);
+		int clientBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
+		int serverBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
+
 		if ("official".equals(srcNs) ? details.sharedMappings() : (details.client() && details.server())) {
-			mapSparrow(
-				fromOfficial ? files.getMergedSparrowFile(minecraftVersion) : files.getIntermediaryMergedSparrowFile(minecraftVersion),
-				fromOfficial ? files.getIntermediaryMergedSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion),
-				fromOfficial ? files.getMergedIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion)
-			);
+			if (details.sharedMappings() ? (mergedBuild > 0) : (clientBuild > 0 || serverBuild > 0)) {
+				mapSparrow(
+					fromOfficial ? files.getMergedSparrowFile(minecraftVersion) : files.getIntermediaryMergedSparrowFile(minecraftVersion),
+					fromOfficial ? files.getIntermediaryMergedSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion),
+					fromOfficial ? files.getMergedIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion)
+				);
+			}
 		} else {
-			if (details.client()) {
+			if (details.client() && clientBuild > 0) {
 				mapSparrow(
 					fromOfficial ? files.getClientSparrowFile(minecraftVersion) : files.getIntermediaryClientSparrowFile(minecraftVersion),
 					fromOfficial ? files.getIntermediaryClientSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion),
 					fromOfficial ? files.getClientIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion)
 				);
 			}
-			if (details.server()) {
+			if (details.server() && serverBuild > 0) {
 				mapSparrow(
 					fromOfficial ? files.getServerSparrowFile(minecraftVersion) : files.getIntermediaryServerSparrowFile(minecraftVersion),
 					fromOfficial ? files.getIntermediaryServerSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion),
