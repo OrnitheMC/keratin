@@ -393,7 +393,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			});
 
 			TaskProvider<?> prepareBuild = tasks.register("prepareBuild", PrepareBuildTask.class, task -> {
-				task.dependsOn(mapNestsToIntermediary);
+				task.dependsOn(mergeIntermediaryNests);
 			});
 			TaskProvider<?> checkMappings = tasks.register("checkMappings", CheckMappingsTask.class, task -> {
 				task.dependsOn(mapMinecraftToIntermediary, prepareBuild);
