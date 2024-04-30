@@ -35,6 +35,8 @@ public interface OrnitheFilesAPI {
 
 	File getRunDirectory(String minecraftVersion);
 
+	File getDecompiledSourceDirectory();
+
 	File getVersionsManifest();
 
 	File getVersionInfo(String minecraftVersion);

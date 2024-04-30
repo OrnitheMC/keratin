@@ -17,7 +17,7 @@ public abstract class DecompileMinecraftWithCfrTask extends DecompileTask {
 		OrnitheFilesAPI files = keratin.getFiles();
 
 		File jar = files.getProcessedNamedJar(minecraftVersion);
-		File src = getSourceDirectory().get();
+		File src = files.getDecompiledSourceDirectory();
 
 		decompile("CFR", javaexec -> {
 			javaexec.getMainClass().set("org.benf.cfr.reader.Main");

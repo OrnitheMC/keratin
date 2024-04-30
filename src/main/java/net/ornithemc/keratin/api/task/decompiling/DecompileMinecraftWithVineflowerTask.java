@@ -17,7 +17,7 @@ public abstract class DecompileMinecraftWithVineflowerTask extends DecompileTask
 		OrnitheFilesAPI files = keratin.getFiles();
 
 		File jar = files.getProcessedNamedJar(minecraftVersion);
-		File src = getSourceDirectory().get();
+		File src = files.getDecompiledSourceDirectory();
 
 		decompile("Vineflower", javaexec -> {
 			javaexec.getMainClass().set("org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler");

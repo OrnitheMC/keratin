@@ -35,6 +35,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Property<File> sparrowBuildsCache;
 	private final Property<File> mappingsDir;
 	private final Versioned<File> runDir;
+	private final Property<File> decompiledSrcDir;
 
 	private final Property<File> versionsManifest;
 	private final Versioned<File> versionInfos;
@@ -118,6 +119,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.sparrowBuildsCache = fileProperty(() -> this.project.file("sparrow-builds.json"));
 		this.mappingsDir = fileProperty(() -> this.project.file("mappings"));
 		this.runDir = new Versioned<>(minecraftVersion -> this.project.file("run/%s".formatted(minecraftVersion)));
+		this.decompiledSrcDir = fileProperty(() -> this.project.file("decompiledSrc"));
 
 		this.versionsManifest = fileProperty(() -> new File(getGlobalBuildCache(), "versions-manifest.json"));
 		this.versionInfos = new Versioned<>(minecraftVersion -> new File(getVersionJsonsCache(), "%s-info.json".formatted(minecraftVersion)));
@@ -503,6 +505,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	@Override
 	public File getRunDirectory(String minecraftVersion) {
 		return runDir.get(minecraftVersion);
+	}
+
+	@Override
+	public File getDecompiledSourceDirectory() {
+		return decompiledSrcDir.get();
 	}
 
 	@Override
