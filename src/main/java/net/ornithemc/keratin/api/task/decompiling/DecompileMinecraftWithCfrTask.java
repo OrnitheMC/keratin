@@ -21,9 +21,11 @@ public abstract class DecompileMinecraftWithCfrTask extends DecompileTask {
 
 		decompile("CFR", javaexec -> {
 			javaexec.getMainClass().set("org.benf.cfr.reader.Main");
-			javaexec.getArgs().add(jar.getAbsolutePath());
-			javaexec.getArgs().add("--outputdir");
-			javaexec.getArgs().add(src.getAbsolutePath());
+			javaexec.args(
+				jar.getAbsolutePath(),
+				"--outputdir",
+				src.getAbsolutePath()
+			);
 		});
 	}
 }

@@ -21,8 +21,10 @@ public abstract class DecompileMinecraftWithVineflowerTask extends DecompileTask
 
 		decompile("Vineflower", javaexec -> {
 			javaexec.getMainClass().set("org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler");
-			javaexec.getArgs().add(jar.getAbsolutePath());
-			javaexec.getArgs().add(src.getAbsolutePath());
+			javaexec.args(
+				jar.getAbsolutePath(),
+				src.getAbsolutePath()
+			);
 		});
 	}
 }
