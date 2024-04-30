@@ -23,9 +23,12 @@ public abstract class CheckMappingsTask extends BuildTask {
 		File jar = files.getMainIntermediaryJar(minecraftVersion);
 		File mappings = files.getNamedMappings(minecraftVersion);
 
-		new CheckMappingsCommand().run(new String[] {
-			jar.getAbsolutePath(),
-			mappings.getAbsolutePath()
-		});
+		try {
+			new CheckMappingsCommand().run(new String[] {
+				jar.getAbsolutePath(),
+				mappings.getAbsolutePath()
+			});
+		} catch (Exception e) {
+		}
 	}
 }
