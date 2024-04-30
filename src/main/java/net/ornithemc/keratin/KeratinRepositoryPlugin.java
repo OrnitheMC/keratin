@@ -38,6 +38,10 @@ public class KeratinRepositoryPlugin implements Plugin<PluginAware> {
 			repo.setUrl(Constants.FABRIC_MAVEN_URL);
 		});
 		repositories.maven(repo -> {
+			repo.setName(Constants.QUILT_MAVEN_NAME);
+			repo.setUrl(Constants.QUILT_MAVEN_URL);
+		});
+		repositories.maven(repo -> {
 			repo.setName(Constants.VINEFLOWER_SNAPSHOTS_MAVEN_NAME);
 			repo.setUrl(Constants.VINEFLOWER_SNAPSHOTS_MAVEN_URL);
 		});
