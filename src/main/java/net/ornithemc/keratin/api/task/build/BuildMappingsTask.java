@@ -46,7 +46,7 @@ public abstract class BuildMappingsTask extends BuildTask {
 			mappings.accept(writer);
 		}
 
-		if (details.sharedMappings()) {
+		if (details.sharedMappings() || !details.client() || !details.server()) {
 			MappingVisitor visitor = new MappingSourceNsSwitch(mappings, "intermediary");
 			MappingReader.read(intermediaryFile.toPath(), visitor);
 
