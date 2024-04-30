@@ -29,6 +29,7 @@ public class KeratinRepositoryPlugin implements Plugin<PluginAware> {
 	}
 
 	private void declareRepositories(RepositoryHandler repositories) {
+		repositories.mavenCentral();
 		repositories.maven(repo -> {
 			repo.setName(Constants.MAVEN_NAME);
 			repo.setUrl(Constants.MAVEN_URL);
