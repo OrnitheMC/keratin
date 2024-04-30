@@ -28,13 +28,13 @@ public abstract class MergeNestsTask extends MergeTask {
 			throw new IllegalStateException("cannot merge Nests for Minecraft " + minecraftVersion + ": both client and server Nests must be available");
 		}
 
-		getProject().getLogger().lifecycle(":merging " + namespace + " Nests for Minecraft " + minecraftVersion);
-
 		if (!details.sharedMappings()) {
 			int clientBuild = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
 			int serverBuild = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
 
 			if (clientBuild > 0 && serverBuild > 0) {
+				getProject().getLogger().lifecycle(":merging " + namespace + " Nests for Minecraft " + minecraftVersion);
+
 				mergeNests(
 					files.getIntermediaryClientNests(minecraftVersion),
 					files.getIntermediaryServerNests(minecraftVersion),

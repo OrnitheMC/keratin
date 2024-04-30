@@ -28,13 +28,13 @@ public abstract class MergeSparrowTask extends MergeTask {
 			throw new IllegalStateException("cannot merge Sparrow for Minecraft " + minecraftVersion + ": both client and server files must be available");
 		}
 
-		getProject().getLogger().lifecycle(":merging " + namespace + " Sparrow for Minecraft " + minecraftVersion);
-
 		if (!details.sharedMappings()) {
 			int clientBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
 			int serverBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
 
 			if (clientBuild > 0 && serverBuild > 0) {
+				getProject().getLogger().lifecycle(":merging " + namespace + " Sparrow for Minecraft " + minecraftVersion);
+
 				mergeSparrow(
 					files.getIntermediaryClientSparrowFile(minecraftVersion),
 					files.getIntermediaryServerSparrowFile(minecraftVersion),
