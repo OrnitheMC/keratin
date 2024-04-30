@@ -21,20 +21,18 @@ public abstract class MergeMinecraftJarsTask extends MergeTask {
 		OrnitheFilesAPI files = keratin.getFiles();
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (!details.client() && !details.server()) {
-			throw new IllegalStateException("cannot merge Minecraft " + minecraftVersion + ": both client and server jars must be available");
-		}
+		if (details.client() && details.server()) {
+			boolean official = "official".equals(namespace);
 
-		getProject().getLogger().lifecycle(":merging " + namespace + " jars for Minecraft " + minecraftVersion);
+			if (official == details.sharedMappings()) {
+				getProject().getLogger().lifecycle(":merging " + namespace + " jars for Minecraft " + minecraftVersion);
 
-		boolean official = "official".equals(namespace);
-
-		if (official == details.sharedMappings()) {
-			mergeJars(
-				official ? files.getClientJar(minecraftVersion) : files.getIntermediaryClientJar(minecraftVersion),
-				official ? files.getServerJar(minecraftVersion) : files.getIntermediaryServerJar(minecraftVersion),
-				official ? files.getMergedJar(minecraftVersion) : files.getIntermediaryMergedJar(minecraftVersion)
-			);
+				mergeJars(
+					official ? files.getClientJar(minecraftVersion) : files.getIntermediaryClientJar(minecraftVersion),
+					official ? files.getServerJar(minecraftVersion) : files.getIntermediaryServerJar(minecraftVersion),
+					official ? files.getMergedJar(minecraftVersion) : files.getIntermediaryMergedJar(minecraftVersion)
+				);
+			}
 		}
 	}
 
