@@ -24,7 +24,9 @@ abstract class DecompileTask extends MinecraftTask {
 		OrnitheFilesAPI files = keratin.getFiles();
 
 		File src = files.getDecompiledSourceDirectory();
-		FileUtils.forceDelete(src);
+		if (src.exists()) {
+			FileUtils.forceDelete(src);
+		}
 
 		getProject().javaexec(javaexec -> {
 			javaexec.classpath(getProject().getConfigurations().getByName(Configurations.DECOMPILE_CLASSPATH));

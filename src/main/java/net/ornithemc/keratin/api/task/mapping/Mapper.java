@@ -2,7 +2,7 @@ package net.ornithemc.keratin.api.task.mapping;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
 
 import org.gradle.api.Action;
 
@@ -16,11 +16,11 @@ import net.ornithemc.mappingutils.io.Format;
 
 public interface Mapper extends TaskAware {
 
-	default void mapJar(File input, File output, File mappings, List<File> libraries, String srcNs, String dstNs) {
+	default void mapJar(File input, File output, File mappings, Collection<File> libraries, String srcNs, String dstNs) {
 		mapJar(input, output, mappings, libraries, srcNs, dstNs, builder -> { });
 	}
 
-	default void mapJar(File input, File output, File mappings, List<File> libraries, String srcNs, String dstNs, Action<TinyRemapper.Builder> action) {
+	default void mapJar(File input, File output, File mappings, Collection<File> libraries, String srcNs, String dstNs, Action<TinyRemapper.Builder> action) {
 		if (output.exists()) {
 			output.delete();
 		}

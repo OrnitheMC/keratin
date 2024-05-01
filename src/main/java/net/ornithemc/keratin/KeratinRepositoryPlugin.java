@@ -30,21 +30,29 @@ public class KeratinRepositoryPlugin implements Plugin<PluginAware> {
 
 	private void declareRepositories(RepositoryHandler repositories) {
 		repositories.mavenCentral();
-		repositories.maven(repo -> {
-			repo.setName(Constants.MAVEN_NAME);
-			repo.setUrl(Constants.MAVEN_URL);
+		repositories.maven(repository -> {
+			repository.setName(Constants.MAVEN_NAME);
+			repository.setUrl(Constants.MAVEN_URL);
 		});
-		repositories.maven(repo -> {
-			repo.setName(Constants.FABRIC_MAVEN_NAME);
-			repo.setUrl(Constants.FABRIC_MAVEN_URL);
+		repositories.maven(repository -> {
+			repository.setName(Constants.FABRIC_MAVEN_NAME);
+			repository.setUrl(Constants.FABRIC_MAVEN_URL);
 		});
-		repositories.maven(repo -> {
-			repo.setName(Constants.QUILT_MAVEN_NAME);
-			repo.setUrl(Constants.QUILT_MAVEN_URL);
+		repositories.maven(repository -> {
+			repository.setName(Constants.QUILT_MAVEN_NAME);
+			repository.setUrl(Constants.QUILT_MAVEN_URL);
 		});
-		repositories.maven(repo -> {
-			repo.setName(Constants.VINEFLOWER_SNAPSHOTS_MAVEN_NAME);
-			repo.setUrl(Constants.VINEFLOWER_SNAPSHOTS_MAVEN_URL);
+		repositories.maven(repository -> {
+			repository.setName(Constants.VINEFLOWER_SNAPSHOTS_MAVEN_NAME);
+			repository.setUrl(Constants.VINEFLOWER_SNAPSHOTS_MAVEN_URL);
+		});
+		repositories.maven(repository -> {
+			repository.setName(Constants.MINECRAFT_LIBRARIES_MAVEN_NAME);
+			repository.setUrl(Constants.MINECRAFT_LIBRARIES_MAVEN_URL);
+			repository.metadataSources(metadataSources -> {
+				metadataSources.artifact();
+				metadataSources.ignoreGradleMetadataRedirection();
+			});
 		});
 	}
 }

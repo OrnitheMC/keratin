@@ -1,7 +1,7 @@
 package net.ornithemc.keratin.api;
 
 import java.io.File;
-import java.util.List;
+import java.util.Collection;
 
 public interface OrnitheFilesAPI {
 
@@ -43,7 +43,7 @@ public interface OrnitheFilesAPI {
 
 	File getVersionDetails(String minecraftVersion);
 
-	List<File> getLibraries(String minecraftVersion);
+	Collection<File> getLibraries(String minecraftVersion);
 
 	File getClientJar(String minecraftVersion);
 

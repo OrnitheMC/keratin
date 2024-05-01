@@ -72,7 +72,9 @@ public interface MappingsGraph extends TaskAware {
 		File tmpDiff1 = fromFromMinecraftVersion == null ? null : new File(tmpGraphDir, "%s#%s.tinydiff".formatted(fromFromMinecraftVersion, minecraftVersion));
 		File tmpDiff2 = fromFromMinecraftVersion == null ? null : new File(tmpGraphDir, "%s#%s.tinydiff".formatted(fromFromMinecraftVersion, fromMinecraftVersion));
 
-		FileUtils.forceDelete(tmpGraphDir);
+		if (tmpGraphDir.exists()) {
+			FileUtils.forceDelete(tmpGraphDir);
+		}
 		tmpGraphDir.mkdirs();
 
 		generateDummyMappings(jar, classNamePattern, dummy);

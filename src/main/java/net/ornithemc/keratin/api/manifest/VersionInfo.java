@@ -4,7 +4,7 @@ import java.util.List;
 
 public record VersionInfo(List<Library> libraries) {
 
-	public record Library(Downloads downloads) {
+	public record Library(Downloads downloads, String name) {
 
 		public record Downloads(Artifact artifact) {
 

@@ -1,20 +1,20 @@
 package net.ornithemc.keratin;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
-import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 
@@ -28,8 +28,10 @@ import net.ornithemc.keratin.api.KeratinGradleExtensionAPI;
 import net.ornithemc.keratin.api.TaskSelection;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.manifest.VersionInfo;
+import net.ornithemc.keratin.api.manifest.VersionInfo.Library;
+import net.ornithemc.keratin.api.manifest.VersionInfo.Library.Downloads;
+import net.ornithemc.keratin.api.manifest.VersionInfo.Library.Downloads.Artifact;
 import net.ornithemc.keratin.api.manifest.VersionsManifest;
-import net.ornithemc.keratin.api.task.MakeCacheDirectoriesTask;
 import net.ornithemc.keratin.api.task.build.BuildMappingsTask;
 import net.ornithemc.keratin.api.task.build.BuildProcessedMappingsTask;
 import net.ornithemc.keratin.api.task.build.CheckMappingsTask;
@@ -38,9 +40,6 @@ import net.ornithemc.keratin.api.task.build.PrepareBuildTask;
 import net.ornithemc.keratin.api.task.decompiling.DecompileMinecraftWithCfrTask;
 import net.ornithemc.keratin.api.task.decompiling.DecompileMinecraftWithVineflowerTask;
 import net.ornithemc.keratin.api.task.enigma.LaunchEnigmaTask;
-import net.ornithemc.keratin.api.task.manifest.DownloadVersionDetailsTask;
-import net.ornithemc.keratin.api.task.manifest.DownloadVersionInfoTask;
-import net.ornithemc.keratin.api.task.manifest.DownloadVersionsManifestTask;
 import net.ornithemc.keratin.api.task.mapping.DownloadIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.GenerateIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.GenerateNewIntermediaryTask;
@@ -57,7 +56,6 @@ import net.ornithemc.keratin.api.task.merging.MergeMinecraftJarsTask;
 import net.ornithemc.keratin.api.task.merging.MergeNestsTask;
 import net.ornithemc.keratin.api.task.merging.MergeSparrowTask;
 import net.ornithemc.keratin.api.task.minecraft.DownloadMinecraftJarsTask;
-import net.ornithemc.keratin.api.task.minecraft.DownloadMinecraftLibrariesTask;
 import net.ornithemc.keratin.api.task.processing.DownloadNestsTask;
 import net.ornithemc.keratin.api.task.processing.DownloadSparrowTask;
 import net.ornithemc.keratin.api.task.processing.ProcessMappingsTask;
@@ -221,41 +219,92 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		return intermediaryGen;
 	}
 
-	@SuppressWarnings("unused")
-	@Override
-	public void tasks(TaskSelection selection) {
+	private void configure(TaskSelection selection) throws Exception {
+		boolean refreshDeps = project.getGradle().getStartParameter().isRefreshDependencies();
+
+		String minecraftVersion = getMinecraftVersion().get();
+
 		ConfigurationContainer configurations = project.getConfigurations();
 		DependencyHandler dependencies = project.getDependencies();
+		
+		Configuration minecraftLibraries = configurations.register(Configurations.MINECRAFT_LIBRARIES).get();
+
+		for (File cacheDir : files.getCacheDirectories()) {
+			if (!cacheDir.exists()) {
+				cacheDir.mkdirs();
+			}
+		}
+
+		File versionsManifest = files.getVersionsManifest();
+
+		if (refreshDeps || !versionsManifest.exists()) {
+			project.getLogger().lifecycle(":downloading versions manifest");
+			FileUtils.copyURLToFile(new URL(Constants.VERSIONS_MANIFEST_URL), versionsManifest);
+		}
+
+		File versionInfo = files.getVersionInfo(minecraftVersion);
+
+		if (refreshDeps || !versionInfo.exists()) {
+			project.getLogger().lifecycle(":downloading version info for Minecraft " + minecraftVersion);
+
+			VersionsManifest manifest = getVersionsManifest();
+			VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
+
+			FileUtils.copyURLToFile(new URL(entry.url()), versionInfo);
+		}
+
+		File versionDetails = files.getVersionDetails(minecraftVersion);
+
+		if (refreshDeps || !versionDetails.exists()) {
+			project.getLogger().lifecycle(":downloading version details for Minecraft " + minecraftVersion);
+
+			VersionsManifest manifest = getVersionsManifest();
+			VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
+
+			FileUtils.copyURLToFile(new URL(entry.details()), versionDetails);
+		}
+
+		VersionInfo info = getVersionInfo(minecraftVersion);
+
+		for (Library library : info.libraries()) {
+			Downloads downloads = library.downloads();
+			Artifact artifact = downloads.artifact();
+
+			if (artifact != null) {
+				dependencies.add(minecraftLibraries.getName(), library.name());
+			}
+		}
+
+		if (selection == TaskSelection.FEATHER) {
+			Configuration decompileClasspath = configurations.register(Configurations.DECOMPILE_CLASSPATH).get();
+			Configuration enigmaRuntime = configurations.register(Configurations.ENIGMA_RUNTIME).get();
+
+			dependencies.add(decompileClasspath.getName(), "net.fabricmc:cfr:0.0.9");
+			dependencies.add(decompileClasspath.getName(), "org.vineflower:vineflower:1.10.1");
+			dependencies.add(enigmaRuntime.getName(), "net.ornithemc:enigma-swing:1.9.0");
+			dependencies.add(enigmaRuntime.getName(), "org.quiltmc:quilt-enigma-plugin:1.3.0");
+		}
+	}
+
+	@SuppressWarnings("unused")
+	@Override
+	public void tasks(TaskSelection selection) throws Exception {
+		configure(selection);
+
+		ConfigurationContainer configurations = project.getConfigurations();
 		TaskContainer tasks = project.getTasks();
 
-		TaskProvider<?> makeDirs = tasks.register("makeCacheDirectories", MakeCacheDirectoriesTask.class);
-		TaskProvider<?> downloadManifest = tasks.register("downloadVersionsManifest", DownloadVersionsManifestTask.class, task -> {
-			task.dependsOn(makeDirs);
-			task.getUrl().convention(Constants.VERSIONS_MANIFEST_URL);
-			task.getUrl().finalizeValueOnRead();
-			task.getOutput().convention(project.provider(() -> files.getVersionsManifest()));
-			task.getOutput().finalizeValueOnRead();
+		TaskProvider<?> syncLibraries = tasks.register("syncMinecraftLibraries", Sync.class, task -> {
+			task.from(configurations.getByName(Configurations.MINECRAFT_LIBRARIES));
+			task.into(files.getLibrariesCache());
 		});
-		TaskProvider<?> downloadInfo = tasks.register("downloadVersionInfo", DownloadVersionInfoTask.class, task -> {
-			task.dependsOn(downloadManifest);
-		});
-		TaskProvider<?> downloadDetails = tasks.register("downloadVersionDetails", DownloadVersionDetailsTask.class, task -> {
-			task.dependsOn(downloadManifest);
-		});
-
-		TaskProvider<?> downloadLibraries = tasks.register("downloadMinecraftLibraries", DownloadMinecraftLibrariesTask.class, task -> {
-			task.dependsOn(downloadInfo);
-		});
-		TaskProvider<?> downloadJars = tasks.register("downloadMinecraftJars", DownloadMinecraftJarsTask.class, task -> {
-			task.dependsOn(downloadDetails);
-		});
+		TaskProvider<?> downloadJars = tasks.register("downloadMinecraftJars", DownloadMinecraftJarsTask.class);
 		TaskProvider<?> mergeJars = tasks.register("mergeMinecraftJars", MergeMinecraftJarsTask.class, task -> {
 			task.dependsOn(downloadJars);
 			task.getNamespace().set("official");
 		});
 
 		TaskProvider<?> updateNestsBuilds = tasks.register("updateNestsBuildsCache", UpdateBuildsCacheFromMetaTask.class, task -> {
-			task.dependsOn(makeDirs);
 			task.getMetaUrl().convention(Constants.META_URL);
 			task.getMetaUrl().finalizeValueOnRead();
 			task.getMetaEndpoint().convention("/v3/versions/nests");
@@ -264,7 +313,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			task.getCacheFile().finalizeValueOnRead();
 		});
 		TaskProvider<?> updateSparrowBuilds = tasks.register("updateSparrowBuildsCache", UpdateBuildsCacheFromMetaTask.class, task -> {
-			task.dependsOn(makeDirs);
 			task.getMetaUrl().convention(Constants.META_URL);
 			task.getMetaUrl().finalizeValueOnRead();
 			task.getMetaEndpoint().convention("/v3/versions/sparrow");
@@ -273,16 +321,12 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			task.getCacheFile().finalizeValueOnRead();
 		});
 
-		TaskProvider<?> downloadNests = tasks.register("downloadNests", DownloadNestsTask.class, task -> {
-			task.dependsOn(downloadDetails);
-		});
-	
-		TaskProvider<?> downloadSparrow = tasks.register("downloadSparrow", DownloadSparrowTask.class, task -> {
-			task.dependsOn(downloadDetails);
-		});
+		TaskProvider<?> downloadNests = tasks.register("downloadNests", DownloadNestsTask.class);
+		TaskProvider<?> downloadSparrow = tasks.register("downloadSparrow", DownloadSparrowTask.class);
 
 		if (selection == TaskSelection.CALAMUS) {
 			Action<GenerateIntermediaryTask> configureIntermediaryTask = task -> {
+				task.dependsOn(mergeJars);
 				task.getTargetNamespace().set("intermediary");
 				task.getTargetPackage().set("net/minecraft/unmapped/");
 				task.getNameLength().set(7);
@@ -305,19 +349,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			TaskProvider<?> updateIntermediary = tasks.register("updateIntermediary", UpdateIntermediaryTask.class, configureIntermediaryTask);
 		}
 		if (selection == TaskSelection.FEATHER) {
-			Configuration decompileClasspath = configurations.register(Configurations.DECOMPILE_CLASSPATH).get();
-			Configuration enigmaRuntime = configurations.register(Configurations.ENIGMA_RUNTIME).get();
-
-			Dependency cfr = dependencies.add(decompileClasspath.getName(), "net.fabricmc:cfr:0.0.9");
-			Dependency vineflower = dependencies.add(decompileClasspath.getName(), "org.vineflower:vineflower:1.10.1");
-			Dependency enigmaSwing = dependencies.add(enigmaRuntime.getName(), "net.ornithemc:enigma-swing:1.9.0");
-			Dependency enigmaPlugin = dependencies.add(enigmaRuntime.getName(), "org.quiltmc:quilt-enigma-plugin:1.3.0");
-
 			TaskProvider<?> downloadIntermediary = tasks.register("downloadIntermediary", DownloadIntermediaryTask.class, task -> {
-				task.dependsOn(downloadDetails);
+				task.dependsOn(mergeJars);
 			});
 			TaskProvider<?> mapMinecraftToIntermediary = tasks.register("mapMinecraftToIntermediary", MapMinecraftTask.class, task -> {
-				task.dependsOn(downloadLibraries, mergeJars, downloadIntermediary);
+				task.dependsOn(syncLibraries, downloadIntermediary);
 				task.getSourceNamespace().set("official");
 				task.getTargetNamespace().set("intermediary");
 			});
@@ -333,7 +369,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				
 			});
 			TaskProvider<?> mergeIntermediaryNests = tasks.register("mergeIntermediaryNests", MergeNestsTask.class, task -> {
-				task.dependsOn(downloadDetails, mapNestsToIntermediary);
+				task.dependsOn(mapNestsToIntermediary);
 				task.getNamespace().set("intermediary");
 			});
 
@@ -344,7 +380,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				
 			});
 			TaskProvider<?> mergeIntermediarySparrow = tasks.register("mergeIntermediarySparrow", MergeSparrowTask.class, task -> {
-				task.dependsOn(downloadDetails, mapSparrowToIntermediary);
+				task.dependsOn(mapSparrowToIntermediary);
 				task.getNamespace().set("intermediary");
 			});
 

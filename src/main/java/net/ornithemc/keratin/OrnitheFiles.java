@@ -1,9 +1,11 @@
 package net.ornithemc.keratin;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
@@ -17,6 +19,8 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 
 	private final Project project;
 	private final KeratinGradleExtension keratin;
+
+	private final Set<Property<File>> cacheDirs;
 
 	private final Property<File> globalBuildCache;
 	private final Property<File> localBuildCache;
@@ -40,8 +44,6 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Property<File> versionsManifest;
 	private final Versioned<File> versionInfos;
 	private final Versioned<File> versionDetails;
-
-	private final Versioned<List<File>> libraries;
 
 	private final Versioned<File> clientJar;
 	private final Versioned<File> serverJar;
@@ -102,18 +104,20 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.project = keratin.getProject();
 		this.keratin = keratin;
 
-		this.globalBuildCache = fileProperty(() -> new File(this.project.getGradle().getGradleUserHomeDir(), "caches/%s".formatted(keratin.getGlobalCacheDir().get())));
-		this.localBuildCache = fileProperty(() -> new File(this.project.file(".gradle"), keratin.getLocalCacheDir().get()));
+		this.cacheDirs = new LinkedHashSet<>();
 
-		this.versionJsonsCache = fileProperty(() -> new File(getGlobalBuildCache(), "version-jsons"));
-		this.gameJarsCache = fileProperty(() -> new File(getGlobalBuildCache(), "game-jars"));
-		this.mappedJarsCache = fileProperty(() -> new File(getGlobalBuildCache(), "mapped-jars"));
-		this.processedJarsCache = fileProperty(() -> new File(getGlobalBuildCache(), "processed-jars"));
-		this.librariesCache = fileProperty(() -> new File(getGlobalBuildCache(), "libraries"));
-		this.mappingsCache = fileProperty(() -> new File(getGlobalBuildCache(), "mappings"));
-		this.processedMappingsCache = fileProperty(() -> new File(getGlobalBuildCache(), "processed-mappings"));
-		this.nestsCache = fileProperty(() -> new File(getGlobalBuildCache(), "nests"));
-		this.sparrowCache = fileProperty(() -> new File(getGlobalBuildCache(), "sparrow"));
+		this.globalBuildCache = cacheDirectoryProperty(() -> new File(this.project.getGradle().getGradleUserHomeDir(), "caches/%s".formatted(keratin.getGlobalCacheDir().get())));
+		this.localBuildCache = cacheDirectoryProperty(() -> new File(this.project.file(".gradle"), keratin.getLocalCacheDir().get()));
+
+		this.versionJsonsCache = cacheDirectoryProperty(() -> new File(getGlobalBuildCache(), "version-jsons"));
+		this.gameJarsCache = cacheDirectoryProperty(() -> new File(getGlobalBuildCache(), "game-jars"));
+		this.mappedJarsCache = cacheDirectoryProperty(() -> new File(getGlobalBuildCache(), "mapped-jars"));
+		this.processedJarsCache = cacheDirectoryProperty(() -> new File(getGlobalBuildCache(), "processed-jars"));
+		this.librariesCache = cacheDirectoryProperty(() -> new File(getGlobalBuildCache(), "libraries"));
+		this.mappingsCache = cacheDirectoryProperty(() -> new File(getGlobalBuildCache(), "mappings"));
+		this.processedMappingsCache = cacheDirectoryProperty(() -> new File(getGlobalBuildCache(), "processed-mappings"));
+		this.nestsCache = cacheDirectoryProperty(() -> new File(getGlobalBuildCache(), "nests"));
+		this.sparrowCache = cacheDirectoryProperty(() -> new File(getGlobalBuildCache(), "sparrow"));
 
 		this.nestsBuildsCache = fileProperty(() -> this.project.file("nests-builds.json"));
 		this.sparrowBuildsCache = fileProperty(() -> this.project.file("sparrow-builds.json"));
@@ -124,8 +128,6 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.versionsManifest = fileProperty(() -> new File(getGlobalBuildCache(), "versions-manifest.json"));
 		this.versionInfos = new Versioned<>(minecraftVersion -> new File(getVersionJsonsCache(), "%s-info.json".formatted(minecraftVersion)));
 		this.versionDetails = new Versioned<>(minecraftVersion -> new File(getVersionJsonsCache(), "%s-details.json".formatted(minecraftVersion)));
-
-		this.libraries = new Versioned<>(minecraftVersion -> new ArrayList<>());
 
 		this.clientJar = new Versioned<>(minecraftVersion -> new File(getGameJarsCache(), "%s-client.jar".formatted(minecraftVersion)));
 		this.serverJar = new Versioned<>(minecraftVersion -> new File(getGameJarsCache(), "%s-server.jar".formatted(minecraftVersion)));
@@ -394,6 +396,12 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		return property;
 	}
 
+	private Property<File> cacheDirectoryProperty(Callable<File> provider) {
+		Property<File> property = fileProperty(provider);
+		cacheDirs.add(property);
+		return property;
+	}
+
 	private int getIntermediaryGen() {
 		return keratin.getIntermediaryGen().get();
 	}
@@ -430,6 +438,10 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		}
 
 		throw new RuntimeException("somehow Minecraft version " + minecraftVersion + " is neither client nor server!");
+	}
+
+	public Set<File> getCacheDirectories() {
+		return cacheDirs.stream().map(Property::get).collect(Collectors.toSet());
 	}
 
 	@Override
@@ -528,12 +540,12 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
-	public List<File> getLibraries(String minecraftVersion) {
-		return libraries.get(minecraftVersion);
-	}
+	public Collection<File> getLibraries(String minecraftVersion) {
+		if (!keratin.getMinecraftVersion().get().equals(minecraftVersion)) {
+			throw new IllegalArgumentException("libraries can only be queried for the main Minecraft version of this project!");
+		}
 
-	public void addLibrary(String minecraftVersion, File library) {
-		libraries.get(minecraftVersion).add(library);
+		return project.getConfigurations().getByName(Configurations.MINECRAFT_LIBRARIES).getFiles();
 	}
 
 	@Override

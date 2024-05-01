@@ -70,7 +70,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 
 					IntermediaryUtil.updateIntermediary(
 						files.getMergedJar(fromMinecraftVersion),
-						files.getLibraries(fromMinecraftVersion),
+						Collections.emptyList(),
 						files.getMergedJar(minecraftVersion),
 						files.getMergedNests(minecraftVersion),
 						files.getLibraries(minecraftVersion),
@@ -95,7 +95,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 
 					IntermediaryUtil.updateIntermediary(
 						files.getMergedJar(fromMinecraftVersion),
-						files.getLibraries(fromMinecraftVersion),
+						Collections.emptyList(),
 						files.getClientJar(minecraftVersion),
 						files.getClientNests(minecraftVersion),
 						files.getLibraries(minecraftVersion),
@@ -120,9 +120,9 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 
 						IntermediaryUtil.updateIntermediary(
 							files.getClientJar(fromMinecraftVersion),
-							files.getLibraries(fromMinecraftVersion),
+							Collections.emptyList(),
 							files.getServerJar(fromMinecraftVersion),
-							files.getLibraries(fromMinecraftVersion),
+							Collections.emptyList(),
 							files.getClientJar(minecraftVersion),
 							files.getClientNests(minecraftVersion),
 							files.getLibraries(minecraftVersion),
@@ -154,9 +154,9 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 
 							IntermediaryUtil.updateIntermediary(
 								files.getClientJar(fromMinecraftVersion),
-								files.getLibraries(fromMinecraftVersion),
+								Collections.emptyList(),
 								files.getServerJar(fromFromMinecraftVersion),
-								files.getLibraries(fromFromMinecraftVersion),
+								Collections.emptyList(),
 								files.getClientJar(minecraftVersion),
 								files.getClientNests(minecraftVersion),
 								files.getLibraries(minecraftVersion),
@@ -181,9 +181,9 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 
 							IntermediaryUtil.updateIntermediary(
 								files.getClientJar(fromFromMinecraftVersion),
-								files.getLibraries(fromFromMinecraftVersion),
+								Collections.emptyList(),
 								files.getServerJar(fromMinecraftVersion),
-								files.getLibraries(fromMinecraftVersion),
+								Collections.emptyList(),
 								files.getClientJar(minecraftVersion),
 								files.getClientNests(minecraftVersion),
 								files.getLibraries(minecraftVersion),
@@ -214,7 +214,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 
 					IntermediaryUtil.updateIntermediary(
 						files.getClientJar(fromMinecraftVersion),
-						files.getLibraries(fromMinecraftVersion),
+						Collections.emptyList(),
 						null,
 						Collections.emptyList(),
 						files.getClientJar(minecraftVersion),
@@ -241,7 +241,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 						null,
 						Collections.emptyList(),
 						files.getServerJar(fromMinecraftVersion),
-						files.getLibraries(fromMinecraftVersion),
+						Collections.emptyList(),
 						null,
 						null,
 						Collections.emptyList(),

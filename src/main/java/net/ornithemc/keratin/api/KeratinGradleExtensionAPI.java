@@ -18,7 +18,7 @@ public interface KeratinGradleExtensionAPI {
 
 	Property<Integer> getIntermediaryGen();
 
-	void tasks(TaskSelection selection);
+	void tasks(TaskSelection selection) throws Exception;
 
 	OrnitheFilesAPI getFiles();
 
