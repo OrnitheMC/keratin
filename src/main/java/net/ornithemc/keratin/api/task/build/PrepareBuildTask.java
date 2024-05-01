@@ -24,10 +24,15 @@ public abstract class PrepareBuildTask extends BuildTask implements MappingsGrap
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
 
+		File buildCache = files.getLocalBuildCache();
 		File graphDir = files.getMappingsDirectory();
 		File output = files.getNamedMappings(minecraftVersion);
 		File processedOutput = files.getProcessedNamedMappings(minecraftVersion);
 		File nests = files.getMainIntermediaryNests(minecraftVersion);
+
+		if (!buildCache.exists()) {
+			buildCache.mkdirs();
+		}
 
 		loadMappings(minecraftVersion, graphDir, processedOutput, Format.TINY_V2);
 
