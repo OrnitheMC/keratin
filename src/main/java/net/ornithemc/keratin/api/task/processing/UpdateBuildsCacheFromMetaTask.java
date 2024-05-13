@@ -51,7 +51,7 @@ public abstract class UpdateBuildsCacheFromMetaTask extends KeratinTask {
 					String gameVersion = json.get("gameVersion").getAsString();
 					int build = json.get("build").getAsInt();
 
-					builds.compute(gameVersion, (key, value) -> Math.max(value, build));
+					builds.compute(gameVersion, (key, value) -> value == null ? build : Math.max(value, build));
 				}
 			}
 		}
