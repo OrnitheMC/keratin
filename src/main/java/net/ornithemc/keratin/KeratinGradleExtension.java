@@ -191,7 +191,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			return builds;
 		});
 		this.matchesDir = this.project.getObjects().property(File.class);
-		this.matchesDir.convention(this.project.provider(() -> this.project.file("matches")));
+		this.matchesDir.convention(this.project.provider(() -> this.project.file("matches/matches")));
 		this.matchesDir.finalizeValueOnRead();
 	}
 
