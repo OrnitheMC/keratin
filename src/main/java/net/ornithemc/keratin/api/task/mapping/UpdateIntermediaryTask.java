@@ -61,7 +61,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 			throw new IllegalStateException("updating intermediary to shared-mappings client-only/server-only versions is not supported");
 		}
 
-		OptionsBuilder options = new OptionsBuilder();
+		OptionsBuilder options = getOptions(details);
 
 		if (details.sharedMappings()) {
 			if (fromDetails.sharedMappings()) {
