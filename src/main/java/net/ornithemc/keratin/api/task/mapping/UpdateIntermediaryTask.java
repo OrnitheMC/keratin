@@ -26,8 +26,8 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 	@TaskAction
 	public void run() throws IOException {
 		String minecraftVersion = getMinecraftVersion().get();
-		String fromMinecraftVersion = getFromMinecraftVersion().get();
-		String fromFromMinecraftVersion = getFromFromMinecraftVersion().get();
+		String fromMinecraftVersion = getFromMinecraftVersion().getOrNull();
+		String fromFromMinecraftVersion = getFromFromMinecraftVersion().getOrNull();
 
 		if (fromMinecraftVersion == null) {
 			throw new IllegalStateException("no Minecraft version specified to update from");
