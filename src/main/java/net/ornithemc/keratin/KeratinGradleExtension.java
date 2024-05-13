@@ -326,7 +326,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 		if (selection == TaskSelection.CALAMUS) {
 			Action<GenerateIntermediaryTask> configureIntermediaryTask = task -> {
-				task.dependsOn(mergeJars);
+				task.dependsOn(mergeJars, downloadNests);
 				task.getTargetNamespace().set("intermediary");
 				task.getTargetPackage().set("net/minecraft/unmapped/");
 				task.getNameLength().set(7);
