@@ -127,7 +127,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 							files.getClientNests(minecraftVersion),
 							files.getLibraries(minecraftVersion),
 							files.getServerJar(minecraftVersion),
-							files.getServerNests(fromMinecraftVersion),
+							files.getServerNests(minecraftVersion),
 							files.getLibraries(minecraftVersion),
 							fromFile,
 							file,
