@@ -526,7 +526,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 		if (file == null) {
 			file = findMatches(dir, sideB, versionB, sideA, versionA);
-			inverted = false;
+			inverted = true;
 		}
 
 		if (file == null) {
