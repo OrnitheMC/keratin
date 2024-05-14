@@ -26,7 +26,7 @@ public abstract class ExtendGraphTask extends MinecraftTask implements MappingsG
 	public void run() throws IOException {
 		String minecraftVersion = getMinecraftVersion().get();
 		String fromMinecraftVersion = getFromMinecraftVersion().get();
-		String fromFromMinecraftVersion = getFromFromMinecraftVersion().get();
+		String fromFromMinecraftVersion = getFromFromMinecraftVersion().getOrNull();
 
 		if (fromFromMinecraftVersion == null) {
 			getProject().getLogger().lifecycle("extending the graph from Minecraft " + fromMinecraftVersion + " to " + minecraftVersion);
@@ -38,7 +38,7 @@ public abstract class ExtendGraphTask extends MinecraftTask implements MappingsG
 		OrnitheFilesAPI files = keratin.getFiles();
 
 		File graphDir = files.getMappingsDirectory();
-		String classNamePattern = getClassNamePattern().get();
+		String classNamePattern = getClassNamePattern().getOrElse("");
 
 		File jar = files.getMainProcessedIntermediaryJar(minecraftVersion);
 		File fromJar = files.getMainProcessedIntermediaryJar(fromMinecraftVersion);

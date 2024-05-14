@@ -27,7 +27,7 @@ public abstract class ResetGraphTask extends MinecraftTask implements MappingsGr
 
 		File graphDir = files.getMappingsDirectory();
 		File rootMinecraftJar = files.getMainProcessedIntermediaryJar(rootMinecraftVersion);
-		String classNamePattern = getClassNamePattern().get();
+		String classNamePattern = getClassNamePattern().getOrElse("");
 
 		resetGraph(graphDir, rootMinecraftVersion, rootMinecraftJar, classNamePattern);
 	}
