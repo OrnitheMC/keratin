@@ -65,7 +65,7 @@ public interface MappingsGraph extends TaskAware {
 		File diff2 = fromFromMinecraftVersion == null ? null : new File(graphDir, "%s#%s.tinydiff".formatted(fromFromMinecraftVersion, fromMinecraftVersion));
 
 		File tmpGraphDir = new File(".mappings");
-		File dummy = new File(tmpGraphDir, "%.tiny".formatted(minecraftVersion));
+		File dummy = new File(tmpGraphDir, "%s.tiny".formatted(minecraftVersion));
 		File fromDummy = new File(tmpGraphDir, "%s.tiny".formatted(fromMinecraftVersion));
 		File fromFromDummy = fromFromMinecraftVersion == null ? null : new File(tmpGraphDir, "%s.tiny".formatted(fromFromMinecraftVersion));
 		File tmpDiff = new File(tmpGraphDir, "%s#%s.tinydiff".formatted(fromMinecraftVersion, minecraftVersion));
