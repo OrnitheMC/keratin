@@ -61,8 +61,8 @@ public interface MappingsGraph extends TaskAware {
 			throw new RuntimeException("cannot extend graph from " + fromFromMinecraftVersion + ": no processed intermediary mapped jar found!");
 		}
 
-		File diff1 = new File(graphDir, "%s#%s.tinydiff".formatted(fromFromMinecraftVersion, minecraftVersion));
-		File diff2 = fromFromMinecraftVersion == null ? null : new File(graphDir, "%s#%s.tinydiff".formatted(fromFromMinecraftVersion, fromMinecraftVersion));
+		File diff = new File(graphDir, "%s#%s.tinydiff".formatted(fromMinecraftVersion, minecraftVersion));
+		File diff1 = fromFromMinecraftVersion == null ? null : new File(graphDir, "%s#%s.tinydiff".formatted(fromFromMinecraftVersion, minecraftVersion));
 
 		File tmpGraphDir = new File(".mappings");
 		File dummy = new File(tmpGraphDir, "%s.tiny".formatted(minecraftVersion));
@@ -109,7 +109,7 @@ public interface MappingsGraph extends TaskAware {
 
 		saveChanges(tmpGraph, changes, fromMinecraftVersion);
 
-		Files.copy(tmpDiff2.toPath(), diff2.toPath());
+		Files.copy(tmpDiff.toPath(), diff.toPath());
 		if (fromFromMinecraftVersion != null) {
 			Files.copy(tmpDiff1.toPath(), diff1.toPath());
 		}
