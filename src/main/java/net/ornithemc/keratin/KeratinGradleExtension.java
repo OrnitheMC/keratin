@@ -5,7 +5,9 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.Action;
@@ -14,6 +16,9 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.provider.Property;
+import org.gradle.api.publish.PublicationContainer;
+import org.gradle.api.publish.PublishingExtension;
+import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
@@ -32,6 +37,7 @@ import net.ornithemc.keratin.api.manifest.VersionInfo.Library;
 import net.ornithemc.keratin.api.manifest.VersionInfo.Library.Downloads;
 import net.ornithemc.keratin.api.manifest.VersionInfo.Library.Downloads.Artifact;
 import net.ornithemc.keratin.api.manifest.VersionsManifest;
+import net.ornithemc.keratin.api.task.build.BuildMappingsJarTask;
 import net.ornithemc.keratin.api.task.build.BuildMappingsTask;
 import net.ornithemc.keratin.api.task.build.BuildProcessedMappingsTask;
 import net.ornithemc.keratin.api.task.build.CheckMappingsTask;
@@ -40,6 +46,7 @@ import net.ornithemc.keratin.api.task.build.PrepareBuildTask;
 import net.ornithemc.keratin.api.task.decompiling.DecompileMinecraftWithCfrTask;
 import net.ornithemc.keratin.api.task.decompiling.DecompileMinecraftWithVineflowerTask;
 import net.ornithemc.keratin.api.task.enigma.LaunchEnigmaTask;
+import net.ornithemc.keratin.api.task.mapping.ConvertMappingsFromTinyV1ToTinyV2Task;
 import net.ornithemc.keratin.api.task.mapping.DownloadIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.GenerateIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.GenerateNewIntermediaryTask;
@@ -347,6 +354,65 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 			TaskProvider<?> generateIntermediary = tasks.register("generateIntermediary", GenerateNewIntermediaryTask.class, configureIntermediaryTask);
 			TaskProvider<?> updateIntermediary = tasks.register("updateIntermediary", UpdateIntermediaryTask.class, configureIntermediaryTask);
+
+			Set<String> minecraftVersions = new LinkedHashSet<>();
+
+			if (getMinecraftVersion().isPresent()) {
+				minecraftVersions.add(getMinecraftVersion().get());
+			} else {
+				File dir = files.getMappingsDirectory();
+
+				for (File file : dir.listFiles()) {
+					if (!file.isFile() || !file.canRead()) {
+						continue;
+					}
+
+					String fileName = file.getName();
+
+					if (!fileName.endsWith(".tiny")) {
+						continue;
+					}
+
+					minecraftVersions.add(fileName.substring(0, fileName.length() - ".tiny".length()));
+				}
+			}
+
+			File mappingsDir = files.getMappingsDirectory();
+			File buildDir = project.getLayout().getBuildDirectory().dir("mappings").get().getAsFile();
+
+			PublishingExtension publishing = (PublishingExtension) project.getExtensions().getByName("publishing");
+			PublicationContainer publications = publishing.getPublications();
+
+			for (String minecraftVersion : minecraftVersions) {
+				File tinyV1 = new File(mappingsDir, "$s.tiny".formatted(minecraftVersion));
+				File tinyV2 = new File(buildDir, "$s.tiny".formatted(minecraftVersion));
+
+				TaskProvider<?> convertMappings = tasks.register("convert%sFromTinyV1ToTinyV2".formatted(minecraftVersion), ConvertMappingsFromTinyV1ToTinyV2Task.class, task -> {
+					task.getInput().set(tinyV1);
+					task.getOutput().set(tinyV2);
+				});
+
+				TaskProvider<?> tinyV1Jar = tasks.register("$sTinyV1Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
+					task.getArchiveBaseName().set("%s-tiny-v1.jar".formatted(minecraftVersion));
+					task.mappings(tinyV1);
+				});
+				TaskProvider<?> tinyV2Jar = tasks.register("$sTinyV2Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
+					task.dependsOn(convertMappings);
+					task.getArchiveBaseName().set("%s-tiny-v2.jar".formatted(minecraftVersion));
+					task.mappings(tinyV1);
+				});
+
+				MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
+					publication.setGroupId("net.ornithemc");
+					publication.setArtifactId("calamus-intermediary-gen%d".formatted(getIntermediaryGen().get()));
+					publication.setVersion(minecraftVersion);
+
+					publication.artifact(tinyV1Jar);
+					publication.artifact(tinyV2Jar, config -> {
+						config.setClassifier("v2");
+					});
+				});
+			}
 		}
 		if (selection == TaskSelection.FEATHER) {
 			TaskProvider<?> downloadIntermediary = tasks.register("downloadIntermediary", DownloadIntermediaryTask.class, task -> {
