@@ -7,8 +7,9 @@ import net.fabricmc.nameproposal.MappingNameCompleter;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.api.task.MinecraftTask;
 
-public abstract class CompleteMappingsTask extends BuildTask {
+public abstract class CompleteMappingsTask extends MinecraftTask {
 
 	@Override
 	public void run(String minecraftVersion) throws IOException {

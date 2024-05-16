@@ -14,8 +14,9 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
+import net.ornithemc.keratin.api.task.MinecraftTask;
 
-public abstract class BuildMappingsTask extends BuildTask {
+public abstract class BuildMappingsTask extends MinecraftTask {
 
 	@Override
 	public void run(String minecraftVersion) throws IOException {

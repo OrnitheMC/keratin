@@ -7,11 +7,12 @@ import com.google.common.io.Files;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.graph.MappingsGraph;
 import net.ornithemc.mappingutils.MappingUtils;
 import net.ornithemc.mappingutils.io.Format;
 
-public abstract class PrepareBuildTask extends BuildTask implements MappingsGraph {
+public abstract class PrepareBuildTask extends MinecraftTask implements MappingsGraph {
 
 	@Override
 	public void run(String minecraftVersion) throws IOException {

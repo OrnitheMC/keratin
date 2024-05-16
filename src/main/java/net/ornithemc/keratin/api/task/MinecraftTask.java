@@ -19,7 +19,10 @@ public abstract class MinecraftTask extends KeratinTask {
 	@TaskAction
 	public void run() throws Exception {
 		for (String minecraftVersion : getMinecraftVersions().get()) {
-			configureMinecraftVersionAction.execute(minecraftVersion);
+			if (configureMinecraftVersionAction != null) {
+				configureMinecraftVersionAction.execute(minecraftVersion);
+			}
+
 			run(minecraftVersion);
 		}
 	}

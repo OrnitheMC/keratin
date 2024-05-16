@@ -5,11 +5,12 @@ import java.io.IOException;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.graph.MappingsGraph;
 import net.ornithemc.keratin.api.task.mapping.graph.Validators;
 import net.ornithemc.mappingutils.io.Format;
 
-public abstract class BuildProcessedMappingsTask extends BuildTask implements MappingsGraph {
+public abstract class BuildProcessedMappingsTask extends MinecraftTask implements MappingsGraph {
 
 	@Override
 	public void run(String minecraftVersion) throws IOException {

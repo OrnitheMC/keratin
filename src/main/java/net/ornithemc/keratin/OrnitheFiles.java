@@ -42,6 +42,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Versioned<File> runDir;
 	private final Versioned<File> decompiledSrcDir;
 	private final Versioned<File> fakeSrcDir;
+	private final Versioned<File> javadocDir;
 
 	private final Property<File> versionsManifest;
 	private final Versioned<File> versionInfos;
@@ -128,6 +129,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.runDir = new Versioned<>(minecraftVersion -> this.project.file("run/%s".formatted(minecraftVersion)));
 		this.decompiledSrcDir = new Versioned<>(minecraftVersion -> this.project.file("%s-decompiledSrc".formatted(minecraftVersion)));
 		this.fakeSrcDir = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-fakeSrc".formatted(minecraftVersion)));
+		this.javadocDir = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-javadoc".formatted(minecraftVersion)));
 
 		this.versionsManifest = fileProperty(() -> new File(getGlobalBuildCache(), "versions-manifest.json"));
 		this.versionInfos = new Versioned<>(minecraftVersion -> new File(getVersionJsonsCache(), "%s-info.json".formatted(minecraftVersion)));
@@ -536,6 +538,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	@Override
 	public File getFakeSourceDirectory(String minecraftVersion) {
 		return fakeSrcDir.get(minecraftVersion);
+	}
+
+	@Override
+	public File getJavadocDirectory(String minecraftVersion) {
+		return javadocDir.get(minecraftVersion);
 	}
 
 	@Override

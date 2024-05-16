@@ -299,7 +299,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			Configuration javadocClasspath = configurations.register(Configurations.javadocClasspath(minecraftVersion)).get();
 
 			dependencies.add(javadocClasspath.getName(), "net.fabricmc:fabric-loader:0.15.11");
-			dependencies.add(javadocClasspath.getName(), "om.google.code.findbugs:jsr305:3.0.2");
+			dependencies.add(javadocClasspath.getName(), "com.google.code.findbugs:jsr305:3.0.2");
 
 			File versionInfo = files.getVersionInfo(minecraftVersion);
 
@@ -446,6 +446,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.configure(minecraftVersion, tinyV2File, "%s-tiny-v2.jar");
 				});
 
+				tasks.getByName("build").dependsOn(tinyV1Jar, tinyV2Jar);
+
 				MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
 					publication.setGroupId("net.ornithemc");
 					publication.setArtifactId("calamus-intermediary-gen%d".formatted(intermediaryGen.get()));
@@ -578,6 +580,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 			for (String minecraftVersion : minecraftVersions) {
 				TaskProvider<?> genFakeSource = tasks.register("%s_genFakeSource".formatted(minecraftVersion), JavaExec.class, task -> {
+					task.dependsOn(buildMappings, mapMinecraftToNamed);
 					task.getMainClass().set("net.fabricmc.mappingpoet.Main");
 					task.classpath(configurations.getByName(Configurations.MAPPING_POET));
 					task.args(
@@ -597,6 +600,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.setMaxMemory("2G");
 					task.source(files.getFakeSourceDirectory(minecraftVersion));
 					task.setClasspath(configurations.getByName(Configurations.javadocClasspath(minecraftVersion)).plus(configurations.getByName(Configurations.minecraftLibraries(minecraftVersion))));
+					task.setDestinationDir(files.getJavadocDirectory(minecraftVersion));
 				});
 
 				TaskProvider<?> mergedTinyV1Jar = tasks.register("%s_mergedTinyV1Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
@@ -617,6 +621,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.getArchiveFileName().set("%s-javadoc.jar".formatted(minecraftVersion));
 					task.getDestinationDirectory().set(project.file("build/libs"));
 				});
+
+				tasks.getByName("build").dependsOn(mergedTinyV1Jar, tinyV2Jar, mergedTinyV2Jar, javadocJar);
 
 				MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
 					publication.setGroupId("net.ornithemc");

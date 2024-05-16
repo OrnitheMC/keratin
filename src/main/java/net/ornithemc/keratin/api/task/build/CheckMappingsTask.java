@@ -6,8 +6,9 @@ import cuchaz.enigma.command.CheckMappingsCommand;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.api.task.MinecraftTask;
 
-public abstract class CheckMappingsTask extends BuildTask {
+public abstract class CheckMappingsTask extends MinecraftTask {
 
 	@Override
 	public void run(String minecraftVersion) throws Exception {

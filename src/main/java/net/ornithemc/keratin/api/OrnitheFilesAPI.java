@@ -41,6 +41,8 @@ public interface OrnitheFilesAPI {
 
 	File getFakeSourceDirectory(String minecraftVersion);
 
+	File getJavadocDirectory(String minecraftVersion);
+
 	File getVersionsManifest();
 
 	File getVersionInfo(String minecraftVersion);
