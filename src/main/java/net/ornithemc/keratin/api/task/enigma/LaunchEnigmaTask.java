@@ -2,8 +2,6 @@ package net.ornithemc.keratin.api.task.enigma;
 
 import java.io.File;
 
-import org.gradle.api.tasks.TaskAction;
-
 import net.ornithemc.keratin.Configurations;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
@@ -11,10 +9,8 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class LaunchEnigmaTask extends MinecraftTask {
 
-	@TaskAction
-	public void run() {
-		String minecraftVersion = getMinecraftVersion().get();
-
+	@Override
+	public void run(String minecraftVersion) {
 		getProject().getLogger().lifecycle(":launching Enigma");
 
 		KeratinGradleExtension keratin = getExtension();

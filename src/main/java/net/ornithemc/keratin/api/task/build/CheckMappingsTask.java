@@ -2,8 +2,6 @@ package net.ornithemc.keratin.api.task.build;
 
 import java.io.File;
 
-import org.gradle.api.tasks.TaskAction;
-
 import cuchaz.enigma.command.CheckMappingsCommand;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
@@ -11,9 +9,8 @@ import net.ornithemc.keratin.api.OrnitheFilesAPI;
 
 public abstract class CheckMappingsTask extends BuildTask {
 
-	@TaskAction
-	public void run() throws Exception {
-		String minecraftVersion = getMinecraftVersion().get();
+	@Override
+	public void run(String minecraftVersion) throws Exception {
 
 		getProject().getLogger().lifecycle(":checking mappings for Minecraft " + minecraftVersion);
 

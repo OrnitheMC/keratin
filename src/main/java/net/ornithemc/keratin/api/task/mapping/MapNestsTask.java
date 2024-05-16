@@ -2,8 +2,6 @@ package net.ornithemc.keratin.api.task.mapping;
 
 import java.io.IOException;
 
-import org.gradle.api.tasks.TaskAction;
-
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
@@ -11,9 +9,8 @@ import net.ornithemc.keratin.api.manifest.VersionDetails;
 
 public abstract class MapNestsTask extends MappingTask {
 
-	@TaskAction
-	public void run() throws IOException {
-		String minecraftVersion = getMinecraftVersion().get();
+	@Override
+	public void run(String minecraftVersion) throws IOException {
 		String srcNs = getSourceNamespace().get();
 		String dstNs = getTargetNamespace().get();
 

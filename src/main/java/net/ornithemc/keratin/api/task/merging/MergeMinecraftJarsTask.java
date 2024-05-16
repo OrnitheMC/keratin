@@ -2,17 +2,14 @@ package net.ornithemc.keratin.api.task.merging;
 
 import java.io.IOException;
 
-import org.gradle.api.tasks.TaskAction;
-
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 
 public abstract class MergeMinecraftJarsTask extends MergeTask {
 
-	@TaskAction
-	public void run() throws IOException {
-		String minecraftVersion = getMinecraftVersion().get();
+	@Override
+	public void run(String minecraftVersion) throws IOException {
 		String namespace = getNamespace().get();
 
 		validateNamespace(namespace);

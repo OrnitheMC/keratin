@@ -2,8 +2,6 @@ package net.ornithemc.keratin.api.task.mapping;
 
 import java.io.File;
 
-import org.gradle.api.tasks.TaskAction;
-
 import net.fabricmc.stitch.commands.tinyv2.CommandSplitTinyV2;
 
 import net.ornithemc.keratin.Constants;
@@ -15,10 +13,8 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class DownloadIntermediaryTask extends MinecraftTask implements DownloaderAndExtracter {
 
-	@TaskAction
-	public void run() throws Exception {
-		String minecraftVersion = getMinecraftVersion().get();
-
+	@Override
+	public void run(String minecraftVersion) throws Exception {
 		getProject().getLogger().lifecycle(":downloading intermediary for Minecraft " + minecraftVersion);
 
 		KeratinGradleExtension keratin = getExtension();

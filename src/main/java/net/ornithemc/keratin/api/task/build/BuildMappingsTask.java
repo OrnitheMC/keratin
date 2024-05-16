@@ -3,8 +3,6 @@ package net.ornithemc.keratin.api.task.build;
 import java.io.File;
 import java.io.IOException;
 
-import org.gradle.api.tasks.TaskAction;
-
 import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.MappingWriter;
@@ -19,10 +17,8 @@ import net.ornithemc.keratin.api.manifest.VersionDetails;
 
 public abstract class BuildMappingsTask extends BuildTask {
 
-	@TaskAction
-	public void run() throws IOException {
-		String minecraftVersion = getMinecraftVersion().get();
-
+	@Override
+	public void run(String minecraftVersion) throws IOException {
 		getProject().getLogger().lifecycle(":building mappings for Minecraft " + minecraftVersion);
 
 		KeratinGradleExtension keratin = getExtension();

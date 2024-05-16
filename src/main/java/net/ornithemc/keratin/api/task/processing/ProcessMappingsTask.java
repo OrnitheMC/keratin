@@ -3,8 +3,6 @@ package net.ornithemc.keratin.api.task.processing;
 import java.io.File;
 import java.io.IOException;
 
-import org.gradle.api.tasks.TaskAction;
-
 import com.google.common.io.Files;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
@@ -13,10 +11,8 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class ProcessMappingsTask extends MinecraftTask implements Nester {
 
-	@TaskAction
-	public void run() throws IOException {
-		String minecraftVersion = getMinecraftVersion().get();
-
+	@Override
+	public void run(String minecraftVersion) throws IOException {
 		getProject().getLogger().lifecycle(":processing mappings for Minecraft " + minecraftVersion);
 
 		KeratinGradleExtension keratin = getExtension();

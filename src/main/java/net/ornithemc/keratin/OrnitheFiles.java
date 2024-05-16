@@ -38,8 +38,10 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Property<File> nestsBuildsCache;
 	private final Property<File> sparrowBuildsCache;
 	private final Property<File> mappingsDir;
+	private final Property<File> matchesDir;
 	private final Versioned<File> runDir;
-	private final Property<File> decompiledSrcDir;
+	private final Versioned<File> decompiledSrcDir;
+	private final Versioned<File> fakeSrcDir;
 
 	private final Property<File> versionsManifest;
 	private final Versioned<File> versionInfos;
@@ -106,8 +108,8 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 
 		this.cacheDirs = new LinkedHashSet<>();
 
-		this.globalBuildCache = cacheDirectoryProperty(() -> new File(this.project.getGradle().getGradleUserHomeDir(), "caches/%s".formatted(keratin.getGlobalCacheDir().get())));
-		this.localBuildCache = cacheDirectoryProperty(() -> new File(this.project.file(".gradle"), keratin.getLocalCacheDir().get()));
+		this.globalBuildCache = cacheDirectoryProperty(() -> new File(this.project.getGradle().getGradleUserHomeDir(), "caches/%s".formatted(keratin.getGlobalCacheDirectory().get())));
+		this.localBuildCache = cacheDirectoryProperty(() -> new File(this.project.file(".gradle"), keratin.getLocalCacheDirectory().get()));
 
 		this.versionJsonsCache = cacheDirectoryProperty(() -> new File(getGlobalBuildCache(), "version-jsons"));
 		this.gameJarsCache = cacheDirectoryProperty(() -> new File(getGlobalBuildCache(), "game-jars"));
@@ -122,8 +124,10 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.nestsBuildsCache = fileProperty(() -> this.project.file("nests-builds.json"));
 		this.sparrowBuildsCache = fileProperty(() -> this.project.file("sparrow-builds.json"));
 		this.mappingsDir = fileProperty(() -> this.project.file("mappings"));
+		this.matchesDir = fileProperty(() -> this.project.file("matches/matches"));
 		this.runDir = new Versioned<>(minecraftVersion -> this.project.file("run/%s".formatted(minecraftVersion)));
-		this.decompiledSrcDir = fileProperty(() -> this.project.file("decompiledSrc"));
+		this.decompiledSrcDir = new Versioned<>(minecraftVersion -> this.project.file("%s-decompiledSrc".formatted(minecraftVersion)));
+		this.fakeSrcDir = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-fakeSrc".formatted(minecraftVersion)));
 
 		this.versionsManifest = fileProperty(() -> new File(getGlobalBuildCache(), "versions-manifest.json"));
 		this.versionInfos = new Versioned<>(minecraftVersion -> new File(getVersionJsonsCache(), "%s-info.json".formatted(minecraftVersion)));
@@ -515,13 +519,23 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
+	public File getMatchesDirectory() {
+		return matchesDir.get();
+	}
+
+	@Override
 	public File getRunDirectory(String minecraftVersion) {
 		return runDir.get(minecraftVersion);
 	}
 
 	@Override
-	public File getDecompiledSourceDirectory() {
-		return decompiledSrcDir.get();
+	public File getDecompiledSourceDirectory(String minecraftVersion) {
+		return decompiledSrcDir.get(minecraftVersion);
+	}
+
+	@Override
+	public File getFakeSourceDirectory(String minecraftVersion) {
+		return fakeSrcDir.get(minecraftVersion);
 	}
 
 	@Override
@@ -541,11 +555,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 
 	@Override
 	public Collection<File> getLibraries(String minecraftVersion) {
-		if (!keratin.getMinecraftVersion().get().equals(minecraftVersion)) {
-			throw new IllegalArgumentException("libraries can only be queried for the main Minecraft version of this project!");
-		}
-
-		return project.getConfigurations().getByName(Configurations.MINECRAFT_LIBRARIES).getFiles();
+		return project.getConfigurations().getByName(Configurations.minecraftLibraries(minecraftVersion)).getFiles();
 	}
 
 	@Override

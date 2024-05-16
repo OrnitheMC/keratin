@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Internal;
-import org.gradle.api.tasks.TaskAction;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
@@ -22,9 +21,8 @@ public abstract class ExtendGraphTask extends MinecraftTask implements MappingsG
 	@Internal
 	public abstract Property<String> getClassNamePattern();
 
-	@TaskAction
-	public void run() throws IOException {
-		String minecraftVersion = getMinecraftVersion().get();
+	@Override
+	public void run(String minecraftVersion) throws IOException {
 		String fromMinecraftVersion = getFromMinecraftVersion().get();
 		String fromFromMinecraftVersion = getFromFromMinecraftVersion().getOrNull();
 

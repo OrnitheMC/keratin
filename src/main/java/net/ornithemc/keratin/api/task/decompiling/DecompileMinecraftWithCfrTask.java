@@ -3,23 +3,20 @@ package net.ornithemc.keratin.api.task.decompiling;
 import java.io.File;
 import java.io.IOException;
 
-import org.gradle.api.tasks.TaskAction;
-
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 
 public abstract class DecompileMinecraftWithCfrTask extends DecompileTask {
 
-	@TaskAction
-	public void run() throws IOException {
-		String minecraftVersion = getMinecraftVersion().get();
+	@Override
+	public void run(String minecraftVersion) throws IOException {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
 
 		File jar = files.getProcessedNamedJar(minecraftVersion);
-		File src = files.getDecompiledSourceDirectory();
+		File src = files.getDecompiledSourceDirectory(minecraftVersion);
 
-		decompile("CFR", javaexec -> {
+		decompile(minecraftVersion, "CFR", javaexec -> {
 			javaexec.getMainClass().set("org.benf.cfr.reader.Main");
 			javaexec.args(
 				jar.getAbsolutePath(),

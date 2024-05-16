@@ -15,15 +15,13 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 
 abstract class DecompileTask extends MinecraftTask {
 
-	protected void decompile(String decompilerName, Action<JavaExecSpec> configuration) throws IOException {
-		String minecraftVersion = getMinecraftVersion().get();
-
+	protected void decompile(String minecraftVersion, String decompilerName, Action<JavaExecSpec> configuration) throws IOException {
 		getProject().getLogger().lifecycle(":decompiling Minecraft " + minecraftVersion + " with " + decompilerName);
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
 
-		File src = files.getDecompiledSourceDirectory();
+		File src = files.getDecompiledSourceDirectory(minecraftVersion);
 		if (src.exists()) {
 			FileUtils.forceDelete(src);
 		}

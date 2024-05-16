@@ -1,7 +1,6 @@
 package net.ornithemc.keratin.api;
 
-import java.io.File;
-
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 
 import net.ornithemc.keratin.api.manifest.VersionDetails;
@@ -10,11 +9,13 @@ import net.ornithemc.keratin.api.manifest.VersionsManifest;
 
 public interface KeratinGradleExtensionAPI {
 
-	Property<String> getGlobalCacheDir();
+	Property<String> getGlobalCacheDirectory();
 
-	Property<String> getLocalCacheDir();
+	Property<String> getLocalCacheDirectory();
 
-	Property<String> getMinecraftVersion();
+	ListProperty<String> getMinecraftVersions();
+
+	void minecraftVersions(String... minecraftVersions);
 
 	Property<Integer> getIntermediaryGen();
 
@@ -24,18 +25,12 @@ public interface KeratinGradleExtensionAPI {
 
 	VersionsManifest getVersionsManifest();
 
-	VersionInfo getVersionInfo();
-
 	VersionInfo getVersionInfo(String minecraftVersion);
-
-	VersionDetails getVersionDetails();
 
 	VersionDetails getVersionDetails(String minecraftVersion);
 
 	int getNestsBuild(String minecraftVersion, GameSide side);
 
 	int getSparrowBuild(String minecraftVersion, GameSide side);
-
-	Property<File> getMatchesDirectory();
 
 }

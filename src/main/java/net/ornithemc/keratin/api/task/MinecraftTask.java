@@ -1,19 +1,29 @@
 package net.ornithemc.keratin.api.task;
 
-import javax.inject.Inject;
-
-import org.gradle.api.provider.Property;
+import org.gradle.api.Action;
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.tasks.Internal;
+import org.gradle.api.tasks.TaskAction;
 
 public abstract class MinecraftTask extends KeratinTask {
 
-	@Inject
-	public MinecraftTask() {
-		getMinecraftVersion().convention(getExtension().getMinecraftVersion());
-		getMinecraftVersion().finalizeValueOnRead();
-	}
+	private Action<String> configureMinecraftVersionAction;
 
 	@Internal
-	public abstract Property<String> getMinecraftVersion();
+	public abstract ListProperty<String> getMinecraftVersions();
+
+	public void configureMinecraftVersion(Action<String> configureMinecraftVersionAction) {
+		this.configureMinecraftVersionAction = configureMinecraftVersionAction;
+	}
+
+	@TaskAction
+	public void run() throws Exception {
+		for (String minecraftVersion : getMinecraftVersions().get()) {
+			configureMinecraftVersionAction.execute(minecraftVersion);
+			run(minecraftVersion);
+		}
+	}
+
+	protected abstract void run(String minecraftVersion) throws Exception;
 
 }

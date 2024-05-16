@@ -2,8 +2,6 @@ package net.ornithemc.keratin.api.task.processing;
 
 import java.io.File;
 
-import org.gradle.api.tasks.TaskAction;
-
 import net.ornithemc.keratin.Constants;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
@@ -14,10 +12,8 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class DownloadSparrowTask extends MinecraftTask implements DownloaderAndExtracter {
 
-	@TaskAction
-	public void run() throws Exception {
-		String minecraftVersion = getMinecraftVersion().get();
-
+	@Override
+	public void run(String minecraftVersion) throws Exception {
 		getProject().getLogger().lifecycle(":downloading Sparrow for Minecraft " + minecraftVersion);
 
 		KeratinGradleExtension keratin = getExtension();

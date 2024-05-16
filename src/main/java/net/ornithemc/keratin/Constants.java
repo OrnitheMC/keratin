@@ -42,4 +42,7 @@ public class Constants {
 	public static String sparrowUrl(String mc, GameSide side, int build) {
 		return MAVEN_URL + "/net/ornithemc/sparrow/" + mc + side.suffix() + "+build." + build + "/sparrow-" + mc + side.suffix() + "+build." + build + ".jar";
 	}
+
+	public static final String NESTS_ENDPOINT = "/v3/versions/nests";
+	public static final String SPARROW_ENDPOINT = "/v3/versions/sparrow";
 }

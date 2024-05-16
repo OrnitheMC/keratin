@@ -33,9 +33,13 @@ public interface OrnitheFilesAPI {
 
 	File getMappingsDirectory();
 
+	File getMatchesDirectory();
+
 	File getRunDirectory(String minecraftVersion);
 
-	File getDecompiledSourceDirectory();
+	File getDecompiledSourceDirectory(String minecraftVersion);
+
+	File getFakeSourceDirectory(String minecraftVersion);
 
 	File getVersionsManifest();
 

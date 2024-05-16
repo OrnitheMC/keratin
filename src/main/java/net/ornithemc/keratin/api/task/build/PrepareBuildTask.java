@@ -3,8 +3,6 @@ package net.ornithemc.keratin.api.task.build;
 import java.io.File;
 import java.io.IOException;
 
-import org.gradle.api.tasks.TaskAction;
-
 import com.google.common.io.Files;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
@@ -15,10 +13,8 @@ import net.ornithemc.mappingutils.io.Format;
 
 public abstract class PrepareBuildTask extends BuildTask implements MappingsGraph {
 
-	@TaskAction
-	public void run() throws IOException {
-		String minecraftVersion = getMinecraftVersion().get();
-
+	@Override
+	public void run(String minecraftVersion) throws IOException {
 		getProject().getLogger().lifecycle(":preparing build for Minecraft " + minecraftVersion);
 
 		KeratinGradleExtension keratin = getExtension();

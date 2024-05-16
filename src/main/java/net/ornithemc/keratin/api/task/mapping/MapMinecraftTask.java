@@ -1,7 +1,5 @@
 package net.ornithemc.keratin.api.task.mapping;
 
-import org.gradle.api.tasks.TaskAction;
-
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
@@ -9,9 +7,8 @@ import net.ornithemc.keratin.api.task.merging.Merger;
 
 public abstract class MapMinecraftTask extends MappingTask implements Merger {
 
-	@TaskAction
-	public void run() {
-		String minecraftVersion = getMinecraftVersion().get();
+	@Override
+	public void run(String minecraftVersion) {
 		String srcNs = getSourceNamespace().get();
 		String dstNs = getTargetNamespace().get();
 

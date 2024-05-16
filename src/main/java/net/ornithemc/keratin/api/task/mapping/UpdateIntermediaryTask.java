@@ -6,7 +6,6 @@ import java.util.Collections;
 
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Internal;
-import org.gradle.api.tasks.TaskAction;
 
 import net.fabricmc.stitch.util.IntermediaryUtil;
 
@@ -23,9 +22,8 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 	@Internal
 	public abstract Property<String> getFromFromMinecraftVersion();
 
-	@TaskAction
-	public void run() throws IOException {
-		String minecraftVersion = getMinecraftVersion().get();
+	@Override
+	public void run(String minecraftVersion) throws IOException {
 		String fromMinecraftVersion = getFromMinecraftVersion().getOrNull();
 		String fromFromMinecraftVersion = getFromFromMinecraftVersion().getOrNull();
 
