@@ -1,6 +1,6 @@
 package net.ornithemc.keratin.api.task.merging;
 
-import java.io.IOException;
+import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
@@ -9,7 +9,7 @@ import net.ornithemc.keratin.api.manifest.VersionDetails;
 public abstract class MergeMinecraftJarsTask extends MergeTask {
 
 	@Override
-	public void run(String minecraftVersion) throws IOException {
+	public void run(WorkQueue workQueue, String minecraftVersion) {
 		String namespace = getNamespace().get();
 
 		validateNamespace(namespace);
@@ -22,13 +22,11 @@ public abstract class MergeMinecraftJarsTask extends MergeTask {
 			boolean official = "official".equals(namespace);
 
 			if (official == details.sharedMappings()) {
-				getProject().getLogger().lifecycle(":merging " + namespace + " jars for Minecraft " + minecraftVersion);
-
-				mergeJars(
-					official ? files.getClientJar(minecraftVersion) : files.getIntermediaryClientJar(minecraftVersion),
-					official ? files.getServerJar(minecraftVersion) : files.getIntermediaryServerJar(minecraftVersion),
-					official ? files.getMergedJar(minecraftVersion) : files.getIntermediaryMergedJar(minecraftVersion)
-				);
+				workQueue.submit(MergeJars.class, parameters -> {
+					parameters.getClient().set(official ? files.getClientJar(minecraftVersion) : files.getIntermediaryClientJar(minecraftVersion));
+					parameters.getServer().set(official ? files.getServerJar(minecraftVersion) : files.getIntermediaryServerJar(minecraftVersion));
+					parameters.getMerged().set(official ? files.getMergedJar(minecraftVersion) : files.getIntermediaryMergedJar(minecraftVersion));
+				});
 			}
 		}
 	}

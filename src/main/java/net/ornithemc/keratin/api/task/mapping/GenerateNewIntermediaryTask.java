@@ -3,6 +3,8 @@ package net.ornithemc.keratin.api.task.mapping;
 import java.io.File;
 import java.io.IOException;
 
+import org.gradle.workers.WorkQueue;
+
 import net.fabricmc.stitch.util.IntermediaryUtil;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
@@ -13,7 +15,7 @@ import net.ornithemc.keratin.matching.Matches;
 public abstract class GenerateNewIntermediaryTask extends GenerateIntermediaryTask {
 
 	@Override
-	public void run(String minecraftVersion) throws IOException {
+	public void run(WorkQueue workQueue, String minecraftVersion) throws IOException {
 		getProject().getLogger().lifecycle(":generating intermediary for Minecraft " + minecraftVersion);
 
 		KeratinGradleExtension keratin = getExtension();

@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Internal;
+import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
@@ -18,7 +19,7 @@ public abstract class SaveMappingsIntoGraphTask extends MinecraftTask implements
 	public abstract Property<PropagationDirection> getPropagationDirection();
 
 	@Override
-	public void run(String minecraftVersion) throws IOException {
+	public void run(WorkQueue workQueue, String minecraftVersion) throws IOException {
 		getProject().getLogger().lifecycle(":saving mappings into the graph for Minecraft " + minecraftVersion);
 
 		KeratinGradleExtension keratin = getExtension();

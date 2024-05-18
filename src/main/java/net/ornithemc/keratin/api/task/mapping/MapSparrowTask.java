@@ -1,6 +1,6 @@
 package net.ornithemc.keratin.api.task.mapping;
 
-import java.io.IOException;
+import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
@@ -10,13 +10,11 @@ import net.ornithemc.keratin.api.manifest.VersionDetails;
 public abstract class MapSparrowTask extends MappingTask {
 
 	@Override
-	public void run(String minecraftVersion) throws IOException {
+	public void run(WorkQueue workQueue, String minecraftVersion) {
 		String srcNs = getSourceNamespace().get();
 		String dstNs = getTargetNamespace().get();
 
 		validateNamespaces(srcNs, dstNs);
-
-		getProject().getLogger().lifecycle(":mapping Sparrow for Minecraft " + minecraftVersion + " from " + srcNs + " to " + dstNs);
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
@@ -30,26 +28,26 @@ public abstract class MapSparrowTask extends MappingTask {
 
 		if ("official".equals(srcNs) ? details.sharedMappings() : (details.client() && details.server())) {
 			if (details.sharedMappings() ? (mergedBuild > 0) : (clientBuild > 0 || serverBuild > 0)) {
-				mapSparrow(
-					fromOfficial ? files.getMergedSparrowFile(minecraftVersion) : files.getIntermediaryMergedSparrowFile(minecraftVersion),
-					fromOfficial ? files.getIntermediaryMergedSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion),
-					fromOfficial ? files.getMergedIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion)
-				);
+				workQueue.submit(MapSparrow.class, parameters -> {
+					parameters.getInput().set(fromOfficial ? files.getMergedSparrowFile(minecraftVersion) : files.getIntermediaryMergedSparrowFile(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? files.getIntermediaryMergedSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? files.getMergedIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+				});
 			}
 		} else {
 			if (details.client() && clientBuild > 0) {
-				mapSparrow(
-					fromOfficial ? files.getClientSparrowFile(minecraftVersion) : files.getIntermediaryClientSparrowFile(minecraftVersion),
-					fromOfficial ? files.getIntermediaryClientSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion),
-					fromOfficial ? files.getClientIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion)
-				);
+				workQueue.submit(MapSparrow.class, parameters -> {
+					parameters.getInput().set(fromOfficial ? files.getClientSparrowFile(minecraftVersion) : files.getIntermediaryClientSparrowFile(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? files.getIntermediaryClientSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? files.getClientIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+				});
 			}
 			if (details.server() && serverBuild > 0) {
-				mapSparrow(
-					fromOfficial ? files.getServerSparrowFile(minecraftVersion) : files.getIntermediaryServerSparrowFile(minecraftVersion),
-					fromOfficial ? files.getIntermediaryServerSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion),
-					fromOfficial ? files.getServerIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion)
-				);
+				workQueue.submit(MapSparrow.class, parameters -> {
+					parameters.getInput().set(fromOfficial ? files.getServerSparrowFile(minecraftVersion) : files.getIntermediaryServerSparrowFile(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? files.getIntermediaryServerSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? files.getServerIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+				});
 			}
 		}
 	}

@@ -278,9 +278,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 		boolean refreshDeps = project.getGradle().getStartParameter().isRefreshDependencies();
 
-		ConfigurationContainer configurations = project.getConfigurations();
-		DependencyHandler dependencies = project.getDependencies();
-
 		for (File cacheDir : files.getCacheDirectories()) {
 			if (!cacheDir.exists()) {
 				cacheDir.mkdirs();
@@ -290,22 +287,13 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		File versionsManifest = files.getVersionsManifest();
 
 		if (refreshDeps || !versionsManifest.exists()) {
-			project.getLogger().lifecycle(":downloading versions manifest");
 			FileUtils.copyURLToFile(new URL(Constants.VERSIONS_MANIFEST_URL), versionsManifest);
 		}
 
 		for (String minecraftVersion : minecraftVersions) {
-			Configuration minecraftLibraries = configurations.register(Configurations.minecraftLibraries(minecraftVersion)).get();
-			Configuration javadocClasspath = configurations.register(Configurations.javadocClasspath(minecraftVersion)).get();
-
-			dependencies.add(javadocClasspath.getName(), "net.fabricmc:fabric-loader:0.15.11");
-			dependencies.add(javadocClasspath.getName(), "com.google.code.findbugs:jsr305:3.0.2");
-
 			File versionInfo = files.getVersionInfo(minecraftVersion);
 
 			if (refreshDeps || !versionInfo.exists()) {
-				project.getLogger().lifecycle(":downloading version info for Minecraft " + minecraftVersion);
-
 				VersionsManifest manifest = getVersionsManifest();
 				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
@@ -315,13 +303,22 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			File versionDetails = files.getVersionDetails(minecraftVersion);
 
 			if (refreshDeps || !versionDetails.exists()) {
-				project.getLogger().lifecycle(":downloading version details for Minecraft " + minecraftVersion);
-
 				VersionsManifest manifest = getVersionsManifest();
 				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
 				FileUtils.copyURLToFile(new URL(entry.details()), versionDetails);
 			}
+		}
+
+		ConfigurationContainer configurations = project.getConfigurations();
+		DependencyHandler dependencies = project.getDependencies();
+
+		for (String minecraftVersion : minecraftVersions) {
+			Configuration minecraftLibraries = configurations.register(Configurations.minecraftLibraries(minecraftVersion)).get();
+			Configuration javadocClasspath = configurations.register(Configurations.javadocClasspath(minecraftVersion)).get();
+
+			dependencies.add(javadocClasspath.getName(), "net.fabricmc:fabric-loader:0.15.11");
+			dependencies.add(javadocClasspath.getName(), "com.google.code.findbugs:jsr305:3.0.2");
 
 			VersionInfo info = getVersionInfo(minecraftVersion);
 

@@ -3,9 +3,9 @@ package net.ornithemc.keratin.api.task;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
 
 import org.gradle.api.Project;
-import org.gradle.api.Task;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
@@ -34,22 +34,26 @@ public interface Downloader extends TaskAware {
 		return sb.toString().equals(sha1);
 	}
 
-	default void download(String url, File output) throws Exception {
-		download(url, "", output);
+	default CompletableFuture<Void> download(String url, File output) throws Exception {
+		return download(url, "", output);
 	}
 
-	default void download(String url, String sha1, File output) throws Exception {
+	default CompletableFuture<Void> download(String url, String sha1, File output) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		Project project = keratin.getProject();
 
-		if (!output.exists() || isRefreshDependencies() || !validateChecksum(output, sha1)) {
-			DownloadAction download = new DownloadAction(project, (Task) this);
+		boolean refreshDeps = isRefreshDependencies();
 
-			download.src(new URL(url));
-			download.dest(output);
-			download.overwrite(true);
+		if (!output.exists() || refreshDeps || !validateChecksum(output, sha1)) {
+			DownloadAction downloader = new DownloadAction(project, (org.gradle.api.Task) this);
 
-			download.execute().join();
+			downloader.src(new URL(url));
+			downloader.dest(output);
+			downloader.overwrite(true);
+
+			return downloader.execute();
 		}
+
+		return CompletableFuture.completedFuture(null);
 	}
 }

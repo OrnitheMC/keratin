@@ -2,6 +2,8 @@ package net.ornithemc.keratin.api.task.processing;
 
 import java.io.File;
 
+import org.gradle.workers.WorkQueue;
+
 import net.ornithemc.keratin.Constants;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
@@ -13,9 +15,7 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 public abstract class DownloadNestsTask extends MinecraftTask implements DownloaderAndExtracter {
 
 	@Override
-	public void run(String minecraftVersion) throws Exception {
-		getProject().getLogger().lifecycle(":downloading Nests for Minecraft " + minecraftVersion);
-
+	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);

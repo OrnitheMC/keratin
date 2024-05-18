@@ -2,6 +2,8 @@ package net.ornithemc.keratin.api.task.mapping;
 
 import java.io.File;
 
+import org.gradle.workers.WorkQueue;
+
 import net.fabricmc.stitch.commands.tinyv2.CommandSplitTinyV2;
 
 import net.ornithemc.keratin.Constants;
@@ -14,9 +16,7 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 public abstract class DownloadIntermediaryTask extends MinecraftTask implements DownloaderAndExtracter {
 
 	@Override
-	public void run(String minecraftVersion) throws Exception {
-		getProject().getLogger().lifecycle(":downloading intermediary for Minecraft " + minecraftVersion);
-
+	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
 
@@ -26,11 +26,7 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 			throw new IllegalStateException("gen1 intermediary is not supported at this time");
 		}
 
-		downloadAndExtract(
-			Constants.calamusGen2Url(minecraftVersion, intermediaryGen),
-			"mappings/mappings.tiny",
-			files.getMergedIntermediaryMappings(minecraftVersion)
-		);
+		Runnable after = null;
 
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
@@ -43,12 +39,25 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 			boolean genServer = (details.server() && (!server.exists() || isRefreshDependencies()));
 
 			if (genClient || genServer) {
-				new CommandSplitTinyV2().run(new String[] {
-					merged.getAbsolutePath(),
-					details.client() ? client.getAbsolutePath() : "-",
-					details.server() ? server.getAbsolutePath() : "-"
-				});
+				after = () -> {
+					try {
+						new CommandSplitTinyV2().run(new String[] {
+							merged.getAbsolutePath(),
+							details.client() ? client.getAbsolutePath() : "-",
+							details.server() ? server.getAbsolutePath() : "-"
+						});
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				};
 			}
 		}
+
+		downloadAndExtract(
+			Constants.calamusGen2Url(minecraftVersion, intermediaryGen),
+			"mappings/mappings.tiny",
+			files.getMergedIntermediaryMappings(minecraftVersion),
+			after
+		);
 	}
 }

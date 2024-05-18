@@ -1,8 +1,6 @@
 package net.ornithemc.keratin.api.task.merging;
 
-import java.io.IOException;
-
-import com.google.common.io.Files;
+import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
@@ -12,7 +10,7 @@ import net.ornithemc.keratin.api.manifest.VersionDetails;
 public abstract class MergeSparrowTask extends MergeTask {
 
 	@Override
-	public void run(String minecraftVersion) throws IOException {
+	public void run(WorkQueue workQueue, String minecraftVersion) {
 		String namespace = getNamespace().get();
 
 		validateNamespace(namespace);
@@ -26,30 +24,14 @@ public abstract class MergeSparrowTask extends MergeTask {
 		}
 
 		if (!details.sharedMappings()) {
-			int clientBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
-			int serverBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
-
-			if (clientBuild > 0 && serverBuild > 0) {
-				getProject().getLogger().lifecycle(":merging " + namespace + " Sparrow for Minecraft " + minecraftVersion);
-
-				mergeSparrow(
-					files.getIntermediaryClientSparrowFile(minecraftVersion),
-					files.getIntermediaryServerSparrowFile(minecraftVersion),
-					files.getIntermediaryMergedSparrowFile(minecraftVersion)
-				);
-			} else {
-				if (clientBuild > 0) {
-					Files.copy(
-						files.getIntermediaryClientSparrowFile(minecraftVersion),
-						files.getIntermediaryMergedSparrowFile(minecraftVersion)
-					);
-				}
-				if (serverBuild > 0) {
-					Files.copy(
-						files.getIntermediaryServerSparrowFile(minecraftVersion),
-						files.getIntermediaryMergedSparrowFile(minecraftVersion)
-					);
-				}
+			if (!details.sharedMappings()) {
+				workQueue.submit(MergeSparrow.class, parameters -> {
+					parameters.getClientBuild().set(keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT));
+					parameters.getServerBuild().set(keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER));
+					parameters.getClient().set(files.getIntermediaryClientNests(minecraftVersion));
+					parameters.getServer().set(files.getIntermediaryServerNests(minecraftVersion));
+					parameters.getMerged().set(files.getIntermediaryMergedNests(minecraftVersion));
+				});
 			}
 		}
 	}

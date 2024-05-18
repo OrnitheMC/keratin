@@ -6,7 +6,6 @@ import java.nio.file.Files;
 
 import org.apache.commons.io.FileUtils;
 
-import net.ornithemc.keratin.api.task.TaskAware;
 import net.ornithemc.mappingutils.MappingUtils;
 import net.ornithemc.mappingutils.PropagationDirection;
 import net.ornithemc.mappingutils.PropagationOptions;
@@ -18,7 +17,7 @@ import net.ornithemc.mappingutils.io.diff.MappingsDiff;
 import net.ornithemc.mappingutils.io.diff.MappingsDiffValidator;
 import net.ornithemc.mappingutils.io.diff.graph.VersionGraph;
 
-public interface MappingsGraph extends TaskAware {
+public interface MappingsGraph {
 
 	Format GRAPH_FORMAT = Format.TINY_V2;
 

@@ -1,6 +1,6 @@
 package net.ornithemc.keratin.api.task.mapping;
 
-import java.io.IOException;
+import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
@@ -10,13 +10,11 @@ import net.ornithemc.keratin.api.manifest.VersionDetails;
 public abstract class MapNestsTask extends MappingTask {
 
 	@Override
-	public void run(String minecraftVersion) throws IOException {
+	public void run(WorkQueue workQueue, String minecraftVersion) {
 		String srcNs = getSourceNamespace().get();
 		String dstNs = getTargetNamespace().get();
 
 		validateNamespaces(srcNs, dstNs);
-
-		getProject().getLogger().lifecycle(":mapping Nests for Minecraft " + minecraftVersion + " from " + srcNs + " to " + dstNs);
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
@@ -30,26 +28,26 @@ public abstract class MapNestsTask extends MappingTask {
 
 		if ("official".equals(srcNs) ? details.sharedMappings() : (details.client() && details.server())) {
 			if (details.sharedMappings() ? (mergedBuild > 0) : (clientBuild > 0 || serverBuild > 0)) {
-				mapNests(
-					fromOfficial ? files.getMergedNests(minecraftVersion) : files.getIntermediaryMergedNests(minecraftVersion),
-					fromOfficial ? files.getIntermediaryMergedNests(minecraftVersion) : files.getNamedNests(minecraftVersion),
-					fromOfficial ? files.getMergedIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion)
-				);
+				workQueue.submit(MapNests.class, parameters -> {
+					parameters.getInput().set(fromOfficial ? files.getMergedNests(minecraftVersion) : files.getIntermediaryMergedNests(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? files.getIntermediaryMergedNests(minecraftVersion) : files.getNamedNests(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? files.getMergedIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+				});
 			}
 		} else {
 			if (details.client() && clientBuild > 0) {
-				mapNests(
-					fromOfficial ? files.getClientNests(minecraftVersion) : files.getIntermediaryClientNests(minecraftVersion),
-					fromOfficial ? files.getIntermediaryClientNests(minecraftVersion) : files.getNamedNests(minecraftVersion),
-					fromOfficial ? files.getClientIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion)
-				);
+				workQueue.submit(MapNests.class, parameters -> {
+					parameters.getInput().set(fromOfficial ? files.getClientNests(minecraftVersion) : files.getIntermediaryClientNests(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? files.getIntermediaryClientNests(minecraftVersion) : files.getNamedNests(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? files.getClientIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+				});
 			}
 			if (details.server() && serverBuild > 0) {
-				mapNests(
-					fromOfficial ? files.getServerNests(minecraftVersion) : files.getIntermediaryServerNests(minecraftVersion),
-					fromOfficial ? files.getIntermediaryServerNests(minecraftVersion) : files.getNamedNests(minecraftVersion),
-					fromOfficial ? files.getServerIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion)
-				);
+				workQueue.submit(MapNests.class, parameters -> {
+					parameters.getInput().set(fromOfficial ? files.getServerNests(minecraftVersion) : files.getIntermediaryServerNests(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? files.getIntermediaryServerNests(minecraftVersion) : files.getNamedNests(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? files.getServerIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+				});
 			}
 		}
 	}

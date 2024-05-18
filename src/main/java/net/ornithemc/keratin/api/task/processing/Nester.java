@@ -3,12 +3,11 @@ package net.ornithemc.keratin.api.task.processing;
 import java.io.File;
 import java.io.IOException;
 
-import net.ornithemc.keratin.api.task.TaskAware;
 import net.ornithemc.mappingutils.MappingUtils;
 import net.ornithemc.mappingutils.io.Format;
 import net.ornithemc.nester.NesterException;
 
-public interface Nester extends TaskAware {
+public interface Nester {
 
 	default void nestJar(File input, File output, File nests) throws IOException {
 		try {
