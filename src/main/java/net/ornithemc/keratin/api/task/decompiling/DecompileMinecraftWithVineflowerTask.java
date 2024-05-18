@@ -15,7 +15,7 @@ public abstract class DecompileMinecraftWithVineflowerTask extends DecompileTask
 		Project project = keratin.getProject();
 		OrnitheFilesAPI files = keratin.getFiles();
 
-		submitDecompileTask(
+		submitJavaExecDecompileTask(
 			workQueue,
 			"org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler",
 			project.getConfigurations().getByName(Configurations.DECOMPILE_CLASSPATH),

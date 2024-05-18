@@ -24,7 +24,6 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.publish.PublicationContainer;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
-import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
@@ -55,6 +54,7 @@ import net.ornithemc.keratin.api.task.build.PrepareBuildTask;
 import net.ornithemc.keratin.api.task.decompiling.DecompileMinecraftWithCfrTask;
 import net.ornithemc.keratin.api.task.decompiling.DecompileMinecraftWithVineflowerTask;
 import net.ornithemc.keratin.api.task.enigma.LaunchEnigmaTask;
+import net.ornithemc.keratin.api.task.javadoc.GenerateFakeSourceTask;
 import net.ornithemc.keratin.api.task.mapping.ConvertMappingsFromTinyV1ToTinyV2Task;
 import net.ornithemc.keratin.api.task.mapping.DownloadIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.GenerateIntermediaryTask;
@@ -575,22 +575,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				task.dependsOn(mapProcessedMinecraftToNamed);
 			});
 
-			for (String minecraftVersion : minecraftVersions) {
-				TaskProvider<?> genFakeSource = tasks.register("%s_genFakeSource".formatted(minecraftVersion), JavaExec.class, task -> {
-					task.dependsOn(buildMappings, mapMinecraftToNamed);
-					task.getMainClass().set("net.fabricmc.mappingpoet.Main");
-					task.classpath(configurations.getByName(Configurations.MAPPING_POET));
-					task.args(
-						files.getMergedTinyV2NamedMappings(minecraftVersion).getAbsolutePath(),
-						files.getNamedJar(minecraftVersion).getAbsolutePath(),
-						files.getFakeSourceDirectory(minecraftVersion).getAbsolutePath(),
-						files.getLibrariesCache().getAbsolutePath()
-					);
+			TaskProvider<?> genFakeSource = tasks.register("generakeFakeSource", GenerateFakeSourceTask.class, task -> {
+				task.dependsOn(buildMappings, mapMinecraftToNamed);
+			});
 
-					task.doFirst(t -> {
-						t.getLogger().lifecycle(":generating fake source for Minecraft " + minecraftVersion);
-					});
-				});
+			for (String minecraftVersion : minecraftVersions) {
 				TaskProvider<Javadoc> javadoc = tasks.register("%s_javadoc".formatted(minecraftVersion), Javadoc.class, task -> {
 					task.dependsOn(genFakeSource);
 					task.setFailOnError(false);
