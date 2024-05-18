@@ -3,7 +3,6 @@ package net.ornithemc.keratin.api.task.merging;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
-import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 
@@ -26,8 +25,6 @@ public abstract class MergeSparrowTask extends MergeTask {
 		if (!details.sharedMappings()) {
 			if (!details.sharedMappings()) {
 				workQueue.submit(MergeSparrow.class, parameters -> {
-					parameters.getClientBuild().set(keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT));
-					parameters.getServerBuild().set(keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER));
 					parameters.getClient().set(files.getIntermediaryClientNests(minecraftVersion));
 					parameters.getServer().set(files.getIntermediaryServerNests(minecraftVersion));
 					parameters.getMerged().set(files.getIntermediaryMergedNests(minecraftVersion));

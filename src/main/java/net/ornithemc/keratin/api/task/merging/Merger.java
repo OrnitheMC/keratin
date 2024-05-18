@@ -45,10 +45,6 @@ public interface Merger extends TaskAware {
 
 	interface NestsAndSparrowMergerParameters extends WorkParameters {
 
-		Property<Integer> getClientBuild();
-
-		Property<Integer> getServerBuild();
-
 		Property<File> getClient();
 
 		Property<File> getServer();
@@ -61,21 +57,18 @@ public interface Merger extends TaskAware {
 
 		@Override
 		public void execute() {
-			File client = getParameters().getClient().get();
-			File server = getParameters().getServer().get();
-			File merged = getParameters().getMerged().get();
-
-			int clientBuild = getParameters().getClientBuild().get();
-			int serverBuild = getParameters().getServerBuild().get();
+			File client = getParameters().getClient().getOrNull();
+			File server = getParameters().getServer().getOrNull();
+			File merged = getParameters().getMerged().getOrNull();
 
 			try {
-				if (clientBuild > 0 && serverBuild > 0) {
+				if (client != null && server != null) {
 					MappingUtils.mergeNests(client.toPath(), server.toPath(), merged.toPath());
 				} else {
-					if (clientBuild > 0) {
+					if (client != null) {
 						Files.copy(client, merged);
 					}
-					if (serverBuild > 0) {
+					if (server != null) {
 						Files.copy(server, merged);
 					}
 				}
@@ -89,21 +82,18 @@ public interface Merger extends TaskAware {
 
 		@Override
 		public void execute() {
-			File client = getParameters().getClient().get();
-			File server = getParameters().getServer().get();
-			File merged = getParameters().getMerged().get();
-
-			int clientBuild = getParameters().getClientBuild().get();
-			int serverBuild = getParameters().getServerBuild().get();
+			File client = getParameters().getClient().getOrNull();
+			File server = getParameters().getServer().getOrNull();
+			File merged = getParameters().getMerged().getOrNull();
 
 			try {
-				if (clientBuild > 0 && serverBuild > 0) {
+				if (client != null && server != null) {
 					MappingUtils.mergeSignatures(client.toPath(), server.toPath(), merged.toPath());
 				} else {
-					if (clientBuild > 0) {
+					if (client != null) {
 						Files.copy(client, merged);
 					}
-					if (serverBuild > 0) {
+					if (server != null) {
 						Files.copy(server, merged);
 					}
 				}
