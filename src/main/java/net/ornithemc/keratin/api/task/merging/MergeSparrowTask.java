@@ -25,9 +25,9 @@ public abstract class MergeSparrowTask extends MergeTask {
 		if (!details.sharedMappings()) {
 			if (!details.sharedMappings()) {
 				workQueue.submit(MergeSparrow.class, parameters -> {
-					parameters.getClient().set(files.getIntermediaryClientNests(minecraftVersion));
-					parameters.getServer().set(files.getIntermediaryServerNests(minecraftVersion));
-					parameters.getMerged().set(files.getIntermediaryMergedNests(minecraftVersion));
+					parameters.getClient().set(files.getIntermediaryClientSparrowFile(minecraftVersion));
+					parameters.getServer().set(files.getIntermediaryServerSparrowFile(minecraftVersion));
+					parameters.getMerged().set(files.getIntermediaryMergedSparrowFile(minecraftVersion));
 				});
 			}
 		}
