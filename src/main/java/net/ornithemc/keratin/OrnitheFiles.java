@@ -174,7 +174,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 				if (clientBuild < 1 && serverBuild < 1) {
 					return null;
 				} else {
-					return new File(getProcessedMappingsCache(), "%s-nests+build.(%d-%d)-intermediary-gen%d-merged.jar".formatted(minecraftVersion, clientBuild, serverBuild, getIntermediaryGen()));
+					return new File(getProcessedJarsCache(), "%s-nests+build.(%d-%d)-intermediary-gen%d-merged.jar".formatted(minecraftVersion, clientBuild, serverBuild, getIntermediaryGen()));
 				}
 			} else {
 				return new File(getProcessedJarsCache(), "%s-nests+build.%d-intermediary-gen%d-merged.jar".formatted(minecraftVersion, build, getIntermediaryGen()));
@@ -207,7 +207,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 				if (clientBuild < 1 && serverBuild < 1) {
 					return null;
 				} else {
-					return new File(getProcessedMappingsCache(), "%s-sparrow+build.(%d-%d)-intermediary-gen%d-merged.jar".formatted(minecraftVersion, clientBuild, serverBuild, getIntermediaryGen()));
+					return new File(getProcessedJarsCache(), "%s-sparrow+build.(%d-%d)-intermediary-gen%d-merged.jar".formatted(minecraftVersion, clientBuild, serverBuild, getIntermediaryGen()));
 				}
 			} else {
 				return new File(getProcessedJarsCache(), "%s-sparrow+build.%d-intermediary-gen%d-merged.jar".formatted(minecraftVersion, build, getIntermediaryGen()));
@@ -250,7 +250,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 				if (clientBuild < 1 && serverBuild < 1) {
 					return null;
 				} else {
-					return new File(getProcessedMappingsCache(), "%s-nests+build.(%d-%d)-intermediary-gen%d-merged.nest".formatted(minecraftVersion, clientBuild, serverBuild, getIntermediaryGen()));
+					return new File(getProcessedMappingsCache(), "%s-nests+build.(%d-%d)-intermediary-gen%d-merged.tiny".formatted(minecraftVersion, clientBuild, serverBuild, getIntermediaryGen()));
 				}
 			} else {
 				return new File(getProcessedMappingsCache(), "%s-nests+build.%d-intermediary-gen%d-merged.tiny".formatted(minecraftVersion, build, getIntermediaryGen()));
@@ -697,17 +697,17 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 
 	@Override
 	public File getNestedClientIntermediaryMappings(String minecraftVersion) {
-		return nestedIntermediaryClientJar.get(minecraftVersion);
+		return nestedClientIntermediaryMappings.get(minecraftVersion);
 	}
 
 	@Override
 	public File getNestedServerIntermediaryMappings(String minecraftVersion) {
-		return nestedIntermediaryServerJar.get(minecraftVersion);
+		return nestedServerIntermediaryMappings.get(minecraftVersion);
 	}
 
 	@Override
 	public File getNestedMergedIntermediaryMappings(String minecraftVersion) {
-		return nestedIntermediaryMergedJar.get(minecraftVersion);
+		return nestedMergedIntermediaryMappings.get(minecraftVersion);
 	}
 
 	@Override
