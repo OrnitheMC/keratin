@@ -8,6 +8,8 @@ import org.gradle.workers.WorkParameters;
 
 import com.google.common.io.Files;
 
+import net.fabricmc.stitch.commands.tinyv2.CommandCombineTinyV2;
+
 public interface Processor {
 
 	interface MinecraftProcessorParameters extends WorkParameters {
@@ -65,13 +67,29 @@ public interface Processor {
 
 	interface MappingsProcessorParameters extends WorkParameters {
 
-		Property<File> getInputMappings();
+		Property<File> getClientInputMappings();
 
-		Property<File> getNestsFile();
+		Property<File> getServerInputMappings();
 
-		Property<File> getNestedMappings();
+		Property<File> getMergedInputMappings();
 
-		Property<File> getOutputMappings();
+		Property<File> getClientNestsFile();
+
+		Property<File> getServerNestsFile();
+
+		Property<File> getMergedNestsFile();
+
+		Property<File> getClientNestedMappings();
+
+		Property<File> getServerNestedMappings();
+
+		Property<File> getMergedNestedMappings();
+
+		Property<File> getClientOutputMappings();
+
+		Property<File> getServerOutputMappings();
+
+		Property<File> getMergedOutputMappings();
 
 	}
 
@@ -80,23 +98,66 @@ public interface Processor {
 		@Override
 		public void execute() {
 			try {
-				File data;
-				File mappingsIn;
-				File mappingsOut = getParameters().getInputMappings().get();
+				File clientData;
+				File serverData;
+				File mergedData;
+				File clientMappingsIn;
+				File serverMappingsIn;
+				File mergedMappingsIn;
+				File clientMappingsOut = getParameters().getClientInputMappings().getOrNull();
+				File serverMappingsOut = getParameters().getServerInputMappings().getOrNull();
+				File mergedMappingsOut = getParameters().getMergedInputMappings().getOrNull();
 
-				data = getParameters().getNestsFile().getOrNull();
+				clientData = getParameters().getClientNestsFile().getOrNull();
+				serverData = getParameters().getServerNestsFile().getOrNull();
+				mergedData = getParameters().getMergedNestsFile().getOrNull();
 
-				if (data != null) {
-					mappingsIn = mappingsOut;
-					mappingsOut = getParameters().getNestedMappings().get();
+				if (clientData != null || serverData != null || mergedData != null) {
+					clientMappingsIn = clientMappingsOut;
+					serverMappingsIn = serverMappingsOut;
+					mergedMappingsIn = mergedMappingsOut;
+					clientMappingsOut = getParameters().getClientNestedMappings().getOrNull();
+					serverMappingsOut = getParameters().getServerNestedMappings().getOrNull();
+					mergedMappingsOut = getParameters().getMergedNestedMappings().getOrNull();
 
-					nestMappings(mappingsIn, mappingsOut, data);
+					if (clientData != null && serverData != null) {
+						nestMappings(clientMappingsIn, clientMappingsOut, clientData);
+						nestMappings(serverMappingsIn, serverMappingsOut, serverData);
+
+						new CommandCombineTinyV2().run(new String[] {
+							clientMappingsOut.getAbsolutePath(),
+							serverMappingsOut.getAbsolutePath(),
+							mergedMappingsOut.getAbsolutePath()
+						});
+					} else {
+						if (clientData != null) {
+							nestMappings(clientMappingsIn, clientMappingsOut, clientData);
+						}
+						if (serverData != null) {
+							nestMappings(serverMappingsIn, serverMappingsOut, serverData);
+						}
+						if (mergedData != null) {
+							nestMappings(mergedMappingsIn, mergedMappingsOut, mergedData);
+						}
+					}
 				}
 
-				mappingsIn = mappingsOut;
-				mappingsOut = getParameters().getOutputMappings().get();
+				clientMappingsIn = clientMappingsOut;
+				serverMappingsIn = serverMappingsOut;
+				mergedMappingsIn = mergedMappingsOut;
+				clientMappingsOut = getParameters().getClientOutputMappings().getOrNull();
+				serverMappingsOut = getParameters().getServerOutputMappings().getOrNull();
+				mergedMappingsOut = getParameters().getMergedOutputMappings().getOrNull();
 
-				Files.copy(mappingsIn, mappingsOut);
+				if (clientMappingsIn != null) {
+					Files.copy(clientMappingsIn, clientMappingsOut);
+				}
+				if (serverMappingsIn != null) {
+					Files.copy(serverMappingsIn, serverMappingsOut);
+				}
+				if (mergedMappingsIn != null) {
+					Files.copy(mergedMappingsIn, mergedMappingsOut);
+				}
 			} catch (Exception e) {
 				throw new RuntimeException("error while processing mappings", e);
 			}

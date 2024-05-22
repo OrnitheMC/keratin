@@ -4,23 +4,36 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.MinecraftTask;
-import net.ornithemc.keratin.api.task.processing.Processor.ProcessMappings;
 
-public abstract class ProcessMappingsTask extends MinecraftTask implements Nester {
+public abstract class ProcessMappingsTask extends MinecraftTask implements Processor {
 
 	@Override
 	public void run(WorkQueue workQueue, String minecraftVersion) {
-		getProject().getLogger().lifecycle(":processing mappings for Minecraft " + minecraftVersion);
-
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
+		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
 		workQueue.submit(ProcessMappings.class, parameters -> {
-			parameters.getInputMappings().set(files.getMainIntermediaryMappings(minecraftVersion));
-			parameters.getNestsFile().set(files.getMainIntermediaryNests(minecraftVersion));
-			parameters.getNestedMappings().set(files.getMainNestedIntermediaryMappings(minecraftVersion));
-			parameters.getOutputMappings().set(files.getMainProcessedIntermediaryMappings(minecraftVersion));
+			if ((details.client() && details.server()) || details.sharedMappings()) {
+				parameters.getMergedInputMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
+				parameters.getMergedNestsFile().set(files.getIntermediaryMergedNests(minecraftVersion));
+				parameters.getMergedNestedMappings().set(files.getNestedMergedIntermediaryMappings(minecraftVersion));
+				parameters.getMergedOutputMappings().set(files.getProcessedMergedIntermediaryMappings(minecraftVersion));
+			}
+			if (details.client()) {
+				parameters.getClientInputMappings().set(files.getClientIntermediaryMappings(minecraftVersion));
+				parameters.getClientNestsFile().set(files.getIntermediaryClientNests(minecraftVersion));
+				parameters.getClientNestedMappings().set(files.getNestedClientIntermediaryMappings(minecraftVersion));
+				parameters.getClientOutputMappings().set(files.getProcessedClientIntermediaryMappings(minecraftVersion));
+			}
+			if (details.server()) {
+				parameters.getServerInputMappings().set(files.getServerIntermediaryMappings(minecraftVersion));
+				parameters.getServerNestsFile().set(files.getIntermediaryServerNests(minecraftVersion));
+				parameters.getServerNestedMappings().set(files.getNestedServerIntermediaryMappings(minecraftVersion));
+				parameters.getServerOutputMappings().set(files.getProcessedServerIntermediaryMappings(minecraftVersion));
+			}
 		});
 	}
 }

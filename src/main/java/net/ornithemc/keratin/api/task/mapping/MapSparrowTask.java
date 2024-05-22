@@ -31,7 +31,7 @@ public abstract class MapSparrowTask extends MappingTask {
 				workQueue.submit(MapSparrow.class, parameters -> {
 					parameters.getInput().set(fromOfficial ? files.getMergedSparrowFile(minecraftVersion) : files.getIntermediaryMergedSparrowFile(minecraftVersion));
 					parameters.getOutput().set(fromOfficial ? files.getIntermediaryMergedSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion));
-					parameters.getMappings().set(fromOfficial ? files.getMergedIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? files.getProcessedMergedIntermediaryMappings(minecraftVersion) : files.getProcessedNamedMappings(minecraftVersion));
 				});
 			}
 		} else {
@@ -39,14 +39,14 @@ public abstract class MapSparrowTask extends MappingTask {
 				workQueue.submit(MapSparrow.class, parameters -> {
 					parameters.getInput().set(fromOfficial ? files.getClientSparrowFile(minecraftVersion) : files.getIntermediaryClientSparrowFile(minecraftVersion));
 					parameters.getOutput().set(fromOfficial ? files.getIntermediaryClientSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion));
-					parameters.getMappings().set(fromOfficial ? files.getClientIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? files.getProcessedClientIntermediaryMappings(minecraftVersion) : files.getProcessedNamedMappings(minecraftVersion));
 				});
 			}
 			if (details.server() && serverBuild > 0) {
 				workQueue.submit(MapSparrow.class, parameters -> {
 					parameters.getInput().set(fromOfficial ? files.getServerSparrowFile(minecraftVersion) : files.getIntermediaryServerSparrowFile(minecraftVersion));
 					parameters.getOutput().set(fromOfficial ? files.getIntermediaryServerSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion));
-					parameters.getMappings().set(fromOfficial ? files.getServerIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? files.getProcessedServerIntermediaryMappings(minecraftVersion) : files.getProcessedNamedMappings(minecraftVersion));
 				});
 			}
 		}

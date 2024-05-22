@@ -11,8 +11,6 @@ public abstract class ProcessMinecraftTask extends MinecraftTask implements Nest
 
 	@Override
 	public void run(WorkQueue workQueue, String minecraftVersion) {
-		getProject().getLogger().lifecycle(":processing Minecraft " + minecraftVersion);
-
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
 

@@ -482,8 +482,12 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				task.getNamespace().set("intermediary");
 			});
 
+			TaskProvider<?> processMappings = tasks.register("processMappings", ProcessMappingsTask.class, task -> {
+				task.dependsOn(downloadIntermediary, mergeIntermediaryNests);
+			});
+
 			TaskProvider<?> mapSparrowToIntermediary = tasks.register("mapSparrowToIntermediary", MapSparrowTask.class, task -> {
-				task.dependsOn(downloadSparrow, downloadIntermediary);
+				task.dependsOn(downloadSparrow, processMappings);
 				task.getSourceNamespace().set("official");
 				task.getTargetNamespace().set("intermediary");
 				
@@ -493,11 +497,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				task.getNamespace().set("intermediary");
 			});
 
-			TaskProvider<?> processMappings = tasks.register("processMappings", ProcessMappingsTask.class, task -> {
-				task.dependsOn(downloadIntermediary, mergeIntermediaryNests);
-			});
 			TaskProvider<?> processMinecraft = tasks.register("processMinecraft", ProcessMinecraftTask.class, task -> {
-				task.dependsOn(mergeIntermediaryJars, mergeIntermediaryNests, mergeIntermediarySparrow, processMappings);
+				task.dependsOn(mergeIntermediaryJars, mergeIntermediaryNests, mergeIntermediarySparrow);
 			});
 
 			TaskProvider<?> loadMappings = tasks.register("loadMappings", LoadMappingsFromGraphTask.class, task -> {
