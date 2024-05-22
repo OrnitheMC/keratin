@@ -93,6 +93,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	private final Project project;
 	private final OrnitheFiles files;
+	private final CalamusVersions calamusVersions;
 	private final FeatherVersions featherVersions;
 
 	private final Property<String> globalCacheDir;
@@ -109,6 +110,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	public KeratinGradleExtension(Project project) {
 		this.project = project;
 		this.files = new OrnitheFiles(this);
+		this.calamusVersions = new CalamusVersions(this);
 		this.featherVersions = new FeatherVersions(this);
 
 		this.globalCacheDir = this.project.getObjects().property(String.class);
@@ -274,6 +276,10 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			minecraftVersions.addAll(this.minecraftVersions.get());
 		} else {
 			findMinecraftVersions(selection, minecraftVersions::add);
+
+			if (selection == TaskSelection.CALAMUS) {
+				minecraftVersions.removeIf(calamusVersions::contains);
+			}
 		}
 
 		boolean refreshDeps = project.getGradle().getStartParameter().isRefreshDependencies();
