@@ -31,7 +31,7 @@ public class FeatherVersions {
 		builds = new HashMap<>();
 
 		try {
-			String metaUrl = Constants.META_URL + "/v3/versions/feather-gen%d".formatted(keratin.getIntermediaryGen().get());
+			String metaUrl = Constants.META_URL + "/v3/versions/gen%d/feather".formatted(keratin.getIntermediaryGen().get());
 
 			try (InputStreamReader ir = new InputStreamReader(new URL(metaUrl).openStream())) {
 				JsonArray jsonArray = KeratinGradleExtension.GSON.fromJson(ir, JsonArray.class);

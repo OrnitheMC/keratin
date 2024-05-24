@@ -31,7 +31,7 @@ public class CalamusVersions {
 		versions = new HashSet<>();
 
 		try {
-			String metaUrl = Constants.META_URL + "/v3/versions/intermediary-gen%d".formatted(keratin.getIntermediaryGen().get());
+			String metaUrl = Constants.META_URL + "/v3/versions/gen%d/intermediary".formatted(keratin.getIntermediaryGen().get());
 
 			try (InputStreamReader ir = new InputStreamReader(new URL(metaUrl).openStream())) {
 				JsonArray jsonArray = KeratinGradleExtension.GSON.fromJson(ir, JsonArray.class);
