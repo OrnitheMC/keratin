@@ -5,9 +5,8 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
-import net.ornithemc.keratin.api.task.processing.Processor.ProcessMinecraft;
 
-public abstract class ProcessMinecraftTask extends MinecraftTask implements Nester, SignaturePatcher {
+public abstract class ProcessMinecraftTask extends MinecraftTask implements Processor {
 
 	@Override
 	public void run(WorkQueue workQueue, String minecraftVersion) {

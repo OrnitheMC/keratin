@@ -21,7 +21,7 @@ public abstract class MapMinecraftTask extends MappingTask {
 
 		boolean fromOfficial = "official".equals(srcNs);
 
-		if (fromOfficial ? details.sharedMappings() : (details.client() && details.server())) {
+		if ((details.client() && details.server()) && (!fromOfficial || details.sharedMappings() )) {
 			workQueue.submit(MapJar.class, parameters -> {
 				parameters.getInput().set(fromOfficial ? files.getMergedJar(minecraftVersion) : files.getIntermediaryMergedJar(minecraftVersion));
 				parameters.getOutput().set(fromOfficial ? files.getIntermediaryMergedJar(minecraftVersion) : files.getNamedJar(minecraftVersion));

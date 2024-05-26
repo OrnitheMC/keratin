@@ -31,8 +31,8 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
 		workQueue.submit(BuildMappings.class, parameters -> {
-			parameters.getLegacyMerged().set(!details.sharedMappings() && details.client() && details.server());
-			parameters.getIntermediaryMappings().set(files.getMainIntermediaryMappings(minecraftVersion));
+			parameters.getLegacyMerged().set(!details.sharedMappings());
+			parameters.getIntermediaryMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
 			parameters.getCompletedMappings().set(files.getCompletedNamedMappings(minecraftVersion));
 			parameters.getNamedV1Mappings().set(files.getTinyV1NamedMappings(minecraftVersion));
 			parameters.getNamedV2Mappings().set(files.getTinyV2NamedMappings(minecraftVersion));

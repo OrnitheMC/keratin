@@ -3,6 +3,7 @@ package net.ornithemc.keratin.api.task.merging;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 
@@ -18,16 +19,17 @@ public abstract class MergeNestsTask extends MergeTask {
 		OrnitheFilesAPI files = keratin.getFiles();
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (!details.client() && !details.server()) {
-			throw new IllegalStateException("cannot merge Nests for Minecraft " + minecraftVersion + ": both client and server Nests must be available");
-		}
+		if (details.client() && details.server() && !details.sharedMappings()) {
+			int clientBuild = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
+			int serverBuild = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
 
-		if (!details.sharedMappings()) {
-			workQueue.submit(MergeNests.class, parameters -> {
-				parameters.getClient().set(files.getIntermediaryClientNests(minecraftVersion));
-				parameters.getServer().set(files.getIntermediaryServerNests(minecraftVersion));
-				parameters.getMerged().set(files.getIntermediaryMergedNests(minecraftVersion));
-			});
+			if (clientBuild > 0 && serverBuild > 0) {
+				workQueue.submit(MergeNests.class, parameters -> {
+					parameters.getClient().set(files.getIntermediaryClientNests(minecraftVersion));
+					parameters.getServer().set(files.getIntermediaryServerNests(minecraftVersion));
+					parameters.getMerged().set(files.getIntermediaryMergedNests(minecraftVersion));
+				});
+			}
 		}
 	}
 

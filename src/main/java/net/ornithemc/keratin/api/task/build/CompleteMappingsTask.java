@@ -27,7 +27,7 @@ public abstract class CompleteMappingsTask extends MinecraftTask {
 		workQueue.submit(CompleteMappings.class, parameters -> {
 			parameters.getJar().set(files.getMainIntermediaryJar(minecraftVersion));
 			parameters.getMappings().set(files.getNamedMappings(minecraftVersion));
-			parameters.getIntermediary().set(files.getMainIntermediaryMappings(minecraftVersion));
+			parameters.getIntermediary().set(files.getMergedIntermediaryMappings(minecraftVersion));
 			parameters.getCompletedMappings().set(files.getCompletedNamedMappings(minecraftVersion));
 		});
 	}

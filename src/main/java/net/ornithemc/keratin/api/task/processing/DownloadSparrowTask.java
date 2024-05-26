@@ -1,8 +1,12 @@
 package net.ornithemc.keratin.api.task.processing;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 
 import org.gradle.workers.WorkQueue;
+
+import com.google.common.io.Files;
 
 import net.ornithemc.keratin.Constants;
 import net.ornithemc.keratin.KeratinGradleExtension;
@@ -34,7 +38,19 @@ public abstract class DownloadSparrowTask extends MinecraftTask implements Downl
 						GameSide.MERGED,
 						build),
 					pathInJar,
-					output
+					output,
+					() -> {
+						try {
+							if (!details.server()) {
+								Files.copy(output, files.getClientSparrowFile(minecraftVersion));
+							}
+							if (!details.client()) {
+								Files.copy(output, files.getServerSparrowFile(minecraftVersion));
+							}
+						} catch (IOException e) {
+							throw new UncheckedIOException(e);
+						}
+					}
 				);
 			}
 		} else {

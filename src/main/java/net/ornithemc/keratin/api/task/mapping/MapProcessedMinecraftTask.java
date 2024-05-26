@@ -4,7 +4,6 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.merging.Merger;
 
 public abstract class MapProcessedMinecraftTask extends MappingTask implements Merger {
@@ -18,39 +17,15 @@ public abstract class MapProcessedMinecraftTask extends MappingTask implements M
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.client() && details.server()) {
-			workQueue.submit(MapJar.class, parameters -> {
-				parameters.getInput().set(files.getProcessedIntermediaryMergedJar(minecraftVersion));
-				parameters.getOutput().set(files.getProcessedNamedJar(minecraftVersion));
-				parameters.getMappings().set(files.getProcessedNamedMappings(minecraftVersion));
-				parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-				parameters.getSourceNamespace().set(srcNs);
-				parameters.getTargetNamespace().set(dstNs);
-			});
-		} else {
-			if (details.client()) {
-				workQueue.submit(MapJar.class, parameters -> {
-					parameters.getInput().set(files.getProcessedIntermediaryClientJar(minecraftVersion));
-					parameters.getOutput().set(files.getProcessedNamedJar(minecraftVersion));
-					parameters.getMappings().set(files.getProcessedNamedMappings(minecraftVersion));
-					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-					parameters.getSourceNamespace().set(srcNs);
-					parameters.getTargetNamespace().set(dstNs);
-				});
-			}
-			if (details.server()) {
-				workQueue.submit(MapJar.class, parameters -> {
-					parameters.getInput().set(files.getProcessedIntermediaryServerJar(minecraftVersion));
-					parameters.getOutput().set(files.getProcessedNamedJar(minecraftVersion));
-					parameters.getMappings().set(files.getProcessedNamedMappings(minecraftVersion));
-					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-					parameters.getSourceNamespace().set(srcNs);
-					parameters.getTargetNamespace().set(dstNs);
-				});
-			}
-		}
+		workQueue.submit(MapJar.class, parameters -> {
+			parameters.getInput().set(files.getMainProcessedIntermediaryJar(minecraftVersion));
+			parameters.getOutput().set(files.getProcessedNamedJar(minecraftVersion));
+			parameters.getMappings().set(files.getProcessedNamedMappings(minecraftVersion));
+			parameters.getLibraries().set(files.getLibraries(minecraftVersion));
+			parameters.getSourceNamespace().set(srcNs);
+			parameters.getTargetNamespace().set(dstNs);
+		});
 	}
 
 	private static void validateNamespaces(String srcNs, String dstNs) {

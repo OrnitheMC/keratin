@@ -120,25 +120,14 @@ public interface Processor {
 					serverMappingsOut = getParameters().getServerNestedMappings().getOrNull();
 					mergedMappingsOut = getParameters().getMergedNestedMappings().getOrNull();
 
-					if (clientData != null && serverData != null) {
+					if (clientData != null) {
 						nestMappings(clientMappingsIn, clientMappingsOut, clientData);
+					}
+					if (serverData != null) {
 						nestMappings(serverMappingsIn, serverMappingsOut, serverData);
-
-						new CommandCombineTinyV2().run(new String[] {
-							clientMappingsOut.getAbsolutePath(),
-							serverMappingsOut.getAbsolutePath(),
-							mergedMappingsOut.getAbsolutePath()
-						});
-					} else {
-						if (clientData != null) {
-							nestMappings(clientMappingsIn, clientMappingsOut, clientData);
-						}
-						if (serverData != null) {
-							nestMappings(serverMappingsIn, serverMappingsOut, serverData);
-						}
-						if (mergedData != null) {
-							nestMappings(mergedMappingsIn, mergedMappingsOut, mergedData);
-						}
+					}
+					if (mergedData != null) {
+						nestMappings(mergedMappingsIn, mergedMappingsOut, mergedData);
 					}
 				}
 
@@ -157,6 +146,14 @@ public interface Processor {
 				}
 				if (mergedMappingsIn != null) {
 					Files.copy(mergedMappingsIn, mergedMappingsOut);
+				}
+
+				if (clientMappingsOut != null && serverMappingsOut != null && mergedMappingsOut != null) {
+					new CommandCombineTinyV2().run(new String[] {
+						clientMappingsOut.getAbsolutePath(),
+						serverMappingsOut.getAbsolutePath(),
+						mergedMappingsOut.getAbsolutePath()
+					});
 				}
 			} catch (Exception e) {
 				throw new RuntimeException("error while processing mappings", e);

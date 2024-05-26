@@ -16,23 +16,26 @@ public abstract class ProcessMappingsTask extends MinecraftTask implements Proce
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
 		workQueue.submit(ProcessMappings.class, parameters -> {
-			if ((details.client() && details.server()) || details.sharedMappings()) {
-				parameters.getMergedInputMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
-				parameters.getMergedNestsFile().set(files.getIntermediaryMergedNests(minecraftVersion));
-				parameters.getMergedNestedMappings().set(files.getNestedMergedIntermediaryMappings(minecraftVersion));
+			if (details.client() && details.server()) {
+				if (details.sharedMappings()) {
+					parameters.getMergedInputMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
+					parameters.getMergedNestsFile().set(files.getMergedNests(minecraftVersion));
+					parameters.getMergedNestedMappings().set(files.getNestedMergedIntermediaryMappings(minecraftVersion));
+				}
 				parameters.getMergedOutputMappings().set(files.getProcessedMergedIntermediaryMappings(minecraftVersion));
-			}
-			if (details.client()) {
-				parameters.getClientInputMappings().set(files.getClientIntermediaryMappings(minecraftVersion));
-				parameters.getClientNestsFile().set(files.getIntermediaryClientNests(minecraftVersion));
-				parameters.getClientNestedMappings().set(files.getNestedClientIntermediaryMappings(minecraftVersion));
-				parameters.getClientOutputMappings().set(files.getProcessedClientIntermediaryMappings(minecraftVersion));
-			}
-			if (details.server()) {
-				parameters.getServerInputMappings().set(files.getServerIntermediaryMappings(minecraftVersion));
-				parameters.getServerNestsFile().set(files.getIntermediaryServerNests(minecraftVersion));
-				parameters.getServerNestedMappings().set(files.getNestedServerIntermediaryMappings(minecraftVersion));
-				parameters.getServerOutputMappings().set(files.getProcessedServerIntermediaryMappings(minecraftVersion));
+			} else {
+				if (details.client()) {
+					parameters.getClientInputMappings().set(files.getClientIntermediaryMappings(minecraftVersion));
+					parameters.getClientNestsFile().set(files.getClientNests(minecraftVersion));
+					parameters.getClientNestedMappings().set(files.getNestedClientIntermediaryMappings(minecraftVersion));
+					parameters.getClientOutputMappings().set(files.getProcessedClientIntermediaryMappings(minecraftVersion));
+				}
+				if (details.server()) {
+					parameters.getServerInputMappings().set(files.getServerIntermediaryMappings(minecraftVersion));
+					parameters.getServerNestsFile().set(files.getServerNests(minecraftVersion));
+					parameters.getServerNestedMappings().set(files.getNestedServerIntermediaryMappings(minecraftVersion));
+					parameters.getServerOutputMappings().set(files.getProcessedServerIntermediaryMappings(minecraftVersion));
+				}
 			}
 		});
 	}

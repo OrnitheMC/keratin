@@ -26,7 +26,7 @@ public abstract class MapSparrowTask extends MappingTask {
 		int clientBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
 		int serverBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
 
-		if ("official".equals(srcNs) ? details.sharedMappings() : (details.client() && details.server())) {
+		if ((details.client() && details.server()) && (!fromOfficial || details.sharedMappings())) {
 			if (details.sharedMappings() ? (mergedBuild > 0) : (clientBuild > 0 || serverBuild > 0)) {
 				workQueue.submit(MapSparrow.class, parameters -> {
 					parameters.getInput().set(fromOfficial ? files.getMergedSparrowFile(minecraftVersion) : files.getIntermediaryMergedSparrowFile(minecraftVersion));
@@ -35,14 +35,14 @@ public abstract class MapSparrowTask extends MappingTask {
 				});
 			}
 		} else {
-			if (details.client() && clientBuild > 0) {
+			if (details.client() && (details.sharedMappings() ? (mergedBuild > 0) : (clientBuild > 0))) {
 				workQueue.submit(MapSparrow.class, parameters -> {
 					parameters.getInput().set(fromOfficial ? files.getClientSparrowFile(minecraftVersion) : files.getIntermediaryClientSparrowFile(minecraftVersion));
 					parameters.getOutput().set(fromOfficial ? files.getIntermediaryClientSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion));
 					parameters.getMappings().set(fromOfficial ? files.getProcessedClientIntermediaryMappings(minecraftVersion) : files.getProcessedNamedMappings(minecraftVersion));
 				});
 			}
-			if (details.server() && serverBuild > 0) {
+			if (details.server() && (details.sharedMappings() ? (mergedBuild > 0) : (serverBuild > 0))) {
 				workQueue.submit(MapSparrow.class, parameters -> {
 					parameters.getInput().set(fromOfficial ? files.getServerSparrowFile(minecraftVersion) : files.getIntermediaryServerSparrowFile(minecraftVersion));
 					parameters.getOutput().set(fromOfficial ? files.getIntermediaryServerSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion));

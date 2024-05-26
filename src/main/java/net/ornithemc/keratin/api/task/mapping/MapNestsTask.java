@@ -22,11 +22,11 @@ public abstract class MapNestsTask extends MappingTask {
 
 		boolean fromOfficial = "official".equals(srcNs);
 
-		int mergedBuild = keratin.getNestsBuild(minecraftVersion, GameSide.MERGED);
 		int clientBuild = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
 		int serverBuild = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
+		int mergedBuild = keratin.getNestsBuild(minecraftVersion, GameSide.MERGED);
 
-		if ("official".equals(srcNs) ? details.sharedMappings() : (details.client() && details.server())) {
+		if ((details.client() && details.server()) && (!fromOfficial || details.sharedMappings())) {
 			if (details.sharedMappings() ? (mergedBuild > 0) : (clientBuild > 0 || serverBuild > 0)) {
 				workQueue.submit(MapNests.class, parameters -> {
 					parameters.getInput().set(fromOfficial ? files.getMergedNests(minecraftVersion) : files.getIntermediaryMergedNests(minecraftVersion));
@@ -35,14 +35,14 @@ public abstract class MapNestsTask extends MappingTask {
 				});
 			}
 		} else {
-			if (details.client() && clientBuild > 0) {
+			if (details.client() && (details.sharedMappings() ? (mergedBuild > 0) : (clientBuild > 0))) {
 				workQueue.submit(MapNests.class, parameters -> {
 					parameters.getInput().set(fromOfficial ? files.getClientNests(minecraftVersion) : files.getIntermediaryClientNests(minecraftVersion));
 					parameters.getOutput().set(fromOfficial ? files.getIntermediaryClientNests(minecraftVersion) : files.getNamedNests(minecraftVersion));
 					parameters.getMappings().set(fromOfficial ? files.getClientIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
 				});
 			}
-			if (details.server() && serverBuild > 0) {
+			if (details.server() && (details.sharedMappings() ? (mergedBuild > 0) : (serverBuild > 0))) {
 				workQueue.submit(MapNests.class, parameters -> {
 					parameters.getInput().set(fromOfficial ? files.getServerNests(minecraftVersion) : files.getIntermediaryServerNests(minecraftVersion));
 					parameters.getOutput().set(fromOfficial ? files.getIntermediaryServerNests(minecraftVersion) : files.getNamedNests(minecraftVersion));

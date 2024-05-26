@@ -57,8 +57,6 @@ public interface OrnitheFilesAPI {
 
 	File getMergedJar(String minecraftVersion);
 
-	File getMainJar(String minecraftVersion);
-
 	File getIntermediaryClientJar(String minecraftVersion);
 
 	File getIntermediaryServerJar(String minecraftVersion);
@@ -101,8 +99,6 @@ public interface OrnitheFilesAPI {
 
 	File getMergedIntermediaryMappings(String minecraftVersion);
 
-	File getMainIntermediaryMappings(String minecraftVersion);
-
 	File getNestedClientIntermediaryMappings(String minecraftVersion);
 
 	File getNestedServerIntermediaryMappings(String minecraftVersion);
@@ -139,8 +135,6 @@ public interface OrnitheFilesAPI {
 
 	File getMergedNests(String minecraftVersion);
 
-	File getMainNests(String minecraftVersion);
-
 	File getIntermediaryClientNests(String minecraftVersion);
 
 	File getIntermediaryServerNests(String minecraftVersion);
@@ -156,8 +150,6 @@ public interface OrnitheFilesAPI {
 	File getServerSparrowFile(String minecraftVersion);
 
 	File getMergedSparrowFile(String minecraftVersion);
-
-	File getMainSparrowFile(String minecraftVersion);
 
 	File getIntermediaryClientSparrowFile(String minecraftVersion);
 

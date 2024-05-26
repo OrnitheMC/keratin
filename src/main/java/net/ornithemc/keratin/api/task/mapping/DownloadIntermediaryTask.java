@@ -26,23 +26,23 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 			throw new IllegalStateException("gen1 intermediary is not supported at this time");
 		}
 
-		Runnable after = null;
-
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (!details.sharedMappings()) {
-			File merged = keratin.getFiles().getMergedIntermediaryMappings(minecraftVersion);
-			File client = keratin.getFiles().getClientIntermediaryMappings(minecraftVersion);
-			File server = keratin.getFiles().getServerIntermediaryMappings(minecraftVersion);
+		File output = files.getMergedIntermediaryMappings(minecraftVersion);
+		Runnable after = null;
 
-			boolean genClient = (details.client() && (!client.exists() || isRefreshDependencies()));
-			boolean genServer = (details.server() && (!server.exists() || isRefreshDependencies()));
+		if (!details.sharedMappings()) {
+			File client = details.client() ? files.getClientIntermediaryMappings(minecraftVersion) : null;
+			File server = details.server() ? files.getServerIntermediaryMappings(minecraftVersion) : null;
+
+			boolean genClient = (client != null && (!client.exists() || isRefreshDependencies()));
+			boolean genServer = (server != null && (!server.exists() || isRefreshDependencies()));
 
 			if (genClient || genServer) {
 				after = () -> {
 					try {
 						new CommandSplitTinyV2().run(new String[] {
-							merged.getAbsolutePath(),
+							output.getAbsolutePath(),
 							details.client() ? client.getAbsolutePath() : "-",
 							details.server() ? server.getAbsolutePath() : "-"
 						});
@@ -56,7 +56,7 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 		downloadAndExtract(
 			Constants.calamusGen2Url(minecraftVersion, intermediaryGen),
 			"mappings/mappings.tiny",
-			files.getMergedIntermediaryMappings(minecraftVersion),
+			output,
 			after
 		);
 	}
