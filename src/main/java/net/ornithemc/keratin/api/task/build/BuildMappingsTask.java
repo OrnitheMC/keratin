@@ -3,6 +3,7 @@ package net.ornithemc.keratin.api.task.build;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Map;
 
 import org.gradle.api.provider.Property;
 import org.gradle.workers.WorkAction;
@@ -10,9 +11,9 @@ import org.gradle.workers.WorkParameters;
 import org.gradle.workers.WorkQueue;
 
 import net.fabricmc.mappingio.MappingReader;
-import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.MappingWriter;
 import net.fabricmc.mappingio.adapter.MappingDstNsReorder;
+import net.fabricmc.mappingio.adapter.MappingNsCompleter;
 import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;
 import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
@@ -86,20 +87,19 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 					MappingReader.read(intermediaryFile.toPath(), mappings);
 
 					try (MappingWriter writer = MappingWriter.create(mergedNamedV1File.toPath(), MappingFormat.TINY_FILE)) {
-						mappings.accept(new MappingDstNsReorder(writer, "clientOfficial", "serverOfficial", "named"));
+						mappings.accept(new MappingDstNsReorder(new MappingNsCompleter(writer, Map.of("named", "intermediary")), "clientOfficial", "serverOfficial", "named"));
 					}
 					try (MappingWriter writer = MappingWriter.create(mergedNamedV2File.toPath(), MappingFormat.TINY_2_FILE)) {
-						mappings.accept(new MappingDstNsReorder(writer, "clientOfficial", "serverOfficial", "named"));
+						mappings.accept(new MappingDstNsReorder(new MappingNsCompleter(writer, Map.of("named", "intermediary")), "clientOfficial", "serverOfficial", "named"));
 					}
 				} else {
-					MappingVisitor visitor = new MappingSourceNsSwitch(mappings, "intermediary");
-					MappingReader.read(intermediaryFile.toPath(), visitor);
+					MappingReader.read(intermediaryFile.toPath(), new MappingSourceNsSwitch(mappings, "intermediary"));
 
 					try (MappingWriter writer = MappingWriter.create(mergedNamedV1File.toPath(), MappingFormat.TINY_FILE)) {
-						mappings.accept(new MappingSourceNsSwitch(new MappingDstNsReorder(writer, "intermediary", "named"), "official"));
+						mappings.accept(new MappingSourceNsSwitch(new MappingDstNsReorder(new MappingNsCompleter(writer, Map.of("named", "intermediary")), "intermediary", "named"), "official"));
 					}
 					try (MappingWriter writer = MappingWriter.create(mergedNamedV2File.toPath(), MappingFormat.TINY_2_FILE)) {
-						mappings.accept(new MappingSourceNsSwitch(new MappingDstNsReorder(writer, "intermediary", "named"), "official"));
+						mappings.accept(new MappingSourceNsSwitch(new MappingDstNsReorder(new MappingNsCompleter(writer, Map.of("named", "intermediary")), "intermediary", "named"), "official"));
 					}
 				}
 			} catch (IOException e) {
