@@ -21,6 +21,15 @@ public abstract class GenerateIntermediaryTask extends MinecraftTask {
 	@Internal
 	public abstract Property<Integer> getNameLength();
 
+	@Override
+	public void run() throws Exception {
+		if (getMinecraftVersions().get().size() > 1) {
+			throw new RuntimeException("intermediary generation tasks can only be run for single versions at a time!");
+		}
+
+		super.run();
+	}
+
 	protected OptionsBuilder getOptions(VersionDetails details) {
 		OptionsBuilder options = new OptionsBuilder();
 

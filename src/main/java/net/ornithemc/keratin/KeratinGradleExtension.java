@@ -424,10 +424,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				});
 			};
 
-			if (minecraftVersions.size() == 1) {
-				TaskProvider<?> generateIntermediary = tasks.register("generateIntermediary", GenerateNewIntermediaryTask.class, configureIntermediaryTask);
-				TaskProvider<?> updateIntermediary = tasks.register("updateIntermediary", UpdateIntermediaryTask.class, configureIntermediaryTask);
-			}
+			TaskProvider<?> generateIntermediary = tasks.register("generateIntermediary", GenerateNewIntermediaryTask.class, configureIntermediaryTask);
+			TaskProvider<?> updateIntermediary = tasks.register("updateIntermediary", UpdateIntermediaryTask.class, configureIntermediaryTask);
 
 			File mappingsDir = files.getMappingsDirectory();
 			File buildDir = project.getLayout().getBuildDirectory().dir("mappings").get().getAsFile();
