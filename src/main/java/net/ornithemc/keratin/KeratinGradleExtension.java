@@ -428,11 +428,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			TaskProvider<?> updateIntermediary = tasks.register("updateIntermediary", UpdateIntermediaryTask.class, configureIntermediaryTask);
 
 			File mappingsDir = files.getMappingsDirectory();
-			File buildDir = project.getLayout().getBuildDirectory().dir("mappings").get().getAsFile();
+			File buildDir = files.getLocalBuildCache();
 
 			for (String minecraftVersion : minecraftVersions) {
-				File tinyV1File = new File(mappingsDir, "$s.tiny".formatted(minecraftVersion));
-				File tinyV2File = new File(buildDir, "$s.tiny".formatted(minecraftVersion));
+				File tinyV1File = new File(mappingsDir, "%s.tiny".formatted(minecraftVersion));
+				File tinyV2File = new File(buildDir, "%s.tiny".formatted(minecraftVersion));
 
 				TaskProvider<?> convertMappings = tasks.register("%s_convertMappingsFromTinyV1ToTinyV2".formatted(minecraftVersion), ConvertMappingsFromTinyV1ToTinyV2Task.class, task -> {
 					task.getInput().set(tinyV1File);
