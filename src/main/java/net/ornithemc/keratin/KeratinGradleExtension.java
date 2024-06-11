@@ -272,7 +272,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private Set<String> configure(TaskSelection selection) throws Exception {
 		Set<String> minecraftVersions = new LinkedHashSet<>();
 
-		if (this.minecraftVersions.isPresent()) {
+		if (!this.minecraftVersions.get().isEmpty()) {
 			minecraftVersions.addAll(this.minecraftVersions.get());
 		} else {
 			findMinecraftVersions(selection, minecraftVersions::add);
