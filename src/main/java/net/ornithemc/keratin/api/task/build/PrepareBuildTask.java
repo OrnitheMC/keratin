@@ -15,6 +15,7 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.graph.MappingsGraph;
+import net.ornithemc.keratin.api.task.mapping.graph.Validators;
 import net.ornithemc.mappingutils.MappingUtils;
 import net.ornithemc.mappingutils.io.Format;
 
@@ -66,7 +67,7 @@ public abstract class PrepareBuildTask extends MinecraftTask implements Mappings
 			File output = getParameters().getOutput().get();
 
 			try {
-				loadMappings(minecraftVersion, graphDir, processedOutput, Format.TINY_V2);
+				loadMappings(minecraftVersion, graphDir, processedOutput, Format.TINY_V2, Validators.REMOVE_DUMMY_MAPPINGS);
 
 				if (nests == null) {
 					Files.copy(processedOutput, output);

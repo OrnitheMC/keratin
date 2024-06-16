@@ -129,7 +129,7 @@ public interface MappingsGraph {
 		Mappings mappings = MappingUtils.separateMappings(graph, minecraftVersion);
 
 		if (validator != null) {
-			mappings.setValidator(Validators.REMOVE_DUMMY_MAPPINGS);
+			mappings.setValidator(validator);
 		}
 
 		outputFormat.writeMappings(output.toPath(), mappings);
@@ -149,7 +149,10 @@ public interface MappingsGraph {
 		workingMappings.setDstNamespace(separatedMappings.getDstNamespace());
 
 		MappingsDiff changes = MappingUtils.diffMappings(separatedMappings, workingMappings);
-		changes.setValidator(Validators.INSERT_DUMMY_MAPPINGS);
+
+		if (validator != null) {
+			changes.setValidator(validator);
+		}
 
 		PropagationOptions options = new PropagationOptions.Builder().setPropagationDirection(propagationDir).lenient().build();
 		MappingUtils.insertMappings(options, graph, changes, minecraftVersion);
