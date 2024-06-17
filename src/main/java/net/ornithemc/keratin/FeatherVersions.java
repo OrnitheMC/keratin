@@ -19,12 +19,12 @@ public class FeatherVersions {
 		this.keratin = keratin;
 	}
 
-	public String get(String minecraftVersion) {
+	public String getNext(String minecraftVersion) {
 		if (builds == null) {
 			findBuilds();
 		}
 
-		return "%s+build.%d".formatted(minecraftVersion, builds.getOrDefault(minecraftVersion, 1));
+		return "%s+build.%d".formatted(minecraftVersion, builds.getOrDefault(minecraftVersion, 0) + 1);
 	}
 
 	private void findBuilds() {

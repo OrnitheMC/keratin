@@ -618,7 +618,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
 					publication.setGroupId("net.ornithemc");
 					publication.setArtifactId("feather-gen%d".formatted(intermediaryGen.get()));
-					publication.setVersion(featherVersions.get(minecraftVersion));
+					publication.setVersion(featherVersions.getNext(minecraftVersion));
 
 					publication.artifact(mergedTinyV1Jar);
 					publication.artifact(tinyV2Jar, config -> {
