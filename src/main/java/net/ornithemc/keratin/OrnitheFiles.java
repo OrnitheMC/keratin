@@ -14,6 +14,7 @@ import org.gradle.api.provider.Property;
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
+import net.ornithemc.keratin.api.task.enigma.EnigmaSession;
 import net.ornithemc.keratin.util.Versioned;
 
 public class OrnitheFiles implements OrnitheFilesAPI {
@@ -38,9 +39,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 
 	private final Property<File> nestsBuildsCache;
 	private final Property<File> sparrowBuildsCache;
+	private final Property<File> enigmaProfile;
 	private final Property<File> mappingsDir;
 	private final Property<File> matchesDir;
 	private final Versioned<File> runDir;
+	private final Versioned<File> enigmaSessionLock;
 	private final Versioned<File> decompiledSrcDir;
 	private final Versioned<File> fakeSrcDir;
 	private final Versioned<File> javadocDir;
@@ -125,9 +128,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 
 		this.nestsBuildsCache = fileProperty(() -> this.project.file("nests-builds.json"));
 		this.sparrowBuildsCache = fileProperty(() -> this.project.file("sparrow-builds.json"));
+		this.enigmaProfile = fileProperty(() -> this.project.file("enigma_profile.json"));
 		this.mappingsDir = fileProperty(() -> this.project.file("mappings"));
 		this.matchesDir = fileProperty(() -> this.project.file("matches/matches"));
 		this.runDir = new Versioned<>(minecraftVersion -> this.project.file("run/%s".formatted(minecraftVersion)));
+		this.enigmaSessionLock = new Versioned<>(minecraftVersion -> new File(getRunDirectory(minecraftVersion), EnigmaSession.LOCK_FILE));
 		this.decompiledSrcDir = new Versioned<>(minecraftVersion -> this.project.file("%s-decompiledSrc".formatted(minecraftVersion)));
 		this.fakeSrcDir = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-fakeSrc".formatted(minecraftVersion)));
 		this.javadocDir = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-javadoc".formatted(minecraftVersion)));
@@ -758,6 +763,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
+	public File getEnigmaProfile() {
+		return enigmaProfile.get();
+	}
+
+	@Override
 	public File getMappingsDirectory() {
 		return mappingsDir.get();
 	}
@@ -770,6 +780,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	@Override
 	public File getRunDirectory(String minecraftVersion) {
 		return runDir.get(minecraftVersion);
+	}
+
+	@Override
+	public File getEnigmaSessionLock(String minecraftVersion) {
+		return enigmaSessionLock.get(minecraftVersion);
 	}
 
 	@Override

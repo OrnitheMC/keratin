@@ -11,7 +11,19 @@ import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.JavaExecution;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
-public abstract class LaunchEnigmaTask extends MinecraftTask implements JavaExecution {
+public abstract class LaunchEnigmaTask extends MinecraftTask implements JavaExecution, EnigmaSession {
+
+	@Override
+	public void run() throws Exception {
+		KeratinGradleExtension keratin = getExtension();
+		OrnitheFilesAPI files = keratin.getFiles();
+
+		for (String minecraftVersion : getMinecraftVersions().get()) {
+			checkSessionLock(minecraftVersion, files.getEnigmaSessionLock(minecraftVersion));
+		}
+
+		super.run();
+	}
 
 	@Override
 	public void run(WorkQueue workQueue, String minecraftVersion) {
@@ -19,13 +31,15 @@ public abstract class LaunchEnigmaTask extends MinecraftTask implements JavaExec
 		Project project = keratin.getProject();
 		OrnitheFilesAPI files = keratin.getFiles();
 
-		workQueue.submit(JavaExecutionAction.class, parameters -> {
+		workQueue.submit(EnigmaSessionAction.class, parameters -> {
+			parameters.getMinecraftVersion().set(minecraftVersion);
+			parameters.getSessionLock().set(files.getEnigmaSessionLock(minecraftVersion));
 			parameters.getMainClass().set("cuchaz.enigma.gui.Main");
 			parameters.getClasspath().set(project.getConfigurations().getByName(Configurations.ENIGMA_RUNTIME).getFiles());
 			parameters.getArgs().set(Arrays.asList(
-					"-jar"     , files.getMainProcessedIntermediaryJar(minecraftVersion).getAbsolutePath(),
-					"-mappings", files.getRunDirectory(minecraftVersion).getAbsolutePath(),
-					"-profile" , "enigma_profile.json"
+				"-jar"     , files.getMainProcessedIntermediaryJar(minecraftVersion).getAbsolutePath(),
+				"-mappings", files.getRunDirectory(minecraftVersion).getAbsolutePath(),
+				"-profile" , files.getEnigmaProfile().getAbsolutePath()
 			));
 		});
 	}

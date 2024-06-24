@@ -31,11 +31,15 @@ public interface OrnitheFilesAPI {
 
 	File getSparrowBuildsCache();
 
+	File getEnigmaProfile();
+
 	File getMappingsDirectory();
 
 	File getMatchesDirectory();
 
 	File getRunDirectory(String minecraftVersion);
+
+	File getEnigmaSessionLock(String minecraftVersion);
 
 	File getDecompiledSourceDirectory(String minecraftVersion);
 
