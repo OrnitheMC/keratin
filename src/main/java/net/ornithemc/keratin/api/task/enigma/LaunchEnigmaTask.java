@@ -38,7 +38,7 @@ public abstract class LaunchEnigmaTask extends MinecraftTask implements JavaExec
 			parameters.getClasspath().set(project.getConfigurations().getByName(Configurations.ENIGMA_RUNTIME).getFiles());
 			parameters.getArgs().set(Arrays.asList(
 				"-jar"     , files.getMainProcessedIntermediaryJar(minecraftVersion).getAbsolutePath(),
-				"-mappings", files.getRunDirectory(minecraftVersion).getAbsolutePath(),
+				"-mappings", files.getWorkingDirectory(minecraftVersion).getAbsolutePath(),
 				"-profile" , files.getEnigmaProfile().getAbsolutePath()
 			));
 		});

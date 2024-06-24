@@ -42,7 +42,8 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Property<File> enigmaProfile;
 	private final Property<File> mappingsDir;
 	private final Property<File> matchesDir;
-	private final Versioned<File> runDir;
+	private final Property<File> runDir;
+	private final Versioned<File> workingDir;
 	private final Versioned<File> enigmaSessionLock;
 	private final Versioned<File> decompiledSrcDir;
 	private final Versioned<File> fakeSrcDir;
@@ -131,8 +132,9 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.enigmaProfile = fileProperty(() -> this.project.file("enigma_profile.json"));
 		this.mappingsDir = fileProperty(() -> this.project.file("mappings"));
 		this.matchesDir = fileProperty(() -> this.project.file("matches/matches"));
-		this.runDir = new Versioned<>(minecraftVersion -> this.project.file("run/%s".formatted(minecraftVersion)));
-		this.enigmaSessionLock = new Versioned<>(minecraftVersion -> new File(getRunDirectory(minecraftVersion), EnigmaSession.LOCK_FILE));
+		this.runDir = fileProperty(() -> this.project.file("run"));
+		this.workingDir = new Versioned<>(minecraftVersion -> new File(getRunDirectory(), minecraftVersion));
+		this.enigmaSessionLock = new Versioned<>(minecraftVersion -> new File(getWorkingDirectory(minecraftVersion), EnigmaSession.LOCK_FILE));
 		this.decompiledSrcDir = new Versioned<>(minecraftVersion -> this.project.file("%s-decompiledSrc".formatted(minecraftVersion)));
 		this.fakeSrcDir = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-fakeSrc".formatted(minecraftVersion)));
 		this.javadocDir = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-javadoc".formatted(minecraftVersion)));
@@ -778,8 +780,13 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
-	public File getRunDirectory(String minecraftVersion) {
-		return runDir.get(minecraftVersion);
+	public File getRunDirectory() {
+		return runDir.get();
+	}
+
+	@Override
+	public File getWorkingDirectory(String minecraftVersion) {
+		return workingDir.get(minecraftVersion);
 	}
 
 	@Override

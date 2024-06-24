@@ -37,7 +37,9 @@ public interface OrnitheFilesAPI {
 
 	File getMatchesDirectory();
 
-	File getRunDirectory(String minecraftVersion);
+	File getRunDirectory();
+
+	File getWorkingDirectory(String minecraftVersion);
 
 	File getEnigmaSessionLock(String minecraftVersion);
 
