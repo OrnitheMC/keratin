@@ -559,6 +559,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			});
 			TaskProvider<?> buildMappings = tasks.register("buildMappings", BuildMappingsTask.class, task -> {
 				task.dependsOn(completeMappings);
+				task.getClassNamePattern().set("^(net/minecraft/|com/mojang/).*$");
 			});
 
 			TaskProvider<?> mapMinecraftToNamed = tasks.register("mapMinecraftToNamed", MapMinecraftTask.class, task -> {

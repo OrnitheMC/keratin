@@ -6,6 +6,7 @@ import java.io.UncheckedIOException;
 import java.util.Map;
 
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Internal;
 import org.gradle.workers.WorkAction;
 import org.gradle.workers.WorkParameters;
 import org.gradle.workers.WorkQueue;
@@ -25,14 +26,20 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class BuildMappingsTask extends MinecraftTask {
 
+	@Internal
+	public abstract Property<String> getClassNamePattern();
+
 	@Override
 	public void run(WorkQueue workQueue, String minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
+		String classNamePattern = getClassNamePattern().getOrElse("*");
+
 		workQueue.submit(BuildMappings.class, parameters -> {
 			parameters.getLegacyMerged().set(!details.sharedMappings());
+			parameters.getClassNamePattern().set(classNamePattern);
 			parameters.getIntermediaryMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
 			parameters.getCompletedMappings().set(files.getCompletedNamedMappings(minecraftVersion));
 			parameters.getNamedV1Mappings().set(files.getTinyV1NamedMappings(minecraftVersion));
@@ -45,6 +52,8 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 	public interface BuildParameters extends WorkParameters {
 
 		Property<Boolean> getLegacyMerged();
+
+		Property<String> getClassNamePattern();
 
 		Property<File> getIntermediaryMappings();
 
@@ -65,6 +74,7 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 		@Override
 		public void execute() {
 			boolean legacyMerged = getParameters().getLegacyMerged().get();
+			String classNamePattern = getParameters().getClassNamePattern().get();
 			File intermediaryFile = getParameters().getIntermediaryMappings().get();
 			File completedMappings = getParameters().getCompletedMappings().get();
 			File namedV1File = getParameters().getNamedV1Mappings().get();
@@ -74,7 +84,7 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 
 			try {
 				MemoryMappingTree mappings = new MemoryMappingTree();
-				MappingReader.read(completedMappings.toPath(), mappings);
+				MappingReader.read(completedMappings.toPath(), new MappingClassNameFilter(mappings, classNamePattern));
 
 				try (MappingWriter writer = MappingWriter.create(namedV1File.toPath(), MappingFormat.TINY_FILE)) {
 					mappings.accept(writer);
