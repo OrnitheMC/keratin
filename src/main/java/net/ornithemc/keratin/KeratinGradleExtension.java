@@ -63,6 +63,7 @@ import net.ornithemc.keratin.api.task.mapping.MapMinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.MapNestsTask;
 import net.ornithemc.keratin.api.task.mapping.MapProcessedMinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.MapSparrowTask;
+import net.ornithemc.keratin.api.task.mapping.SplitIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.UpdateIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.graph.ExtendGraphTask;
 import net.ornithemc.keratin.api.task.mapping.graph.LoadMappingsFromGraphTask;
@@ -465,8 +466,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			TaskProvider<?> downloadIntermediary = tasks.register("downloadIntermediary", DownloadIntermediaryTask.class, task -> {
 				task.dependsOn(mergeJars);
 			});
+			TaskProvider<?> splitIntermediary = tasks.register("splitIntermediary", SplitIntermediaryTask.class, task -> {
+				task.dependsOn(downloadIntermediary);
+			});
 			TaskProvider<?> mapMinecraftToIntermediary = tasks.register("mapMinecraftToIntermediary", MapMinecraftTask.class, task -> {
-				task.dependsOn(syncLibraries, downloadIntermediary);
+				task.dependsOn(syncLibraries, splitIntermediary);
 				task.getSourceNamespace().set("official");
 				task.getTargetNamespace().set("intermediary");
 			});
@@ -476,7 +480,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			});
 
 			TaskProvider<?> mapNestsToIntermediary = tasks.register("mapNestsToIntermediary", MapNestsTask.class, task -> {
-				task.dependsOn(downloadNests, downloadIntermediary);
+				task.dependsOn(downloadNests, splitIntermediary);
 				task.getSourceNamespace().set("official");
 				task.getTargetNamespace().set("intermediary");
 				
@@ -487,7 +491,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			});
 
 			TaskProvider<?> processMappings = tasks.register("processMappings", ProcessMappingsTask.class, task -> {
-				task.dependsOn(downloadIntermediary, mergeIntermediaryNests);
+				task.dependsOn(splitIntermediary, mergeIntermediaryNests);
 			});
 
 			TaskProvider<?> mapSparrowToIntermediary = tasks.register("mapSparrowToIntermediary", MapSparrowTask.class, task -> {

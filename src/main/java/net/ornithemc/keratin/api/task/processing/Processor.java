@@ -1,6 +1,7 @@
 package net.ornithemc.keratin.api.task.processing;
 
 import java.io.File;
+import java.util.Map;
 
 import org.gradle.api.provider.Property;
 import org.gradle.workers.WorkAction;
@@ -8,7 +9,13 @@ import org.gradle.workers.WorkParameters;
 
 import com.google.common.io.Files;
 
-import net.fabricmc.stitch.commands.tinyv2.CommandCombineTinyV2;
+import net.fabricmc.mappingio.MappingReader;
+import net.fabricmc.mappingio.MappingVisitor;
+import net.fabricmc.mappingio.MappingWriter;
+import net.fabricmc.mappingio.adapter.MappingNsRenamer;
+import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;
+import net.fabricmc.mappingio.format.MappingFormat;
+import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 public interface Processor {
 
@@ -149,11 +156,25 @@ public interface Processor {
 				}
 
 				if (clientMappingsOut != null && serverMappingsOut != null && mergedMappingsOut != null) {
-					new CommandCombineTinyV2().run(new String[] {
-						clientMappingsOut.getAbsolutePath(),
-						serverMappingsOut.getAbsolutePath(),
-						mergedMappingsOut.getAbsolutePath()
-					});
+					MemoryMappingTree client = new MemoryMappingTree();
+					MemoryMappingTree server = new MemoryMappingTree();
+
+					MappingReader.read(clientMappingsOut.toPath(), client);
+					MappingReader.read(serverMappingsOut.toPath(), server);
+
+					MemoryMappingTree merged = new MemoryMappingTree();
+
+					MappingVisitor clientVisitor = new MappingNsRenamer(merged, Map.of("official", "clientOfficial"));
+					clientVisitor = new MappingSourceNsSwitch(clientVisitor, "intermediary");
+					MappingVisitor serverVisitor = new MappingNsRenamer(merged, Map.of("official", "serverOfficial"));
+					serverVisitor = new MappingSourceNsSwitch(serverVisitor, "intermediary");
+
+					client.accept(clientVisitor);
+					server.accept(serverVisitor);
+
+					try (MappingWriter writer = MappingWriter.create(mergedMappingsOut.toPath(), MappingFormat.TINY_2_FILE)) {
+						merged.accept(writer);
+					}
 				}
 			} catch (Exception e) {
 				throw new RuntimeException("error while processing mappings", e);
