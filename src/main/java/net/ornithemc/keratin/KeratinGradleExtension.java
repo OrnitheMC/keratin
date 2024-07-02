@@ -462,7 +462,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				});
 			}
 		}
-		if (selection == TaskSelection.FEATHER) {
+		if (selection == TaskSelection.FEATHER || selection == TaskSelection.FEATHER_SETUP) {
 			TaskProvider<?> downloadIntermediary = tasks.register("downloadIntermediary", DownloadIntermediaryTask.class, task -> {
 				task.dependsOn(mergeJars);
 			});
@@ -509,133 +509,135 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				task.dependsOn(mergeIntermediaryJars, mergeIntermediaryNests, mergeIntermediarySparrow);
 			});
 
-			TaskProvider<?> loadMappings = tasks.register("loadMappings", LoadMappingsFromGraphTask.class, task -> {
-				task.dependsOn(processMinecraft);
-			});
-			TaskProvider<?> saveMappings = tasks.register("saveMappings", SaveMappingsIntoGraphTask.class, task -> {
-				task.dependsOn(processMinecraft);
-				task.getPropagationDirection().set(PropagationDirection.BOTH);
-			});
-			TaskProvider<?> saveMappingsUp = tasks.register("saveMappingsUp", SaveMappingsIntoGraphTask.class, task -> {
-				task.dependsOn(processMinecraft);
-				task.getPropagationDirection().set(PropagationDirection.UP);
-			});
-			TaskProvider<?> saveMappingsDown = tasks.register("saveMappingsDown", SaveMappingsIntoGraphTask.class, task -> {
-				task.dependsOn(processMinecraft);
-				task.getPropagationDirection().set(PropagationDirection.DOWN);
-			});
-			TaskProvider<?> insertMappings = tasks.register("insertMappings", SaveMappingsIntoGraphTask.class, task -> {
-				task.dependsOn(processMinecraft);
-				task.getPropagationDirection().set(PropagationDirection.NONE);
-			});
-
-			TaskProvider<?> launchEnigma = tasks.register("enigma", LaunchEnigmaTask.class, task -> {
-				task.dependsOn(loadMappings);
-			});
-
-			if (minecraftVersions.size() == 1) {
-				String classNamePattern = "^(net/minecraft/|com/mojang/).*$";
-
-				TaskProvider<?> resetGraph = tasks.register("resetGraph", ResetGraphTask.class, task -> {
+			if (selection == TaskSelection.FEATHER) {
+				TaskProvider<?> loadMappings = tasks.register("loadMappings", LoadMappingsFromGraphTask.class, task -> {
 					task.dependsOn(processMinecraft);
-					task.getClassNamePattern().convention(classNamePattern);
-					task.getClassNamePattern().finalizeValueOnRead();
 				});
-				TaskProvider<?> extendGraph = tasks.register("extendGraph", ExtendGraphTask.class, task -> {
+				TaskProvider<?> saveMappings = tasks.register("saveMappings", SaveMappingsIntoGraphTask.class, task -> {
 					task.dependsOn(processMinecraft);
-					task.getClassNamePattern().convention(classNamePattern);
-					task.getClassNamePattern().finalizeValueOnRead();
+					task.getPropagationDirection().set(PropagationDirection.BOTH);
 				});
-			}
-
-			TaskProvider<?> prepareBuild = tasks.register("prepareBuild", PrepareBuildTask.class, task -> {
-				task.dependsOn(mergeIntermediaryNests);
-			});
-			TaskProvider<?> checkMappings = tasks.register("checkMappings", CheckMappingsTask.class, task -> {
-				task.dependsOn(mergeIntermediaryJars, prepareBuild);
-			});
-			TaskProvider<?> completeMappings = tasks.register("completeMappings", CompleteMappingsTask.class, task -> {
-				task.dependsOn(mergeIntermediaryJars, prepareBuild);
-			});
-			TaskProvider<?> buildMappings = tasks.register("buildMappings", BuildMappingsTask.class, task -> {
-				task.dependsOn(completeMappings);
-				task.getClassNamePattern().set("^(net/minecraft/|com/mojang/).*$");
-			});
-
-			TaskProvider<?> mapMinecraftToNamed = tasks.register("mapMinecraftToNamed", MapMinecraftTask.class, task -> {
-				task.dependsOn(mergeIntermediaryJars, buildMappings);
-				task.getSourceNamespace().set("intermediary");
-				task.getTargetNamespace().set("named");
-			});
-
-			TaskProvider<?> buildProcessedMappings = tasks.register("buildProcessedMappings", BuildProcessedMappingsTask.class, task -> {
-				task.dependsOn(processMinecraft);
-			});
-
-			TaskProvider<?> mapProcessedMinecraftToNamed = tasks.register("mapProcessedMinecraftToNamed", MapProcessedMinecraftTask.class, task -> {
-				task.dependsOn(buildProcessedMappings);
-				task.getSourceNamespace().set("intermediary");
-				task.getTargetNamespace().set("named");
-			});
-
-			TaskProvider<?> decompileWithCfr = tasks.register("decompileWithCfr", DecompileMinecraftWithCfrTask.class, task -> {
-				task.dependsOn(mapProcessedMinecraftToNamed);
-			});
-			TaskProvider<?> decompileWithVineflower = tasks.register("decompileWithVineflower", DecompileMinecraftWithVineflowerTask.class, task -> {
-				task.dependsOn(mapProcessedMinecraftToNamed);
-			});
-
-			TaskProvider<?> genFakeSource = tasks.register("generakeFakeSource", GenerateFakeSourceTask.class, task -> {
-				task.dependsOn(buildMappings, mapMinecraftToNamed);
-			});
-
-			for (String minecraftVersion : minecraftVersions) {
-				TaskProvider<Javadoc> javadoc = tasks.register("%s_javadoc".formatted(minecraftVersion), Javadoc.class, task -> {
-					task.dependsOn(genFakeSource);
-					task.setFailOnError(false);
-					task.setMaxMemory("2G");
-					task.source(files.getFakeSourceDirectory(minecraftVersion));
-					task.setClasspath(configurations.getByName(Configurations.javadocClasspath(minecraftVersion)).plus(configurations.getByName(Configurations.minecraftLibraries(minecraftVersion))));
-					task.setDestinationDir(files.getJavadocDirectory(minecraftVersion));
+				TaskProvider<?> saveMappingsUp = tasks.register("saveMappingsUp", SaveMappingsIntoGraphTask.class, task -> {
+					task.dependsOn(processMinecraft);
+					task.getPropagationDirection().set(PropagationDirection.UP);
+				});
+				TaskProvider<?> saveMappingsDown = tasks.register("saveMappingsDown", SaveMappingsIntoGraphTask.class, task -> {
+					task.dependsOn(processMinecraft);
+					task.getPropagationDirection().set(PropagationDirection.DOWN);
+				});
+				TaskProvider<?> insertMappings = tasks.register("insertMappings", SaveMappingsIntoGraphTask.class, task -> {
+					task.dependsOn(processMinecraft);
+					task.getPropagationDirection().set(PropagationDirection.NONE);
 				});
 
-				TaskProvider<?> mergedTinyV1Jar = tasks.register("%s_mergedTinyV1Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
-					task.dependsOn(buildMappings);
-					task.configure(minecraftVersion, files.getMergedTinyV1NamedMappings(minecraftVersion), "%s-merged-tiny-v1.jar");
-				});
-				TaskProvider<?> tinyV2Jar = tasks.register("%s_tinyV2Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
-					task.dependsOn(buildMappings);
-					task.configure(minecraftVersion, files.getTinyV2NamedMappings(minecraftVersion), "%s-tiny-v2.jar");
-				});
-				TaskProvider<?> mergedTinyV2Jar = tasks.register("%s_mergedTinyV2Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
-					task.dependsOn(buildMappings);
-					task.configure(minecraftVersion, files.getMergedTinyV2NamedMappings(minecraftVersion), "%s-merged-tiny-v2.jar");
-				});
-				TaskProvider<?> javadocJar = tasks.register("%s_javadocJar".formatted(minecraftVersion), Jar.class, task -> {
-					task.dependsOn(javadoc);
-					task.from(javadoc.get().getDestinationDir());
-					task.getArchiveFileName().set("%s-javadoc.jar".formatted(minecraftVersion));
-					task.getDestinationDirectory().set(project.file("build/libs"));
+				TaskProvider<?> launchEnigma = tasks.register("enigma", LaunchEnigmaTask.class, task -> {
+					task.dependsOn(loadMappings);
 				});
 
-				tasks.getByName("build").dependsOn(mergedTinyV1Jar, tinyV2Jar, mergedTinyV2Jar, javadocJar);
+				if (minecraftVersions.size() == 1) {
+					String classNamePattern = "^(net/minecraft/|com/mojang/).*$";
 
-				MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
-					publication.setGroupId("net.ornithemc");
-					publication.setArtifactId("feather-gen%d".formatted(intermediaryGen.get()));
-					publication.setVersion("%s+build.%d".formatted(minecraftVersion, getNextFeatherBuild(minecraftVersion)));
-
-					publication.artifact(mergedTinyV1Jar);
-					publication.artifact(tinyV2Jar, config -> {
-						config.setClassifier("v2");
+					TaskProvider<?> resetGraph = tasks.register("resetGraph", ResetGraphTask.class, task -> {
+						task.dependsOn(processMinecraft);
+						task.getClassNamePattern().convention(classNamePattern);
+						task.getClassNamePattern().finalizeValueOnRead();
 					});
-					publication.artifact(mergedTinyV2Jar, config -> {
-						config.setClassifier("mergedv2");
+					TaskProvider<?> extendGraph = tasks.register("extendGraph", ExtendGraphTask.class, task -> {
+						task.dependsOn(processMinecraft);
+						task.getClassNamePattern().convention(classNamePattern);
+						task.getClassNamePattern().finalizeValueOnRead();
 					});
-					publication.artifact(javadocJar, config -> {
-						config.setClassifier("javadoc");
-					});
+				}
+
+				TaskProvider<?> prepareBuild = tasks.register("prepareBuild", PrepareBuildTask.class, task -> {
+					task.dependsOn(mergeIntermediaryNests);
 				});
+				TaskProvider<?> checkMappings = tasks.register("checkMappings", CheckMappingsTask.class, task -> {
+					task.dependsOn(mergeIntermediaryJars, prepareBuild);
+				});
+				TaskProvider<?> completeMappings = tasks.register("completeMappings", CompleteMappingsTask.class, task -> {
+					task.dependsOn(mergeIntermediaryJars, prepareBuild);
+				});
+				TaskProvider<?> buildMappings = tasks.register("buildMappings", BuildMappingsTask.class, task -> {
+					task.dependsOn(completeMappings);
+					task.getClassNamePattern().set("^(net/minecraft/|com/mojang/).*$");
+				});
+
+				TaskProvider<?> mapMinecraftToNamed = tasks.register("mapMinecraftToNamed", MapMinecraftTask.class, task -> {
+					task.dependsOn(mergeIntermediaryJars, buildMappings);
+					task.getSourceNamespace().set("intermediary");
+					task.getTargetNamespace().set("named");
+				});
+
+				TaskProvider<?> buildProcessedMappings = tasks.register("buildProcessedMappings", BuildProcessedMappingsTask.class, task -> {
+					task.dependsOn(processMinecraft);
+				});
+
+				TaskProvider<?> mapProcessedMinecraftToNamed = tasks.register("mapProcessedMinecraftToNamed", MapProcessedMinecraftTask.class, task -> {
+					task.dependsOn(buildProcessedMappings);
+					task.getSourceNamespace().set("intermediary");
+					task.getTargetNamespace().set("named");
+				});
+
+				TaskProvider<?> decompileWithCfr = tasks.register("decompileWithCfr", DecompileMinecraftWithCfrTask.class, task -> {
+					task.dependsOn(mapProcessedMinecraftToNamed);
+				});
+				TaskProvider<?> decompileWithVineflower = tasks.register("decompileWithVineflower", DecompileMinecraftWithVineflowerTask.class, task -> {
+					task.dependsOn(mapProcessedMinecraftToNamed);
+				});
+
+				TaskProvider<?> genFakeSource = tasks.register("generakeFakeSource", GenerateFakeSourceTask.class, task -> {
+					task.dependsOn(buildMappings, mapMinecraftToNamed);
+				});
+
+				for (String minecraftVersion : minecraftVersions) {
+					TaskProvider<Javadoc> javadoc = tasks.register("%s_javadoc".formatted(minecraftVersion), Javadoc.class, task -> {
+						task.dependsOn(genFakeSource);
+						task.setFailOnError(false);
+						task.setMaxMemory("2G");
+						task.source(files.getFakeSourceDirectory(minecraftVersion));
+						task.setClasspath(configurations.getByName(Configurations.javadocClasspath(minecraftVersion)).plus(configurations.getByName(Configurations.minecraftLibraries(minecraftVersion))));
+						task.setDestinationDir(files.getJavadocDirectory(minecraftVersion));
+					});
+
+					TaskProvider<?> mergedTinyV1Jar = tasks.register("%s_mergedTinyV1Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
+						task.dependsOn(buildMappings);
+						task.configure(minecraftVersion, files.getMergedTinyV1NamedMappings(minecraftVersion), "%s-merged-tiny-v1.jar");
+					});
+					TaskProvider<?> tinyV2Jar = tasks.register("%s_tinyV2Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
+						task.dependsOn(buildMappings);
+						task.configure(minecraftVersion, files.getTinyV2NamedMappings(minecraftVersion), "%s-tiny-v2.jar");
+					});
+					TaskProvider<?> mergedTinyV2Jar = tasks.register("%s_mergedTinyV2Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
+						task.dependsOn(buildMappings);
+						task.configure(minecraftVersion, files.getMergedTinyV2NamedMappings(minecraftVersion), "%s-merged-tiny-v2.jar");
+					});
+					TaskProvider<?> javadocJar = tasks.register("%s_javadocJar".formatted(minecraftVersion), Jar.class, task -> {
+						task.dependsOn(javadoc);
+						task.from(javadoc.get().getDestinationDir());
+						task.getArchiveFileName().set("%s-javadoc.jar".formatted(minecraftVersion));
+						task.getDestinationDirectory().set(project.file("build/libs"));
+					});
+
+					tasks.getByName("build").dependsOn(mergedTinyV1Jar, tinyV2Jar, mergedTinyV2Jar, javadocJar);
+
+					MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
+						publication.setGroupId("net.ornithemc");
+						publication.setArtifactId("feather-gen%d".formatted(intermediaryGen.get()));
+						publication.setVersion("%s+build.%d".formatted(minecraftVersion, getNextFeatherBuild(minecraftVersion)));
+
+						publication.artifact(mergedTinyV1Jar);
+						publication.artifact(tinyV2Jar, config -> {
+							config.setClassifier("v2");
+						});
+						publication.artifact(mergedTinyV2Jar, config -> {
+							config.setClassifier("mergedv2");
+						});
+						publication.artifact(javadocJar, config -> {
+							config.setClassifier("javadoc");
+						});
+					});
+				}
 			}
 		}
 
