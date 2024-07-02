@@ -10,6 +10,10 @@ import net.ornithemc.nester.NesterException;
 public interface Nester {
 
 	default void nestJar(File input, File output, File nests) throws IOException {
+		_nestJar(input, output, nests);
+	}
+
+	static void _nestJar(File input, File output, File nests) throws IOException {
 		try {
 			net.ornithemc.nester.Nester.nestJar(
 				new net.ornithemc.nester.Nester.Options().silent(true),
@@ -23,6 +27,10 @@ public interface Nester {
 	}
 
 	default void nestMappings(File input, File output, File nests) throws IOException {
+		_nestMappings(input, output, nests);
+	}
+
+	static void _nestMappings(File input, File output, File nests) throws IOException {
 		MappingUtils.applyNests(Format.TINY_V2, input.toPath(), output.toPath(), nests.toPath());
 	}
 }

@@ -10,8 +10,14 @@ import io.github.gaming32.signaturechanger.cli.ApplyAction;
 
 public interface SignaturePatcher {
 
-	default void signaturePatchJar(File jarIn, File jarOut, File sigs) throws IOException {
-		Files.copy(jarIn, jarOut);
-		ApplyAction.run(sigs.toPath(), List.of(jarOut.toPath()));
+	default void signaturePatchJar(File input, File output, File sigs) throws IOException {
+		_signaturePatchJar(input, output, sigs);
+	}
+
+	static void _signaturePatchJar(File input, File output, File sigs) throws IOException {
+		if (!input.equals(output)) {
+			Files.copy(input, output);
+		}
+		ApplyAction.run(sigs.toPath(), List.of(output.toPath()));
 	}
 }

@@ -3,6 +3,7 @@ package net.ornithemc.keratin.api.task.mapping;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Collection;
 import java.util.List;
 
 import org.gradle.api.provider.ListProperty;
@@ -63,31 +64,7 @@ public interface Mapper extends TaskAware {
 			String srcNs = getParameters().getSourceNamespace().get();
 			String dstNs = getParameters().getTargetNamespace().get();
 
-			if (output.exists()) {
-				output.delete();
-			}
-
-			TinyRemapper.Builder remapperBuilder = TinyRemapper.newRemapper()
-				.withMappings(TinyUtils.createTinyMappingProvider(mappings.toPath(), srcNs, dstNs))
-				.renameInvalidLocals(true)
-				.rebuildSourceFilenames(true);
-			TinyRemapper remapper = remapperBuilder.build();
-
-			try {
-				OutputConsumerPath.Builder outputConsumerBuilder = new OutputConsumerPath.Builder(output.toPath());
-				OutputConsumerPath outputConsumer = outputConsumerBuilder.build();
-				outputConsumer.addNonClassFiles(input.toPath());
-				remapper.readInputs(input.toPath());
-				for (File library : libraries) {
-					remapper.readClassPath(library.toPath());
-				}
-				remapper.apply(outputConsumer);
-				outputConsumer.close();
-				remapper.finish();
-			} catch (Exception e) {
-				remapper.finish();
-				throw new RuntimeException("Failed to remap jar", e);
-			}
+			Mapper._mapJar(input, output, mappings, libraries, srcNs, dstNs);
 		}
 	}
 
@@ -95,7 +72,7 @@ public interface Mapper extends TaskAware {
 
 		@Override
 		void map(File input, File output, File mappings) throws IOException {
-			MappingUtils.mapNests(input.toPath(), output.toPath(), Format.TINY_V2, mappings.toPath());
+			Mapper._mapNests(input, output, mappings);
 		}
 	}
 
@@ -103,7 +80,55 @@ public interface Mapper extends TaskAware {
 
 		@Override
 		void map(File input, File output, File mappings) throws IOException {
-			MappingUtils.mapSignatures(input.toPath(), output.toPath(), Format.TINY_V2, mappings.toPath());
+			Mapper._mapSparrow(input, output, mappings);
 		}
+	}
+
+	default void mapJar(File input, File output, File mappings, Collection<File> libraries, String srcNs, String dstNs) throws IOException {
+		Mapper._mapJar(input, output, mappings, libraries, srcNs, dstNs);
+	}
+
+	static void _mapJar(File input, File output, File mappings, Collection<File> libraries, String srcNs, String dstNs) throws IOException {
+		if (output.exists()) {
+			output.delete();
+		}
+
+		TinyRemapper.Builder remapperBuilder = TinyRemapper.newRemapper()
+			.withMappings(TinyUtils.createTinyMappingProvider(mappings.toPath(), srcNs, dstNs))
+			.renameInvalidLocals(true)
+			.rebuildSourceFilenames(true);
+		TinyRemapper remapper = remapperBuilder.build();
+
+		try {
+			OutputConsumerPath.Builder outputConsumerBuilder = new OutputConsumerPath.Builder(output.toPath());
+			OutputConsumerPath outputConsumer = outputConsumerBuilder.build();
+			outputConsumer.addNonClassFiles(input.toPath());
+			remapper.readInputs(input.toPath());
+			for (File library : libraries) {
+				remapper.readClassPath(library.toPath());
+			}
+			remapper.apply(outputConsumer);
+			outputConsumer.close();
+			remapper.finish();
+		} catch (Exception e) {
+			remapper.finish();
+			throw new IOException("Failed to remap jar", e);
+		}
+	}
+
+	default void mapNests(File input, File output, File mappings) throws IOException {
+		Mapper._mapNests(input, output, mappings);
+	}
+
+	static void _mapNests(File input, File output, File mappings) throws IOException {
+		MappingUtils.mapNests(input.toPath(), output.toPath(), Format.TINY_V2, mappings.toPath());
+	}
+
+	default void mapSparrow(File input, File output, File mappings) throws IOException {
+		Mapper._mapSparrow(input, output, mappings);
+	}
+
+	static void _mapSparrow(File input, File output, File mappings) throws IOException {
+		MappingUtils.mapSignatures(input.toPath(), output.toPath(), Format.TINY_V2, mappings.toPath());
 	}
 }

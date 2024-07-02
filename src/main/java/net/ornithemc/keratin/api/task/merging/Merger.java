@@ -33,8 +33,8 @@ public interface Merger extends TaskAware {
 			File server = getParameters().getServer().get();
 			File merged = getParameters().getMerged().get();
 
-			try (JarMerger merger = new JarMerger(client, server, merged)) {
-				merger.merge();
+			try {
+				Merger._mergeJars(client, server, merged);
 			} catch (IOException e) {
 				throw new UncheckedIOException("error while running merger", e);
 			}
@@ -60,7 +60,7 @@ public interface Merger extends TaskAware {
 			File merged = getParameters().getMerged().get();
 
 			try {
-				MappingUtils.mergeNests(client.toPath(), server.toPath(), merged.toPath());
+				Merger._mergeNests(client, server, merged);
 			} catch (IOException e) {
 				throw new UncheckedIOException("error while running merger", e);
 			}
@@ -76,10 +76,36 @@ public interface Merger extends TaskAware {
 			File merged = getParameters().getMerged().get();
 
 			try {
-				MappingUtils.mergeSignatures(client.toPath(), server.toPath(), merged.toPath());
+				Merger._mergeSparrow(client, server, merged);
 			} catch (IOException e) {
 				throw new UncheckedIOException("error while running merger", e);
 			}
 		}
+	}
+
+	default void mergeJars(File client, File server, File merged) throws IOException {
+		_mergeJars(client, server, merged);
+	}
+
+	static void _mergeJars(File client, File server, File merged) throws IOException {
+		try (JarMerger merger = new JarMerger(client, server, merged)) {
+			merger.merge();
+		}
+	}
+
+	default void mergeNests(File client, File server, File merged) throws IOException {
+		_mergeNests(client, server, merged);
+	}
+
+	static void _mergeNests(File client, File server, File merged) throws IOException {
+		MappingUtils.mergeNests(client.toPath(), server.toPath(), merged.toPath());
+	}
+
+	default void mergeSparrow(File client, File server, File merged) throws IOException {
+		_mergeSparrow(client, server, merged);
+	}
+
+	static void _mergeSparrow(File client, File server, File merged) throws IOException {
+		MappingUtils.mergeSignatures(client.toPath(), server.toPath(), merged.toPath());
 	}
 }
