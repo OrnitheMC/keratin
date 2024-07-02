@@ -623,7 +623,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
 					publication.setGroupId("net.ornithemc");
 					publication.setArtifactId("feather-gen%d".formatted(intermediaryGen.get()));
-					publication.setVersion(featherVersions.getNext(minecraftVersion));
+					publication.setVersion("%s+build.%d".formatted(minecraftVersion, getNextFeatherBuild(minecraftVersion)));
 
 					publication.artifact(mergedTinyV1Jar);
 					publication.artifact(tinyV2Jar, config -> {
@@ -677,6 +677,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	@Override
 	public int getSparrowBuild(String minecraftVersion, GameSide side) {
 		return sparrowBuilds.get(minecraftVersion).getOrDefault(side, -1);
+	}
+
+	@Override
+	public int getNextFeatherBuild(String minecraftVersion) {
+		return featherVersions.getNext(minecraftVersion);
 	}
 
 	public Matches findMatches(String sideA, String versionA, String sideB, String versionB) {

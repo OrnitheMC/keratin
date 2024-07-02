@@ -33,4 +33,6 @@ public interface KeratinGradleExtensionAPI {
 
 	int getSparrowBuild(String minecraftVersion, GameSide side);
 
+	int getNextFeatherBuild(String minecraftVersion);
+
 }
