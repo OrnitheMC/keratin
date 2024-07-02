@@ -96,7 +96,8 @@ public interface Mapper extends TaskAware {
 		TinyRemapper.Builder remapperBuilder = TinyRemapper.newRemapper()
 			.withMappings(TinyUtils.createTinyMappingProvider(mappings.toPath(), srcNs, dstNs))
 			.renameInvalidLocals(true)
-			.rebuildSourceFilenames(true);
+			.rebuildSourceFilenames(true)
+			.fixPackageAccess("named".equals(dstNs));
 		TinyRemapper remapper = remapperBuilder.build();
 
 		try {
