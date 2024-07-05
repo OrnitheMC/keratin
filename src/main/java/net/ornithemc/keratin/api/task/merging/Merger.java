@@ -15,7 +15,7 @@ import net.ornithemc.mappingutils.MappingUtils;
 
 public interface Merger extends TaskAware {
 
-	interface JarMergerParameters extends WorkParameters {
+	interface MergerParameters extends WorkParameters {
 
 		Property<File> getClient();
 
@@ -25,7 +25,7 @@ public interface Merger extends TaskAware {
 
 	}
 
-	abstract class MergeJars implements WorkAction<JarMergerParameters> {
+	abstract class MergeAction implements WorkAction<MergerParameters> {
 
 		@Override
 		public void execute() {
@@ -39,47 +39,40 @@ public interface Merger extends TaskAware {
 				throw new UncheckedIOException("error while running merger", e);
 			}
 		}
-	}
 
-	interface NestsAndSparrowMergerParameters extends WorkParameters {
-
-		Property<File> getClient();
-
-		Property<File> getServer();
-
-		Property<File> getMerged();
+		protected abstract void run(File client, File server, File merged) throws IOException;
 
 	}
 
-	abstract class MergeNests implements WorkAction<NestsAndSparrowMergerParameters> {
+	abstract class MergeJars extends MergeAction {
 
 		@Override
-		public void execute() {
-			File client = getParameters().getClient().get();
-			File server = getParameters().getServer().get();
-			File merged = getParameters().getMerged().get();
-
-			try {
-				Merger._mergeNests(client, server, merged);
-			} catch (IOException e) {
-				throw new UncheckedIOException("error while running merger", e);
-			}
+		protected void run(File client, File server, File merged) throws IOException {
+			Merger._mergeJars(client, server, merged);
 		}
 	}
 
-	abstract class MergeSparrow implements WorkAction<NestsAndSparrowMergerParameters> {
+	abstract class MergeRaven extends MergeAction {
 
 		@Override
-		public void execute() {
-			File client = getParameters().getClient().get();
-			File server = getParameters().getServer().get();
-			File merged = getParameters().getMerged().get();
+		protected void run(File client, File server, File merged) throws IOException {
+			Merger._mergeRaven(client, server, merged);
+		}
+	}
 
-			try {
-				Merger._mergeSparrow(client, server, merged);
-			} catch (IOException e) {
-				throw new UncheckedIOException("error while running merger", e);
-			}
+	abstract class MergeSparrow extends MergeAction {
+
+		@Override
+		protected void run(File client, File server, File merged) throws IOException {
+			Merger._mergeSparrow(client, server, merged);
+		}
+	}
+
+	abstract class MergeNests extends MergeAction {
+
+		@Override
+		protected void run(File client, File server, File merged) throws IOException {
+			Merger._mergeNests(client, server, merged);
 		}
 	}
 
@@ -93,12 +86,12 @@ public interface Merger extends TaskAware {
 		}
 	}
 
-	default void mergeNests(File client, File server, File merged) throws IOException {
-		_mergeNests(client, server, merged);
+	default void mergeRaven(File client, File server, File merged) throws IOException {
+		_mergeRaven(client, server, merged);
 	}
 
-	static void _mergeNests(File client, File server, File merged) throws IOException {
-		MappingUtils.mergeNests(client.toPath(), server.toPath(), merged.toPath());
+	static void _mergeRaven(File client, File server, File merged) throws IOException {
+		MappingUtils.mergeExceptions(client.toPath(), server.toPath(), merged.toPath());
 	}
 
 	default void mergeSparrow(File client, File server, File merged) throws IOException {
@@ -107,5 +100,13 @@ public interface Merger extends TaskAware {
 
 	static void _mergeSparrow(File client, File server, File merged) throws IOException {
 		MappingUtils.mergeSignatures(client.toPath(), server.toPath(), merged.toPath());
+	}
+
+	default void mergeNests(File client, File server, File merged) throws IOException {
+		_mergeNests(client, server, merged);
+	}
+
+	static void _mergeNests(File client, File server, File merged) throws IOException {
+		MappingUtils.mergeNests(client.toPath(), server.toPath(), merged.toPath());
 	}
 }

@@ -7,7 +7,7 @@ import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 
-public abstract class MapSparrowTask extends MappingTask {
+public abstract class MapRavenTask extends MappingTask {
 
 	@Override
 	public void run(WorkQueue workQueue, String minecraftVersion) {
@@ -22,30 +22,30 @@ public abstract class MapSparrowTask extends MappingTask {
 
 		boolean fromOfficial = "official".equals(srcNs);
 
-		int clientBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
-		int serverBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
-		int mergedBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.MERGED);
+		int clientBuild = keratin.getRavenBuild(minecraftVersion, GameSide.CLIENT);
+		int serverBuild = keratin.getRavenBuild(minecraftVersion, GameSide.SERVER);
+		int mergedBuild = keratin.getRavenBuild(minecraftVersion, GameSide.MERGED);
 
 		if ((details.client() && details.server()) && (!fromOfficial || details.sharedMappings())) {
 			if (details.sharedMappings() ? (mergedBuild > 0) : (clientBuild > 0 || serverBuild > 0)) {
-				workQueue.submit(MapSparrow.class, parameters -> {
-					parameters.getInput().set(fromOfficial ? files.getMergedSparrowFile(minecraftVersion) : files.getIntermediaryMergedSparrowFile(minecraftVersion));
-					parameters.getOutput().set(fromOfficial ? files.getIntermediaryMergedSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion));
+				workQueue.submit(MapRaven.class, parameters -> {
+					parameters.getInput().set(fromOfficial ? files.getMergedRavenFile(minecraftVersion) : files.getIntermediaryMergedRavenFile(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? files.getIntermediaryMergedRavenFile(minecraftVersion) : files.getNamedRavenFile(minecraftVersion));
 					parameters.getMappings().set(fromOfficial ? files.getMergedIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
 				});
 			}
 		} else {
 			if (details.client() && (details.sharedMappings() ? (mergedBuild > 0) : (clientBuild > 0))) {
-				workQueue.submit(MapSparrow.class, parameters -> {
-					parameters.getInput().set(fromOfficial ? files.getClientSparrowFile(minecraftVersion) : files.getIntermediaryClientSparrowFile(minecraftVersion));
-					parameters.getOutput().set(fromOfficial ? files.getIntermediaryClientSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion));
+				workQueue.submit(MapRaven.class, parameters -> {
+					parameters.getInput().set(fromOfficial ? files.getClientRavenFile(minecraftVersion) : files.getIntermediaryClientRavenFile(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? files.getIntermediaryClientRavenFile(minecraftVersion) : files.getNamedRavenFile(minecraftVersion));
 					parameters.getMappings().set(fromOfficial ? files.getClientIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
 				});
 			}
 			if (details.server() && (details.sharedMappings() ? (mergedBuild > 0) : (serverBuild > 0))) {
-				workQueue.submit(MapSparrow.class, parameters -> {
-					parameters.getInput().set(fromOfficial ? files.getServerSparrowFile(minecraftVersion) : files.getIntermediaryServerSparrowFile(minecraftVersion));
-					parameters.getOutput().set(fromOfficial ? files.getIntermediaryServerSparrowFile(minecraftVersion) : files.getNamedSparrowFile(minecraftVersion));
+				workQueue.submit(MapRaven.class, parameters -> {
+					parameters.getInput().set(fromOfficial ? files.getServerRavenFile(minecraftVersion) : files.getIntermediaryServerRavenFile(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? files.getIntermediaryServerRavenFile(minecraftVersion) : files.getNamedRavenFile(minecraftVersion));
 					parameters.getMappings().set(fromOfficial ? files.getServerIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
 				});
 			}
@@ -59,7 +59,7 @@ public abstract class MapSparrowTask extends MappingTask {
 			default -> false;
 		};
 		if (!valid) {
-			throw new IllegalStateException("cannot map Sparrow from " + srcNs + " to " + dstNs);
+			throw new IllegalStateException("cannot map Raven from " + srcNs + " to " + dstNs);
 		}
 	}
 }

@@ -23,19 +23,23 @@ public interface Processor {
 
 		Property<File> getInputJar();
 
-		Property<File> getNestsFile();
+		Property<File> getRavenFile();
 
-		Property<File> getNestedJar();
+		Property<File> getExceptionsPatchedJar();
 
 		Property<File> getSparrowFile();
 
 		Property<File> getSignaturePatchedJar();
 
+		Property<File> getNestsFile();
+
+		Property<File> getNestedJar();
+
 		Property<File> getOutputJar();
 
 	}
 
-	abstract class ProcessMinecraft implements WorkAction<MinecraftProcessorParameters>, Nester, SignaturePatcher {
+	abstract class ProcessMinecraft implements WorkAction<MinecraftProcessorParameters>, Exceptor, SignaturePatcher, Nester {
 
 		@Override
 		public void execute() {
@@ -44,13 +48,13 @@ public interface Processor {
 				File jarIn;
 				File jarOut = getParameters().getInputJar().get();
 
-				data = getParameters().getNestsFile().getOrNull();
+				data = getParameters().getRavenFile().getOrNull();
 
 				if (data != null) {
 					jarIn = jarOut;
-					jarOut = getParameters().getNestedJar().get();
+					jarOut = getParameters().getExceptionsPatchedJar().get();
 
-					nestJar(jarIn, jarOut, data);
+					exceptionsPatchJar(jarIn, jarOut, data);
 				}
 
 				data = getParameters().getSparrowFile().getOrNull();
@@ -60,6 +64,15 @@ public interface Processor {
 					jarOut = getParameters().getSignaturePatchedJar().get();
 
 					signaturePatchJar(jarIn, jarOut, data);
+				}
+
+				data = getParameters().getNestsFile().getOrNull();
+
+				if (data != null) {
+					jarIn = jarOut;
+					jarOut = getParameters().getNestedJar().get();
+
+					nestJar(jarIn, jarOut, data);
 				}
 
 				jarIn = jarOut;

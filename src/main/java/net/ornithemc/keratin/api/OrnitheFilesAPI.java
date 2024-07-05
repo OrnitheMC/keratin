@@ -23,13 +23,17 @@ public interface OrnitheFilesAPI {
 
 	File getProcessedMappingsCache();
 
-	File getNestsCache();
+	File getRavenCache();
 
 	File getSparrowCache();
 
-	File getNestsBuildsCache();
+	File getNestsCache();
+
+	File getRavenBuildsCache();
 
 	File getSparrowBuildsCache();
+
+	File getNestsBuildsCache();
 
 	File getEnigmaProfile();
 
@@ -71,13 +75,13 @@ public interface OrnitheFilesAPI {
 
 	File getMainIntermediaryJar(String minecraftVersion);
 
-	File getNestedIntermediaryClientJar(String minecraftVersion);
+	File getExceptionsPatchedIntermediaryClientJar(String minecraftVersion);
 
-	File getNestedIntermediaryServerJar(String minecraftVersion);
+	File getExceptionsPatchedIntermediaryServerJar(String minecraftVersion);
 
-	File getNestedIntermediaryMergedJar(String minecraftVersion);
+	File getExceptionsPatchedIntermediaryMergedJar(String minecraftVersion);
 
-	File getMainNestedIntermediaryJar(String minecraftVersion);
+	File getMainExceptionsPatchedIntermediaryJar(String minecraftVersion);
 
 	File getSignaturePatchedIntermediaryClientJar(String minecraftVersion);
 
@@ -86,6 +90,14 @@ public interface OrnitheFilesAPI {
 	File getSignaturePatchedIntermediaryMergedJar(String minecraftVersion);
 
 	File getMainSignaturePatchedIntermediaryJar(String minecraftVersion);
+
+	File getNestedIntermediaryClientJar(String minecraftVersion);
+
+	File getNestedIntermediaryServerJar(String minecraftVersion);
+
+	File getNestedIntermediaryMergedJar(String minecraftVersion);
+
+	File getMainNestedIntermediaryJar(String minecraftVersion);
 
 	File getProcessedIntermediaryClientJar(String minecraftVersion);
 
@@ -135,21 +147,21 @@ public interface OrnitheFilesAPI {
 
 	File getMergedTinyV2NamedMappings(String minecraftVersion);
 
-	File getClientNests(String minecraftVersion);
+	File getClientRavenFile(String minecraftVersion);
 
-	File getServerNests(String minecraftVersion);
+	File getServerRavenFile(String minecraftVersion);
 
-	File getMergedNests(String minecraftVersion);
+	File getMergedRavenFile(String minecraftVersion);
 
-	File getIntermediaryClientNests(String minecraftVersion);
+	File getIntermediaryClientRavenFile(String minecraftVersion);
 
-	File getIntermediaryServerNests(String minecraftVersion);
+	File getIntermediaryServerRavenFile(String minecraftVersion);
 
-	File getIntermediaryMergedNests(String minecraftVersion);
+	File getIntermediaryMergedRavenFile(String minecraftVersion);
 
-	File getMainIntermediaryNests(String minecraftVersion);
+	File getMainIntermediaryRavenFile(String minecraftVersion);
 
-	File getNamedNests(String minecraftVersion);
+	File getNamedRavenFile(String minecraftVersion);
 
 	File getClientSparrowFile(String minecraftVersion);
 
@@ -166,5 +178,21 @@ public interface OrnitheFilesAPI {
 	File getMainIntermediarySparrowFile(String minecraftVersion);
 
 	File getNamedSparrowFile(String minecraftVersion);
+
+	File getClientNests(String minecraftVersion);
+
+	File getServerNests(String minecraftVersion);
+
+	File getMergedNests(String minecraftVersion);
+
+	File getIntermediaryClientNests(String minecraftVersion);
+
+	File getIntermediaryServerNests(String minecraftVersion);
+
+	File getIntermediaryMergedNests(String minecraftVersion);
+
+	File getMainIntermediaryNests(String minecraftVersion);
+
+	File getNamedNests(String minecraftVersion);
 
 }

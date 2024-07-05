@@ -35,14 +35,19 @@ public class Constants {
 		return MAVEN_URL + "/net/ornithemc/calamus-intermediary-gen" + generation + "/" + mc + "/calamus-intermediary-gen" + generation + "-" + mc + "-v2.jar";
 	}
 
-	public static String nestsUrl(String mc, GameSide side, int build) {
-		return MAVEN_URL + "/net/ornithemc/nests/" + mc + side.suffix() + "+build." + build + "/nests-" + mc + side.suffix() + "+build." + build + ".jar";
+	public static String ravenUrl(String mc, GameSide side, int build) {
+		return MAVEN_URL + "/net/ornithemc/raven/" + mc + side.suffix() + "+build." + build + "/raven-" + mc + side.suffix() + "+build." + build + ".jar";
 	}
 
 	public static String sparrowUrl(String mc, GameSide side, int build) {
 		return MAVEN_URL + "/net/ornithemc/sparrow/" + mc + side.suffix() + "+build." + build + "/sparrow-" + mc + side.suffix() + "+build." + build + ".jar";
 	}
 
-	public static final String NESTS_ENDPOINT = "/v3/versions/nests";
+	public static String nestsUrl(String mc, GameSide side, int build) {
+		return MAVEN_URL + "/net/ornithemc/nests/" + mc + side.suffix() + "+build." + build + "/nests-" + mc + side.suffix() + "+build." + build + ".jar";
+	}
+
+	public static final String RAVEN_ENDPOINT = "/v3/versions/raven";
 	public static final String SPARROW_ENDPOINT = "/v3/versions/sparrow";
+	public static final String NESTS_ENDPOINT = "/v3/versions/nests";
 }

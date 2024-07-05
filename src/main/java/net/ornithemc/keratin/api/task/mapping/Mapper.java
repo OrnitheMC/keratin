@@ -42,7 +42,7 @@ public interface Mapper extends TaskAware {
 		@Override
 		public void execute() {
 			try {
-				map(
+				run(
 					getParameters().getInput().get(),
 					getParameters().getOutput().get(),
 					getParameters().getMappings().get()
@@ -52,14 +52,14 @@ public interface Mapper extends TaskAware {
 			}
 		}
 
-		abstract void map(File input, File output, File mappings) throws IOException;
+		abstract void run(File input, File output, File mappings) throws IOException;
 
 	}
 
 	abstract class MapJar extends MapperAction {
 
 		@Override
-		void map(File input, File output, File mappings) throws IOException {
+		void run(File input, File output, File mappings) throws IOException {
 			List<File> libraries = getParameters().getLibraries().get();
 			String srcNs = getParameters().getSourceNamespace().get();
 			String dstNs = getParameters().getTargetNamespace().get();
@@ -68,19 +68,27 @@ public interface Mapper extends TaskAware {
 		}
 	}
 
-	abstract class MapNests extends MapperAction {
+	abstract class MapRaven extends MapperAction {
 
 		@Override
-		void map(File input, File output, File mappings) throws IOException {
-			Mapper._mapNests(input, output, mappings);
+		void run(File input, File output, File mappings) throws IOException {
+			Mapper._mapRaven(input, output, mappings);
 		}
 	}
 
 	abstract class MapSparrow extends MapperAction {
 
 		@Override
-		void map(File input, File output, File mappings) throws IOException {
+		void run(File input, File output, File mappings) throws IOException {
 			Mapper._mapSparrow(input, output, mappings);
+		}
+	}
+
+	abstract class MapNests extends MapperAction {
+
+		@Override
+		void run(File input, File output, File mappings) throws IOException {
+			Mapper._mapNests(input, output, mappings);
 		}
 	}
 
@@ -117,12 +125,12 @@ public interface Mapper extends TaskAware {
 		}
 	}
 
-	default void mapNests(File input, File output, File mappings) throws IOException {
-		Mapper._mapNests(input, output, mappings);
+	default void mapRaven(File input, File output, File mappings) throws IOException {
+		Mapper._mapRaven(input, output, mappings);
 	}
 
-	static void _mapNests(File input, File output, File mappings) throws IOException {
-		MappingUtils.mapNests(input.toPath(), output.toPath(), Format.TINY_V2, mappings.toPath());
+	static void _mapRaven(File input, File output, File mappings) throws IOException {
+		MappingUtils.mapExceptions(input.toPath(), output.toPath(), Format.TINY_V2, mappings.toPath());
 	}
 
 	default void mapSparrow(File input, File output, File mappings) throws IOException {
@@ -131,5 +139,13 @@ public interface Mapper extends TaskAware {
 
 	static void _mapSparrow(File input, File output, File mappings) throws IOException {
 		MappingUtils.mapSignatures(input.toPath(), output.toPath(), Format.TINY_V2, mappings.toPath());
+	}
+
+	default void mapNests(File input, File output, File mappings) throws IOException {
+		Mapper._mapNests(input, output, mappings);
+	}
+
+	static void _mapNests(File input, File output, File mappings) throws IOException {
+		MappingUtils.mapNests(input.toPath(), output.toPath(), Format.TINY_V2, mappings.toPath());
 	}
 }

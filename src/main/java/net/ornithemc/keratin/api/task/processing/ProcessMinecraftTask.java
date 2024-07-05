@@ -15,10 +15,12 @@ public abstract class ProcessMinecraftTask extends MinecraftTask implements Proc
 
 		workQueue.submit(ProcessMinecraft.class, parameters -> {
 			parameters.getInputJar().set(files.getMainIntermediaryJar(minecraftVersion));
-			parameters.getNestsFile().set(files.getMainIntermediaryNests(minecraftVersion));
-			parameters.getNestedJar().set(files.getMainNestedIntermediaryJar(minecraftVersion));
+			parameters.getRavenFile().set(files.getMainIntermediaryRavenFile(minecraftVersion));
+			parameters.getExceptionsPatchedJar().set(files.getMainExceptionsPatchedIntermediaryJar(minecraftVersion));
 			parameters.getSparrowFile().set(files.getMainIntermediarySparrowFile(minecraftVersion));
 			parameters.getSignaturePatchedJar().set(files.getMainSignaturePatchedIntermediaryJar(minecraftVersion));
+			parameters.getNestsFile().set(files.getMainIntermediaryNests(minecraftVersion));
+			parameters.getNestedJar().set(files.getMainNestedIntermediaryJar(minecraftVersion));
 			parameters.getOutputJar().set(files.getMainProcessedIntermediaryJar(minecraftVersion));
 		});
 	}

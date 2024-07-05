@@ -59,6 +59,7 @@ import net.ornithemc.keratin.api.task.mapping.ConvertMappingsFromTinyV1ToTinyV2T
 import net.ornithemc.keratin.api.task.mapping.DownloadIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.GenerateIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.GenerateNewIntermediaryTask;
+import net.ornithemc.keratin.api.task.mapping.MapRavenTask;
 import net.ornithemc.keratin.api.task.mapping.MapMinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.MapNestsTask;
 import net.ornithemc.keratin.api.task.mapping.MapProcessedMinecraftTask;
@@ -69,10 +70,12 @@ import net.ornithemc.keratin.api.task.mapping.graph.ExtendGraphTask;
 import net.ornithemc.keratin.api.task.mapping.graph.LoadMappingsFromGraphTask;
 import net.ornithemc.keratin.api.task.mapping.graph.ResetGraphTask;
 import net.ornithemc.keratin.api.task.mapping.graph.SaveMappingsIntoGraphTask;
+import net.ornithemc.keratin.api.task.merging.MergeRavenTask;
 import net.ornithemc.keratin.api.task.merging.MergeMinecraftJarsTask;
 import net.ornithemc.keratin.api.task.merging.MergeNestsTask;
 import net.ornithemc.keratin.api.task.merging.MergeSparrowTask;
 import net.ornithemc.keratin.api.task.minecraft.DownloadMinecraftJarsTask;
+import net.ornithemc.keratin.api.task.processing.DownloadRavenTask;
 import net.ornithemc.keratin.api.task.processing.DownloadNestsTask;
 import net.ornithemc.keratin.api.task.processing.DownloadSparrowTask;
 import net.ornithemc.keratin.api.task.processing.ProcessMappingsTask;
@@ -105,8 +108,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private final Property<VersionsManifest> versionsManifest;
 	private final Versioned<VersionInfo> versionInfos;
 	private final Versioned<VersionDetails> versionDetails;
-	private final Versioned<Map<GameSide, Integer>> nestsBuilds;
+	private final Versioned<Map<GameSide, Integer>> ravenBuilds;
 	private final Versioned<Map<GameSide, Integer>> sparrowBuilds;
+	private final Versioned<Map<GameSide, Integer>> nestsBuilds;
 
 	public KeratinGradleExtension(Project project) {
 		this.project = project;
@@ -168,50 +172,30 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 			return details;
 		});
-		this.nestsBuilds = new Versioned<>(minecraftVersion -> {
-			File file = this.files.getNestsBuildsCache();
+		this.ravenBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getRavenBuildsCache()));
+		this.sparrowBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getSparrowBuildsCache()));
+		this.nestsBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getNestsBuildsCache()));
+	}
 
-			if (!file.exists()) {
-				return Collections.emptyMap();
+	private static Map<GameSide, Integer> parseBuildsFromCache(String minecraftVersion, File cacheFile) throws IOException {
+		if (!cacheFile.exists()) {
+			return Collections.emptyMap();
+		}
+
+		Map<GameSide, Integer> builds = new EnumMap<>(GameSide.class);
+
+		String s = FileUtils.readFileToString(cacheFile, Charset.defaultCharset());			
+		JsonObject json = GSON.fromJson(s, JsonObject.class);
+
+		for (GameSide side : GameSide.values()) {
+			JsonElement buildJson = json.get(minecraftVersion + side.suffix());
+
+			if (buildJson != null && buildJson.isJsonPrimitive()) {
+				builds.put(side, buildJson.getAsInt());
 			}
+		}
 
-			Map<GameSide, Integer> builds = new EnumMap<>(GameSide.class);
-
-			String s = FileUtils.readFileToString(file, Charset.defaultCharset());			
-			JsonObject json = GSON.fromJson(s, JsonObject.class);
-
-			for (GameSide side : GameSide.values()) {
-				JsonElement buildJson = json.get(minecraftVersion + side.suffix());
-
-				if (buildJson != null && buildJson.isJsonPrimitive()) {
-					builds.put(side, buildJson.getAsInt());
-				}
-			}
-
-			return builds;
-		});
-		this.sparrowBuilds = new Versioned<>(minecraftVersion -> {
-			File file = this.files.getSparrowBuildsCache();
-
-			if (!file.exists()) {
-				return Collections.emptyMap();
-			}
-
-			Map<GameSide, Integer> builds = new EnumMap<>(GameSide.class);
-
-			String s = FileUtils.readFileToString(file, Charset.defaultCharset());			
-			JsonObject json = GSON.fromJson(s, JsonObject.class);
-
-			for (GameSide side : GameSide.values()) {
-				JsonElement buildJson = json.get(minecraftVersion + side.suffix());
-
-				if (buildJson != null && buildJson.isJsonPrimitive()) {
-					builds.put(side, buildJson.getAsInt());
-				}
-			}
-
-			return builds;
-		});
+		return builds;
 	}
 
 	public Project getProject() {
@@ -371,12 +355,12 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		PublishingExtension publishing = (PublishingExtension) project.getExtensions().getByName("publishing");
 		PublicationContainer publications = publishing.getPublications();
 
-		TaskProvider<?> updateNestsBuilds = tasks.register("updateNestsBuildsCache", UpdateBuildsCacheFromMetaTask.class, task -> {
+		TaskProvider<?> updateRavenBuilds = tasks.register("updateRavenBuildsCache", UpdateBuildsCacheFromMetaTask.class, task -> {
 			task.getMetaUrl().convention(Constants.META_URL);
 			task.getMetaUrl().finalizeValueOnRead();
-			task.getMetaEndpoint().convention(Constants.NESTS_ENDPOINT);
+			task.getMetaEndpoint().convention(Constants.RAVEN_ENDPOINT);
 			task.getMetaEndpoint().finalizeValueOnRead();
-			task.getCacheFile().convention(project.provider(() -> files.getNestsBuildsCache()));
+			task.getCacheFile().convention(project.provider(() -> files.getRavenBuildsCache()));
 			task.getCacheFile().finalizeValueOnRead();
 		});
 		TaskProvider<?> updateSparrowBuilds = tasks.register("updateSparrowBuildsCache", UpdateBuildsCacheFromMetaTask.class, task -> {
@@ -385,6 +369,14 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			task.getMetaEndpoint().convention(Constants.SPARROW_ENDPOINT);
 			task.getMetaEndpoint().finalizeValueOnRead();
 			task.getCacheFile().convention(project.provider(() -> files.getSparrowBuildsCache()));
+			task.getCacheFile().finalizeValueOnRead();
+		});
+		TaskProvider<?> updateNestsBuilds = tasks.register("updateNestsBuildsCache", UpdateBuildsCacheFromMetaTask.class, task -> {
+			task.getMetaUrl().convention(Constants.META_URL);
+			task.getMetaUrl().finalizeValueOnRead();
+			task.getMetaEndpoint().convention(Constants.NESTS_ENDPOINT);
+			task.getMetaEndpoint().finalizeValueOnRead();
+			task.getCacheFile().convention(project.provider(() -> files.getNestsBuildsCache()));
 			task.getCacheFile().finalizeValueOnRead();
 		});
 
@@ -402,8 +394,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			task.getNamespace().set("official");
 		});
 
-		TaskProvider<?> downloadNests = tasks.register("downloadNests", DownloadNestsTask.class);
+		TaskProvider<?> downloadRaven = tasks.register("downloadRaven", DownloadRavenTask.class);
 		TaskProvider<?> downloadSparrow = tasks.register("downloadSparrow", DownloadSparrowTask.class);
+		TaskProvider<?> downloadNests = tasks.register("downloadNests", DownloadNestsTask.class);
 
 		if (selection == TaskSelection.CALAMUS) {
 			Action<GenerateIntermediaryTask> configureIntermediaryTask = task -> {
@@ -479,6 +472,26 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				task.getNamespace().set("intermediary");
 			});
 
+			TaskProvider<?> mapRavenToIntermediary = tasks.register("mapRavenToIntermediary", MapRavenTask.class, task -> {
+				task.dependsOn(downloadRaven, splitIntermediary);
+				task.getSourceNamespace().set("official");
+				task.getTargetNamespace().set("intermediary");
+				
+			});
+			TaskProvider<?> mergeIntermediaryRaven = tasks.register("mergeIntermediaryRaven", MergeRavenTask.class, task -> {
+				task.dependsOn(mapRavenToIntermediary);
+				task.getNamespace().set("intermediary");
+			});
+			TaskProvider<?> mapSparrowToIntermediary = tasks.register("mapSparrowToIntermediary", MapSparrowTask.class, task -> {
+				task.dependsOn(downloadSparrow, splitIntermediary);
+				task.getSourceNamespace().set("official");
+				task.getTargetNamespace().set("intermediary");
+				
+			});
+			TaskProvider<?> mergeIntermediarySparrow = tasks.register("mergeIntermediarySparrow", MergeSparrowTask.class, task -> {
+				task.dependsOn(mapSparrowToIntermediary);
+				task.getNamespace().set("intermediary");
+			});
 			TaskProvider<?> mapNestsToIntermediary = tasks.register("mapNestsToIntermediary", MapNestsTask.class, task -> {
 				task.dependsOn(downloadNests, splitIntermediary);
 				task.getSourceNamespace().set("official");
@@ -492,17 +505,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 			TaskProvider<?> processMappings = tasks.register("processMappings", ProcessMappingsTask.class, task -> {
 				task.dependsOn(splitIntermediary, mergeIntermediaryNests);
-			});
-
-			TaskProvider<?> mapSparrowToIntermediary = tasks.register("mapSparrowToIntermediary", MapSparrowTask.class, task -> {
-				task.dependsOn(downloadSparrow, processMappings);
-				task.getSourceNamespace().set("official");
-				task.getTargetNamespace().set("intermediary");
-				
-			});
-			TaskProvider<?> mergeIntermediarySparrow = tasks.register("mergeIntermediarySparrow", MergeSparrowTask.class, task -> {
-				task.dependsOn(mapSparrowToIntermediary);
-				task.getNamespace().set("intermediary");
 			});
 
 			TaskProvider<?> processMinecraft = tasks.register("processMinecraft", ProcessMinecraftTask.class, task -> {
@@ -672,13 +674,18 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	}
 
 	@Override
-	public int getNestsBuild(String minecraftVersion, GameSide side) {
-		return nestsBuilds.get(minecraftVersion).getOrDefault(side, -1);
+	public int getRavenBuild(String minecraftVersion, GameSide side) {
+		return ravenBuilds.get(minecraftVersion).getOrDefault(side, -1);
 	}
 
 	@Override
 	public int getSparrowBuild(String minecraftVersion, GameSide side) {
 		return sparrowBuilds.get(minecraftVersion).getOrDefault(side, -1);
+	}
+
+	@Override
+	public int getNestsBuild(String minecraftVersion, GameSide side) {
+		return nestsBuilds.get(minecraftVersion).getOrDefault(side, -1);
 	}
 
 	@Override
