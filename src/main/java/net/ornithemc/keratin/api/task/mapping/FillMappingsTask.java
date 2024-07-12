@@ -463,6 +463,9 @@ public abstract class FillMappingsTask extends MinecraftTask implements Nester {
 									} else {
 										potentialBridge = false;
 									}
+									break;
+								default:
+									potentialBridge = false;
 								}
 							}
 
