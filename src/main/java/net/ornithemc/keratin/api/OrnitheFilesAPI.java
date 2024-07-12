@@ -117,22 +117,6 @@ public interface OrnitheFilesAPI {
 
 	File getMergedIntermediaryMappings(String minecraftVersion);
 
-	File getNestedClientIntermediaryMappings(String minecraftVersion);
-
-	File getNestedServerIntermediaryMappings(String minecraftVersion);
-
-	File getNestedMergedIntermediaryMappings(String minecraftVersion);
-
-	File getMainNestedIntermediaryMappings(String minecraftVersion);
-
-	File getProcessedClientIntermediaryMappings(String minecraftVersion);
-
-	File getProcessedServerIntermediaryMappings(String minecraftVersion);
-
-	File getProcessedMergedIntermediaryMappings(String minecraftVersion);
-
-	File getMainProcessedIntermediaryMappings(String minecraftVersion);
-
 	File getNamedMappings(String minecraftVersion);
 
 	File getProcessedNamedMappings(String minecraftVersion);

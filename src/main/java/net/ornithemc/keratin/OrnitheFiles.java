@@ -80,12 +80,6 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Versioned<File> clientIntermediaryMappings;
 	private final Versioned<File> serverIntermediaryMappings;
 	private final Versioned<File> mergedIntermediaryMappings;
-	private final Versioned<File> nestedClientIntermediaryMappings;
-	private final Versioned<File> nestedServerIntermediaryMappings;
-	private final Versioned<File> nestedMergedIntermediaryMappings;
-	private final Versioned<File> processedClientIntermediaryMappings;
-	private final Versioned<File> processedServerIntermediaryMappings;
-	private final Versioned<File> processedMergedIntermediaryMappings;
 
 	private final Versioned<File> namedMappings;
 	private final Versioned<File> processedNamedMappings;
@@ -426,84 +420,6 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 			}
 		});
 		this.mergedIntermediaryMappings = new Versioned<>(minecraftVersion -> new File(getMappingsCache(), "%s-intermediary-gen%d-merged.tiny".formatted(minecraftVersion, getIntermediaryGen())));
-		this.nestedClientIntermediaryMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || details.server()) {
-				throw new NoSuchFileException("client intermediary mappings for Minecraft version " + minecraftVersion + " do not exist!");
-			} else {
-				int build = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
-
-				if (build < 1) {
-					return null;
-				} else {
-					return new File(getProcessedMappingsCache(), "%s-nests+build.%d-intermediary-gen%d-client.tiny".formatted(minecraftVersion, build, getIntermediaryGen()));
-				}
-			}
-		});
-		this.nestedServerIntermediaryMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server() || details.client()) {
-				throw new NoSuchFileException("server intermediary mappings for Minecraft version " + minecraftVersion + " do not exist!");
-			} else {
-				int build = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
-
-				if (build < 1) {
-					return null;
-				} else {
-					return new File(getProcessedMappingsCache(), "%s-nests+build.%d-intermediary-gen%d-server.tiny".formatted(minecraftVersion, build, getIntermediaryGen()));
-				}
-			}
-		});
-		this.nestedMergedIntermediaryMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("intermediary mappings for Minecraft version " + minecraftVersion + "cannot be merged: either the client or server mappings do not exist!");
-			} else {
-				int build = keratin.getNestsBuild(minecraftVersion, GameSide.MERGED);
-				int clientBuild = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
-				int serverBuild = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
-
-				if (build < 1) {
-					if (clientBuild < 1 && serverBuild < 1) {
-						return null;
-					} else {
-						return new File(getProcessedMappingsCache(), "%s-nests+build.(%d-%d)-intermediary-gen%d-merged.tiny".formatted(minecraftVersion, clientBuild, serverBuild, getIntermediaryGen()));
-					}
-				} else {
-					return new File(getProcessedMappingsCache(), "%s-nests+build.%d-intermediary-gen%d-merged.tiny".formatted(minecraftVersion, build, getIntermediaryGen()));
-				}
-			}
-		});
-		this.processedClientIntermediaryMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || details.server()) {
-				throw new NoSuchFileException("client intermediary mappings for Minecraft version " + minecraftVersion + " do not exist!");
-			} else {
-				return new File(getProcessedMappingsCache(), "%s-processed-intermediary-gen%d-client.tiny".formatted(minecraftVersion, getIntermediaryGen()));
-			}
-		});
-		this.processedServerIntermediaryMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server() || details.client()) {
-				throw new NoSuchFileException("server intermediary mappings for Minecraft version " + minecraftVersion + " do not exist!");
-			} else {
-				return new File(getProcessedMappingsCache(), "%s-processed-intermediary-gen%d-server.tiny".formatted(minecraftVersion, getIntermediaryGen()));
-			}
-		});
-		this.processedMergedIntermediaryMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("intermediary mappings for Minecraft version " + minecraftVersion + "cannot be merged: either the client or server mappings do not exist!");
-			} else {
-				return new File(getProcessedMappingsCache(), "%s-processed-intermediary-gen%d-merged.tiny".formatted(minecraftVersion, getIntermediaryGen()));
-			}
-		});
 
 		this.namedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named.tiny".formatted(minecraftVersion)));
 		this.processedNamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-processed-named.tiny".formatted(minecraftVersion)));
@@ -1151,46 +1067,6 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	@Override
 	public File getMergedIntermediaryMappings(String minecraftVersion) {
 		return mergedIntermediaryMappings.get(minecraftVersion);
-	}
-
-	@Override
-	public File getNestedClientIntermediaryMappings(String minecraftVersion) {
-		return nestedClientIntermediaryMappings.get(minecraftVersion);
-	}
-
-	@Override
-	public File getNestedServerIntermediaryMappings(String minecraftVersion) {
-		return nestedServerIntermediaryMappings.get(minecraftVersion);
-	}
-
-	@Override
-	public File getNestedMergedIntermediaryMappings(String minecraftVersion) {
-		return nestedMergedIntermediaryMappings.get(minecraftVersion);
-	}
-
-	@Override
-	public File getMainNestedIntermediaryMappings(String minecraftVersion) {
-		return pickFileForPresentSides(minecraftVersion, nestedClientIntermediaryMappings, nestedServerIntermediaryMappings, nestedMergedIntermediaryMappings);
-	}
-
-	@Override
-	public File getProcessedClientIntermediaryMappings(String minecraftVersion) {
-		return processedClientIntermediaryMappings.get(minecraftVersion);
-	}
-
-	@Override
-	public File getProcessedServerIntermediaryMappings(String minecraftVersion) {
-		return processedServerIntermediaryMappings.get(minecraftVersion);
-	}
-
-	@Override
-	public File getProcessedMergedIntermediaryMappings(String minecraftVersion) {
-		return processedMergedIntermediaryMappings.get(minecraftVersion);
-	}
-
-	@Override
-	public File getMainProcessedIntermediaryMappings(String minecraftVersion) {
-		return pickFileForPresentSides(minecraftVersion, processedClientIntermediaryMappings, processedServerIntermediaryMappings, processedMergedIntermediaryMappings);
 	}
 
 	@Override

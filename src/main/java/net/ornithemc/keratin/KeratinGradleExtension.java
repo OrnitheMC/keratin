@@ -78,7 +78,6 @@ import net.ornithemc.keratin.api.task.minecraft.DownloadMinecraftJarsTask;
 import net.ornithemc.keratin.api.task.processing.DownloadRavenTask;
 import net.ornithemc.keratin.api.task.processing.DownloadNestsTask;
 import net.ornithemc.keratin.api.task.processing.DownloadSparrowTask;
-import net.ornithemc.keratin.api.task.processing.ProcessMappingsTask;
 import net.ornithemc.keratin.api.task.processing.ProcessMinecraftTask;
 import net.ornithemc.keratin.api.task.processing.UpdateBuildsCacheFromMetaTask;
 import net.ornithemc.keratin.matching.Matches;
@@ -501,10 +500,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			TaskProvider<?> mergeIntermediaryNests = tasks.register("mergeIntermediaryNests", MergeNestsTask.class, task -> {
 				task.dependsOn(mapNestsToIntermediary);
 				task.getNamespace().set("intermediary");
-			});
-
-			TaskProvider<?> processMappings = tasks.register("processMappings", ProcessMappingsTask.class, task -> {
-				task.dependsOn(splitIntermediary, mergeIntermediaryNests);
 			});
 
 			TaskProvider<?> processMinecraft = tasks.register("processMinecraft", ProcessMinecraftTask.class, task -> {
