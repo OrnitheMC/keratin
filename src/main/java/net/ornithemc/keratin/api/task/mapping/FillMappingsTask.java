@@ -371,6 +371,10 @@ public abstract class FillMappingsTask extends MinecraftTask implements Nester {
 			public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
 				className = name;
 
+				if (main) {
+					jarClasses.add(name);
+				}
+
 				superClasses.computeIfAbsent(name, key -> new HashSet<>()).add(superName);
 				for (String itf : interfaces) {
 					superClasses.computeIfAbsent(name, key -> new HashSet<>()).add(itf);
