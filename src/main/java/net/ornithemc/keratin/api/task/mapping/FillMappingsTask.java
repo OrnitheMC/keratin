@@ -281,6 +281,10 @@ public abstract class FillMappingsTask extends MinecraftTask implements Nester {
 		}
 
 		private void propagate(String className, String methodName, String methodDescriptor, String methodDstName, List<String> methodArgDstNames) {
+			if (!methodsByClass.containsKey(className)) {
+				return; // this class does not appear in the jar, but on of the libraries (thanks realms...)
+			}
+
 			Set<String> methods = methodsByClass.get(className);
 
 			if (methods.contains(methodName + methodDescriptor)) {
