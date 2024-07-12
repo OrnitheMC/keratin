@@ -99,6 +99,7 @@ public abstract class FillMappingsTask extends MinecraftTask implements Nester {
 		private final int namespace;
 		private final boolean named;
 
+		private final Set<String> jarClasses;
 		private final Map<String, Set<String>> superClasses;
 		private final Map<String, Set<String>> subClasses;
 		private final Map<String, Set<String>> methodsByClass;
@@ -109,6 +110,7 @@ public abstract class FillMappingsTask extends MinecraftTask implements Nester {
 			this.namespace = this.mappings.getNamespaceId(dstNs);
 			this.named = "named".equals(dstNs);
 
+			this.jarClasses = new HashSet<>();
 			this.superClasses = new HashMap<>();
 			this.subClasses = new HashMap<>();
 			this.methodsByClass = new HashMap<>();
@@ -151,8 +153,19 @@ public abstract class FillMappingsTask extends MinecraftTask implements Nester {
 			}
 		}
 
+		private Set<String> getSuperClasses(String className) {
+			if (!superClasses.containsKey(className)) {
+				readJavaClass(className);
+			}
+
+			return superClasses.getOrDefault(className, Collections.emptySet());
+		}
+
 		private void findBridgeMethods() {
-			for (Map<String, String> bridgeMethods : bridgeMethodsByClass.values()) {
+			for (Map.Entry<String, Map<String, String>> e : bridgeMethodsByClass.entrySet()) {
+				String className = e.getKey();
+				Map<String, String> bridgeMethods = e.getValue();
+
 				Iterator<Map.Entry<String, String>> it = bridgeMethods.entrySet().iterator();
 
 				while (it.hasNext()) {
@@ -160,16 +173,32 @@ public abstract class FillMappingsTask extends MinecraftTask implements Nester {
 					String bridge = method.getKey();
 					String specialized = method.getValue();
 
-					int i = bridge.indexOf('(');
-					String bridgeDescriptor = bridge.substring(i);
-					int j = specialized.indexOf('(');
-					String specializedDescriptor = specialized.substring(j);
-
-					if (!isBridgeMethod(bridgeDescriptor, specializedDescriptor)) {
-						it.remove();
+					if (methodExistsInSuperClasses(className, bridge)) {
+						int i = bridge.indexOf('(');
+						String bridgeDescriptor = bridge.substring(i);
+						int j = specialized.indexOf('(');
+						String specializedDescriptor = specialized.substring(j);
+						
+						if (isBridgeMethod(bridgeDescriptor, specializedDescriptor)) {
+							continue;
+						}
 					}
+
+					it.remove();
 				}
 			}
+		}
+
+		private boolean methodExistsInSuperClasses(String className, String method) {
+			for (String superClass : getSuperClasses(className)) {
+				Set<String> methods = methodsByClass.get(className);
+
+				if (methods.contains(method) || methodExistsInSuperClasses(superClass, method)) {
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		private boolean isBridgeMethod(String bridgeDescriptor, String specializedDescriptor) {
@@ -224,11 +253,7 @@ public abstract class FillMappingsTask extends MinecraftTask implements Nester {
 				return false;
 			}
 
-			if (!superClasses.containsKey(classNameForSpecialized)) {
-				readJavaClass(classNameForSpecialized);
-			}
-
-			for (String superClassNameForSpecialized : superClasses.getOrDefault(classNameForSpecialized, Collections.emptySet())) {
+			for (String superClassNameForSpecialized : getSuperClasses(classNameForSpecialized)) {
 				if (areClassesBridgeCompatible(classNameForBridge, superClassNameForSpecialized)) {
 					return true;
 				}
@@ -281,7 +306,7 @@ public abstract class FillMappingsTask extends MinecraftTask implements Nester {
 		}
 
 		private void propagate(String className, String methodName, String methodDescriptor, String methodDstName, List<String> methodArgDstNames) {
-			if (!methodsByClass.containsKey(className)) {
+			if (!jarClasses.contains(className)) {
 				return; // this class does not appear in the jar, but on of the libraries (thanks realms...)
 			}
 
@@ -356,21 +381,19 @@ public abstract class FillMappingsTask extends MinecraftTask implements Nester {
 					subClasses.computeIfAbsent(itf, key -> new HashSet<>()).add(name);
 				}
 
-				if (main) {
-					methods = methodsByClass.computeIfAbsent(name, key -> new HashSet<>());
-					if (named) {
-						bridgeMethods = bridgeMethodsByClass.computeIfAbsent(name, key -> new HashMap<>());
-					}
+				methods = methodsByClass.computeIfAbsent(name, key -> new HashSet<>());
+				if (main && named) {
+					bridgeMethods = bridgeMethodsByClass.computeIfAbsent(name, key -> new HashMap<>());
 				}
 			}
 
 			@Override
 			public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
 				// we only care for methods that can be inherited, so no private or static methods
-				if (main && (access & Opcodes.ACC_PRIVATE) == 0 && (access & Opcodes.ACC_STATIC) == 0) {
+				if ((access & Opcodes.ACC_PRIVATE) == 0 && (access & Opcodes.ACC_STATIC) == 0) {
 					// bridge methods are compiler generated, but the obfuscator might have removed
 					// the bridge access flag, in which case it must still not be final
-					if (methods.add(name + descriptor) && named && ((access & Opcodes.ACC_BRIDGE) != 0 || (access & Opcodes.ACC_FINAL) == 0)) {
+					if (methods.add(name + descriptor) && main && named && ((access & Opcodes.ACC_BRIDGE) != 0 || (access & Opcodes.ACC_FINAL) == 0)) {
 						return new MethodVisitor(Opcodes.ASM9) {
 
 							private int invocations;
