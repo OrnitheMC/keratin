@@ -1,5 +1,5 @@
 package net.ornithemc.keratin.api;
 
 public enum TaskSelection {
-	CALAMUS, FEATHER, FEATHER_SETUP
+	CALAMUS, FEATHER, SPARROW_AND_RAVEN
 }

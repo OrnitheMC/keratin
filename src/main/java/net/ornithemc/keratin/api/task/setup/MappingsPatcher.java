@@ -1,4 +1,4 @@
-package net.ornithemc.keratin.api.task.mapping;
+package net.ornithemc.keratin.api.task.setup;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,8 +11,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Internal;
-import org.gradle.workers.WorkQueue;
+import org.gradle.workers.WorkAction;
+import org.gradle.workers.WorkParameters;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -26,26 +26,44 @@ import net.fabricmc.mappingio.adapter.ForwardingMappingVisitor;
 import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
-import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.Nester;
 
-public abstract class PatchAnonymousClassMappingsTask extends MinecraftTask implements Nester {
+public interface MappingsPatcher {
 
-	@Internal
-	public abstract Property<File> getJar();
+	interface MappingsPatcherParameters extends WorkParameters {
 
-	@Internal
-	public abstract Property<File> getMappings();
+		Property<File> getJar();
 
-	@Internal
-	public abstract Property<String> getTargetNamespace();
+		Property<File> getMappings();
 
-	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
-		File jarFile = getJar().get();
-		File mappingsFile = getMappings().get();
-		String targetNamespace = getTargetNamespace().get();
+		Property<String> getTargetNamespace();
 
+		Property<File> getNests();
+
+	}
+
+	abstract class PatchMappings implements WorkAction<MappingsPatcherParameters>, MappingsPatcher {
+
+		@Override
+		public void execute() {
+			File jar = getParameters().getJar().get();
+			File mappings = getParameters().getMappings().get();
+			String targetNs = getParameters().getTargetNamespace().get();
+			File nests = getParameters().getNests().getOrNull();
+
+			try {
+				patchMappings(jar, mappings, targetNs, nests);
+			} catch (IOException e) {
+				throw new RuntimeException("error while running mappings patcher", e);
+			}
+		}
+	}
+
+	default void patchMappings(File jarFile, File mappingsFile, String targetNamespace, File nestsFile) throws IOException {
+		_patchMappings(jarFile, mappingsFile, targetNamespace, nestsFile);
+	}
+
+	static void _patchMappings(File jarFile, File mappingsFile, String targetNamespace, File nestsFile) throws IOException {
 		Map<String, String> newIndices = new HashMap<>();
 
 		try (JarInputStream js = new JarInputStream(new FileInputStream(jarFile))) {
@@ -155,6 +173,10 @@ public abstract class PatchAnonymousClassMappingsTask extends MinecraftTask impl
 
 		try (MappingWriter writer = MappingWriter.create(mappingsFile.toPath(), MappingFormat.TINY_2_FILE)) {
 			mappings.accept(writer);
+		}
+
+		if (nestsFile != null) {
+			Nester._nestMappings(mappingsFile, mappingsFile, nestsFile);
 		}
 	}
 }

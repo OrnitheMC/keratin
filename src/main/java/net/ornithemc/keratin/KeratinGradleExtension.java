@@ -54,6 +54,15 @@ import net.ornithemc.keratin.api.task.build.PrepareBuildTask;
 import net.ornithemc.keratin.api.task.decompiling.DecompileMinecraftWithCfrTask;
 import net.ornithemc.keratin.api.task.decompiling.DecompileMinecraftWithVineflowerTask;
 import net.ornithemc.keratin.api.task.enigma.LaunchEnigmaTask;
+import net.ornithemc.keratin.api.task.generation.MakeBaseExceptionsTask;
+import net.ornithemc.keratin.api.task.generation.MakeBaseSignaturesTask;
+import net.ornithemc.keratin.api.task.generation.MakeGeneratedExceptionsTask;
+import net.ornithemc.keratin.api.task.generation.MakeGeneratedJarsTask;
+import net.ornithemc.keratin.api.task.generation.MakeGeneratedSignaturesTask;
+import net.ornithemc.keratin.api.task.generation.MapGeneratedJarsTask;
+import net.ornithemc.keratin.api.task.generation.SaveExceptionsTask;
+import net.ornithemc.keratin.api.task.generation.SaveSignaturesTask;
+import net.ornithemc.keratin.api.task.generation.SplitGeneratedJarTask;
 import net.ornithemc.keratin.api.task.javadoc.GenerateFakeSourceTask;
 import net.ornithemc.keratin.api.task.mapping.ConvertMappingsFromTinyV1ToTinyV2Task;
 import net.ornithemc.keratin.api.task.mapping.DownloadIntermediaryTask;
@@ -80,6 +89,18 @@ import net.ornithemc.keratin.api.task.processing.DownloadNestsTask;
 import net.ornithemc.keratin.api.task.processing.DownloadSparrowTask;
 import net.ornithemc.keratin.api.task.processing.ProcessMinecraftTask;
 import net.ornithemc.keratin.api.task.processing.UpdateBuildsCacheFromMetaTask;
+import net.ornithemc.keratin.api.task.setup.CombineSetupMappingsTask;
+import net.ornithemc.keratin.api.task.setup.DownloadMappingsTask;
+import net.ornithemc.keratin.api.task.setup.MakeSetupExceptionsTask;
+import net.ornithemc.keratin.api.task.setup.MakeSetupJarsTask;
+import net.ornithemc.keratin.api.task.setup.MakeSetupMappingsTask;
+import net.ornithemc.keratin.api.task.setup.MakeSetupSignaturesTask;
+import net.ornithemc.keratin.api.task.setup.MakeSourceTask;
+import net.ornithemc.keratin.api.task.setup.MapSetupJarsTask;
+import net.ornithemc.keratin.api.task.setup.MergeSetupJarsTask;
+import net.ornithemc.keratin.api.task.setup.PatchSetupMappingsTask;
+import net.ornithemc.keratin.api.task.setup.SetUpSourceTask;
+import net.ornithemc.keratin.api.task.setup.SplitMappingsTask;
 import net.ornithemc.keratin.matching.Matches;
 import net.ornithemc.keratin.util.Versioned;
 import net.ornithemc.mappingutils.PropagationDirection;
@@ -318,6 +339,10 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 				if (artifact != null) {
 					dependencies.add(minecraftLibraries.getName(), library.name());
+
+					if (selection == TaskSelection.SPARROW_AND_RAVEN) {
+						dependencies.add(Configurations.IMPLEMENTATION, library.name());
+					}
 				}
 			}
 		}
@@ -333,11 +358,18 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				configuration.setTransitive(true);
 			}).get();
 
-			dependencies.add(decompileClasspath.getName(), "net.fabricmc:cfr:0.0.9");
 			dependencies.add(decompileClasspath.getName(), "org.vineflower:vineflower:1.10.1");
+			dependencies.add(decompileClasspath.getName(), "net.fabricmc:cfr:0.0.9");
 			dependencies.add(enigmaRuntime.getName(), "net.ornithemc:enigma-swing:1.9.0");
 			dependencies.add(enigmaRuntime.getName(), "org.quiltmc:quilt-enigma-plugin:1.3.0");
 			dependencies.add(mappingPoetJar.getName(), "net.fabricmc:mappingpoet:0.3.0");
+			
+		}
+		if (selection == TaskSelection.SPARROW_AND_RAVEN) {
+			Configuration decompileClasspath = configurations.register(Configurations.DECOMPILE_CLASSPATH).get();
+
+			dependencies.add(Configurations.IMPLEMENTATION, "net.fabricmc:fabric-loader:0.15.11");
+			dependencies.add(decompileClasspath.getName(), "org.vineflower:vineflower:1.10.1");
 		}
 
 		return minecraftVersions;
@@ -380,13 +412,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		});
 
 		TaskProvider<Sync> syncLibraries = tasks.register("syncMinecraftLibraries", Sync.class, task -> {
+			for (String minecraftVersion : minecraftVersions) {
+				task.from(configurations.getByName(Configurations.minecraftLibraries(minecraftVersion)));
+			}
 			task.into(files.getLibrariesCache());
 		});
-		for (String minecraftVersion : minecraftVersions) {
-			syncLibraries.configure(task -> {
-				task.from(configurations.getByName(Configurations.minecraftLibraries(minecraftVersion)));
-			});
-		}
 		TaskProvider<?> downloadJars = tasks.register("downloadMinecraftJars", DownloadMinecraftJarsTask.class);
 		TaskProvider<?> mergeJars = tasks.register("mergeMinecraftJars", MergeMinecraftJarsTask.class, task -> {
 			task.dependsOn(downloadJars);
@@ -454,7 +484,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				});
 			}
 		}
-		if (selection == TaskSelection.FEATHER || selection == TaskSelection.FEATHER_SETUP) {
+		if (selection == TaskSelection.FEATHER || selection == TaskSelection.SPARROW_AND_RAVEN) {
 			TaskProvider<?> downloadIntermediary = tasks.register("downloadIntermediary", DownloadIntermediaryTask.class, task -> {
 				task.dependsOn(mergeJars);
 			});
@@ -471,26 +501,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				task.getNamespace().set("intermediary");
 			});
 
-			TaskProvider<?> mapRavenToIntermediary = tasks.register("mapRavenToIntermediary", MapRavenTask.class, task -> {
-				task.dependsOn(downloadRaven, splitIntermediary);
-				task.getSourceNamespace().set("official");
-				task.getTargetNamespace().set("intermediary");
-				
-			});
-			TaskProvider<?> mergeIntermediaryRaven = tasks.register("mergeIntermediaryRaven", MergeRavenTask.class, task -> {
-				task.dependsOn(mapRavenToIntermediary);
-				task.getNamespace().set("intermediary");
-			});
-			TaskProvider<?> mapSparrowToIntermediary = tasks.register("mapSparrowToIntermediary", MapSparrowTask.class, task -> {
-				task.dependsOn(downloadSparrow, splitIntermediary);
-				task.getSourceNamespace().set("official");
-				task.getTargetNamespace().set("intermediary");
-				
-			});
-			TaskProvider<?> mergeIntermediarySparrow = tasks.register("mergeIntermediarySparrow", MergeSparrowTask.class, task -> {
-				task.dependsOn(mapSparrowToIntermediary);
-				task.getNamespace().set("intermediary");
-			});
 			TaskProvider<?> mapNestsToIntermediary = tasks.register("mapNestsToIntermediary", MapNestsTask.class, task -> {
 				task.dependsOn(downloadNests, splitIntermediary);
 				task.getSourceNamespace().set("official");
@@ -502,11 +512,31 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				task.getNamespace().set("intermediary");
 			});
 
-			TaskProvider<?> processMinecraft = tasks.register("processMinecraft", ProcessMinecraftTask.class, task -> {
-				task.dependsOn(mergeIntermediaryJars, mergeIntermediaryNests, mergeIntermediarySparrow);
-			});
-
 			if (selection == TaskSelection.FEATHER) {
+				TaskProvider<?> mapRavenToIntermediary = tasks.register("mapRavenToIntermediary", MapRavenTask.class, task -> {
+					task.dependsOn(downloadRaven, splitIntermediary);
+					task.getSourceNamespace().set("official");
+					task.getTargetNamespace().set("intermediary");
+					
+				});
+				TaskProvider<?> mergeIntermediaryRaven = tasks.register("mergeIntermediaryRaven", MergeRavenTask.class, task -> {
+					task.dependsOn(mapRavenToIntermediary);
+					task.getNamespace().set("intermediary");
+				});
+				TaskProvider<?> mapSparrowToIntermediary = tasks.register("mapSparrowToIntermediary", MapSparrowTask.class, task -> {
+					task.dependsOn(downloadSparrow, splitIntermediary);
+					task.getSourceNamespace().set("official");
+					task.getTargetNamespace().set("intermediary");
+					
+				});
+				TaskProvider<?> mergeIntermediarySparrow = tasks.register("mergeIntermediarySparrow", MergeSparrowTask.class, task -> {
+					task.dependsOn(mapSparrowToIntermediary);
+					task.getNamespace().set("intermediary");
+				});
+
+				TaskProvider<?> processMinecraft = tasks.register("processMinecraft", ProcessMinecraftTask.class, task -> {
+					task.dependsOn(mergeIntermediaryJars, mergeIntermediaryNests, mergeIntermediarySparrow);
+				});
 				TaskProvider<?> loadMappings = tasks.register("loadMappings", LoadMappingsFromGraphTask.class, task -> {
 					task.dependsOn(processMinecraft);
 				});
@@ -635,6 +665,75 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 						});
 					});
 				}
+			}
+			if (selection == TaskSelection.SPARROW_AND_RAVEN) {
+				TaskProvider<?> makeSetupExceptions = tasks.register("makeSetupExceptions", MakeSetupExceptionsTask.class);
+				TaskProvider<?> makeSetupSignatures = tasks.register("makeSetupSignatures", MakeSetupSignaturesTask.class);
+
+				TaskProvider<?> downloadMappings = tasks.register("downloadMappings", DownloadMappingsTask.class);
+				TaskProvider<?> splitMappings = tasks.register("splitMappings", SplitMappingsTask.class, task -> {
+					task.dependsOn(downloadMappings);
+				});
+				TaskProvider<?> makeSetupMappings = tasks.register("makeSetupMappings", MakeSetupMappingsTask.class, task -> {
+					task.dependsOn(splitMappings, mergeIntermediaryJars);
+				});
+				TaskProvider<?> patchSetupMappings = tasks.register("patchSetupMappings", PatchSetupMappingsTask.class, task -> {
+					task.dependsOn(makeSetupMappings);
+				});
+				TaskProvider<?> mergeSetupMappings = tasks.register("combineSetupMappings", CombineSetupMappingsTask.class, task -> {
+					task.dependsOn(patchSetupMappings);
+				});
+
+				TaskProvider<?> makeSetupJars = tasks.register("makeSetupJars", MakeSetupJarsTask.class, task -> {
+					task.dependsOn(downloadNests, makeSetupExceptions, makeSetupSignatures, mergeSetupMappings);
+				});
+				TaskProvider<?> mapSetupJars = tasks.register("mapSetupJars", MapSetupJarsTask.class, task -> {
+					task.dependsOn(makeSetupJars);
+				});
+				TaskProvider<?> mergeSetupJars = tasks.register("mergeSetupJars", MergeSetupJarsTask.class, task -> {
+					task.dependsOn(mapSetupJars);
+				});
+
+				TaskProvider<?> makeSource = tasks.register("makeSource", MakeSourceTask.class, task -> {
+					task.dependsOn(mergeSetupJars);
+				});
+				TaskProvider<?> setUpSource = tasks.register("setUpSource", SetUpSourceTask.class, task -> {
+					task.dependsOn(makeSource);
+				});
+
+				TaskProvider<?> makeBaseExceptions = tasks.register("makeBaseExceptions", MakeBaseExceptionsTask.class, task -> {
+					task.dependsOn(mergeJars);
+				});
+				TaskProvider<?> makeBaseSignatures = tasks.register("makeBaseSignatures", MakeBaseSignaturesTask.class, task -> {
+					task.dependsOn(mergeJars);
+				});
+
+				TaskProvider<?> makeGeneratedJars = tasks.register("makeGeneratedJars", MakeGeneratedJarsTask.class, task -> {
+					task.dependsOn("build");
+				});
+				TaskProvider<?> splitGeneratedJar = tasks.register("splitGeneratedJar", SplitGeneratedJarTask.class, task -> {
+					task.dependsOn(makeGeneratedJars);
+				});
+				TaskProvider<?> mapGeneratedJars = tasks.register("mapGeneratedJars", MapGeneratedJarsTask.class, task -> {
+					task.dependsOn(mergeSetupMappings, splitGeneratedJar);
+				});
+
+				TaskProvider<?> makeGeneratedExceptions = tasks.register("makeGeneratedExceptions", MakeGeneratedExceptionsTask.class, task -> {
+					task.dependsOn(mapGeneratedJars);
+				});
+				TaskProvider<?> makeGeneratedSignatures = tasks.register("makeGeneratedSignatures", MakeGeneratedSignaturesTask.class, task -> {
+					task.dependsOn(mapGeneratedJars);
+				});
+
+				TaskProvider<?> saveExceptions = tasks.register("saveExceptions", SaveExceptionsTask.class, task -> {
+					task.dependsOn(makeBaseExceptions, makeGeneratedExceptions);
+				});
+				TaskProvider<?> saveSignatures = tasks.register("saveSignatures", SaveSignaturesTask.class, task -> {
+					task.dependsOn(makeBaseSignatures, makeGeneratedSignatures);
+				});
+				TaskProvider<?> save = tasks.register("save", task -> {
+					task.dependsOn(saveExceptions, saveSignatures);
+				});
 			}
 		}
 

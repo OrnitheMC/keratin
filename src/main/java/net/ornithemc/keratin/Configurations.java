@@ -2,6 +2,7 @@ package net.ornithemc.keratin;
 
 public class Configurations {
 
+	public static final String IMPLEMENTATION      = "implementation";
 	public static final String minecraftLibraries(String minecraftVersion) {
 		return "%s_minecraftLibraries".formatted(minecraftVersion);
 	}

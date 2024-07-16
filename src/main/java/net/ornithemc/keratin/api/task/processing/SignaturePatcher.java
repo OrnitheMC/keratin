@@ -7,6 +7,8 @@ import java.util.List;
 import com.google.common.io.Files;
 
 import io.github.gaming32.signaturechanger.cli.ApplyAction;
+import io.github.gaming32.signaturechanger.cli.GenerateAction;
+import io.github.gaming32.signaturechanger.generator.SigsClassGenerator.EmptySignatureMode;
 
 public interface SignaturePatcher {
 
@@ -19,5 +21,13 @@ public interface SignaturePatcher {
 			Files.copy(input, output);
 		}
 		ApplyAction.run(sigs.toPath(), List.of(output.toPath()));
+	}
+
+	default void extractSignatures(File jar, File sigs) throws IOException {
+		_extractSignatures(jar, sigs);
+	}
+
+	static void _extractSignatures(File jar, File sigs) throws IOException {
+		GenerateAction.run(sigs.toPath(), List.of(jar.toPath()), EmptySignatureMode.IGNORE);
 	}
 }

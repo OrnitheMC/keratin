@@ -35,6 +35,10 @@ public class Constants {
 		return MAVEN_URL + "/net/ornithemc/calamus-intermediary-gen" + generation + "/" + mc + "/calamus-intermediary-gen" + generation + "-" + mc + "-v2.jar";
 	}
 
+	public static String featherGen2Url(String mc, int generation, int build) {
+		return MAVEN_URL + "/net/ornithemc/feather-gen" + generation + "/" + mc + "+build." + build + "/feather-gen" + generation + "-" + mc + "+build." + build + "-v2.jar";
+	}
+
 	public static String ravenUrl(String mc, GameSide side, int build) {
 		return MAVEN_URL + "/net/ornithemc/raven/" + mc + side.suffix() + "+build." + build + "/raven-" + mc + side.suffix() + "+build." + build + ".jar";
 	}

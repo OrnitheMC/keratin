@@ -1,4 +1,4 @@
-package net.ornithemc.keratin.api.task.mapping;
+package net.ornithemc.keratin.api.task.setup;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,9 +16,10 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Internal;
-import org.gradle.workers.WorkQueue;
+import org.gradle.workers.WorkAction;
+import org.gradle.workers.WorkParameters;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -32,57 +33,55 @@ import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.MappingWriter;
 import net.fabricmc.mappingio.format.MappingFormat;
+import net.fabricmc.mappingio.tree.MappingTree.ClassMapping;
 import net.fabricmc.mappingio.tree.MappingTree.MethodArgMapping;
 import net.fabricmc.mappingio.tree.MappingTree.MethodMapping;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
-import net.ornithemc.keratin.KeratinGradleExtension;
-import net.ornithemc.keratin.OrnitheFiles;
-import net.ornithemc.keratin.api.task.MinecraftTask;
-import net.ornithemc.keratin.api.task.processing.Nester;
+public interface MappingsFiller {
 
-public abstract class FillMappingsTask extends MinecraftTask implements Nester {
+	interface MappingsFillerParameters extends WorkParameters {
 
-	@Internal
-	public abstract Property<File> getInputNamedMappings();
+		Property<File> getJar();
 
-	@Internal
-	public abstract Property<File> getIntermediaryMappings();
+		ListProperty<File> getLibraries();
 
-	@Internal
-	public abstract Property<File> getNamedMappings();
+		Property<File> getInputMappings();
 
-	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
-		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		Property<File> getOutputMappings();
 
-		File intermediaryInput = files.getMergedIntermediaryMappings(minecraftVersion);
-		File namedInput = getInputNamedMappings().get();
-		File intermediaryOutput = getIntermediaryMappings().get();
-		File namedOutput = getNamedMappings().get();
-
-		File obfJar = files.getMergedJar(minecraftVersion);
-		File intermediaryJar = files.getIntermediaryMergedJar(minecraftVersion);
-		Collection<File> libraries = files.getLibraries(minecraftVersion);
-
-		fillMappings(
-			intermediaryInput,
-			intermediaryOutput,
-			obfJar,
-			libraries,
-			"intermediary"
-		);
-		fillMappings(
-			namedInput,
-			namedOutput,
-			intermediaryJar,
-			libraries,
-			"named"
-		);
+		Property<String> getTargetNamespace();
 	}
 
-	private void fillMappings(File input, File output, File jar, Collection<File> libraries, String namespace) throws IOException {
+	abstract class FillMappings implements WorkAction<MappingsFillerParameters>, MappingsFiller {
+
+		@Override
+		public void execute() {
+			File jar = getParameters().getJar().get();
+			Collection<File> libraries = getParameters().getLibraries().get();
+			File input = getParameters().getInputMappings().get();
+			File output = getParameters().getOutputMappings().get();
+			String targetNs = getParameters().getTargetNamespace().get();
+
+			try {
+				fillMappings(
+					input,
+					output,
+					jar,
+					libraries,
+					targetNs
+				);
+			} catch (IOException e) {
+				throw new RuntimeException("error while filling in " + targetNs + " mappings", e);
+			}
+		}
+	}
+
+	default void fillMappings(File input, File output, File jar, Collection<File> libraries, String namespace) throws IOException {
+		_fillMappings(input, output, jar, libraries, namespace);
+	}
+
+	static void _fillMappings(File input, File output, File jar, Collection<File> libraries, String namespace) throws IOException {
 		MemoryMappingTree mappings = new MemoryMappingTree();
 		MappingReader.read(input.toPath(), mappings);
 
@@ -93,7 +92,7 @@ public abstract class FillMappingsTask extends MinecraftTask implements Nester {
 		}
 	}
 
-	private static class Propagator {
+	class Propagator {
 
 		private final MemoryMappingTree mappings;
 		private final int namespace;
@@ -313,10 +312,14 @@ public abstract class FillMappingsTask extends MinecraftTask implements Nester {
 			Set<String> methods = methodsByClass.get(className);
 
 			if (methods.contains(methodName + methodDescriptor)) {
+				ClassMapping classMapping = mappings.getClass(className);
 				MethodMapping methodMapping = mappings.getMethod(className, methodName, methodDescriptor);
 
 				if (methodMapping == null || !Objects.equals(methodDstName, methodMapping.getDstName(namespace))) {
 					mappings.visitClass(className);
+					if (classMapping == null) {
+						mappings.visitDstName(MappedElementKind.CLASS, namespace, className);
+					}
 					mappings.visitMethod(methodName, methodDescriptor);
 					mappings.visitDstName(MappedElementKind.METHOD, namespace, methodDstName);
 

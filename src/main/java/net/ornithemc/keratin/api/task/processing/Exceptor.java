@@ -17,4 +17,12 @@ public interface Exceptor {
 		}
 		net.ornithemc.exceptor.Exceptor.apply(output.toPath(), exceptions.toPath());
 	}
+
+	default void extractExceptions(File jar, File exceptions) throws IOException {
+		_extractExceptions(jar, exceptions);
+	}
+
+	static void _extractExceptions(File jar, File exceptions) throws IOException {
+		net.ornithemc.exceptor.Exceptor.extract(jar.toPath(), exceptions.toPath());
+	}
 }

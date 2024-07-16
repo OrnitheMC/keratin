@@ -21,8 +21,6 @@ public interface OrnitheFilesAPI {
 
 	File getMappingsCache();
 
-	File getProcessedMappingsCache();
-
 	File getRavenCache();
 
 	File getSparrowCache();
@@ -38,6 +36,10 @@ public interface OrnitheFilesAPI {
 	File getEnigmaProfile();
 
 	File getMappingsDirectory();
+
+	File getExceptionsDirectory();
+
+	File getSignaturesDirectory();
 
 	File getMatchesDirectory();
 
@@ -178,5 +180,97 @@ public interface OrnitheFilesAPI {
 	File getMainIntermediaryNests(String minecraftVersion);
 
 	File getNamedNests(String minecraftVersion);
+
+	File getFeatherMappings(String minecraftVersion);
+
+	File getClientExceptions(String minecraftVersion);
+
+	File getServerExceptions(String minecraftVersion);
+
+	File getMergedExceptions(String minecraftVersion);
+
+	File getClientSignatures(String minecraftVersion);
+
+	File getServerSignatures(String minecraftVersion);
+
+	File getMergedSignatures(String minecraftVersion);
+
+	File getSetupClientIntermediaryMappings(String minecraftVersion);
+
+	File getSetupServerIntermediaryMappings(String minecraftVersion);
+
+	File getSetupMergedIntermediaryMappings(String minecraftVersion);
+
+	File getSetupClientNamedMappings(String minecraftVersion);
+
+	File getSetupServerNamedMappings(String minecraftVersion);
+
+	File getSetupMergedNamedMappings(String minecraftVersion);
+
+	File getCombinedSetupClientMappings(String minecraftVersion);
+
+	File getCombinedSetupServerMappings(String minecraftVersion);
+
+	File getCombinedSetupMergedMappings(String minecraftVersion);
+
+	File getSetupClientExceptions(String minecraftVersion);
+
+	File getSetupServerExceptions(String minecraftVersion);
+
+	File getSetupMergedExceptions(String minecraftVersion);
+
+	File getSetupClientSignatures(String minecraftVersion);
+
+	File getSetupServerSignatures(String minecraftVersion);
+
+	File getSetupMergedSignatures(String minecraftVersion);
+
+	File getSetupClientJar(String minecraftVersion);
+
+	File getSetupServerJar(String minecraftVersion);
+
+	File getSetupMergedJar(String minecraftVersion);
+
+	File getNamedSetupClientJar(String minecraftVersion);
+
+	File getNamedSetupServerJar(String minecraftVersion);
+
+	File getNamedSetupMergedJar(String minecraftVersion);
+
+	File getBaseClientExceptions(String minecraftVersion);
+
+	File getBaseServerExceptions(String minecraftVersion);
+
+	File getBaseMergedExceptions(String minecraftVersion);
+
+	File getBaseClientSignatures(String minecraftVersion);
+
+	File getBaseServerSignatures(String minecraftVersion);
+
+	File getBaseMergedSignatures(String minecraftVersion);
+
+	File getGeneratedClientJar(String minecraftVersion);
+
+	File getGeneratedServerJar(String minecraftVersion);
+
+	File getGeneratedMergedJar(String minecraftVersion);
+
+	File getNamedGeneratedClientJar(String minecraftVersion);
+
+	File getNamedGeneratedServerJar(String minecraftVersion);
+
+	File getNamedGeneratedMergedJar(String minecraftVersion);
+
+	File getGeneratedClientExceptions(String minecraftVersion);
+
+	File getGeneratedServerExceptions(String minecraftVersion);
+
+	File getGeneratedMergedExceptions(String minecraftVersion);
+
+	File getGeneratedClientSignatures(String minecraftVersion);
+
+	File getGeneratedServerSignatures(String minecraftVersion);
+
+	File getGeneratedMergedSignatures(String minecraftVersion);
 
 }
