@@ -73,6 +73,13 @@ public interface JarSplitter {
 	}
 
 	static void _splitJar(File client, File server, File merged) throws IOException {
+		if (!merged.exists()) {
+			throw new IllegalStateException("merged jar does not exist!");
+		}
+
+		if (client.exists()) client.delete();
+		if (server.exists()) server.delete();
+
 		FileSystem clientFs = StitchUtil.getJarFileSystem(client, true).get();
 		FileSystem serverFs = StitchUtil.getJarFileSystem(server, true).get();
 		FileSystem mergedFs = StitchUtil.getJarFileSystem(merged, false).get();
@@ -86,7 +93,9 @@ public interface JarSplitter {
 			ClassReader reader = new ClassReader(bytes);
 			ClassSplitter splitter = new ClassSplitter(Opcodes.ASM9);
 
-			reader.accept(splitter, 0);
+			// for the purposes of generating class/field/method
+			// sigs and excs, the code is not needed
+			reader.accept(splitter, ClassReader.SKIP_CODE);
 
 			ClassNode c = splitter.getClient();
 			ClassNode s = splitter.getServer();
@@ -161,7 +170,7 @@ public interface JarSplitter {
 		@Override
 		public ModuleVisitor visitModule(String name, int access, String version) {
 			ModuleVisitor c = (client == null) ? null : client.visitModule(name, access, version);
-			ModuleVisitor s = (server == null) ? null :server.visitModule(name, access, version);
+			ModuleVisitor s = (server == null) ? null : server.visitModule(name, access, version);
 
 			return new ModuleVisitor(api) {
 
@@ -253,21 +262,25 @@ public interface JarSplitter {
 			if (server != null) server.visitAttribute(attribute);
 		}
 
+		@Override
 		public void visitNestMember(String nestMember) {
 			if (client != null) client.visitNestMember(nestMember);
 			if (server != null) server.visitNestMember(nestMember);
 		}
 
+		@Override
 		public void visitPermittedSubclass(String permittedSubclass) {
 			if (client != null) client.visitPermittedSubclass(permittedSubclass);
 			if (server != null) server.visitPermittedSubclass(permittedSubclass);
 		}
 
+		@Override
 		public void visitInnerClass(String name, String outerName, String innerName, int access) {
 			if (client != null) client.visitInnerClass(name, outerName, innerName, access);
 			if (server != null) server.visitInnerClass(name, outerName, innerName, access);
 		}
 
+		@Override
 		public RecordComponentVisitor visitRecordComponent(String name, String descriptor, String signature) {
 			RecordComponentVisitor c = (client == null) ? null : client.visitRecordComponent(name, descriptor, signature);
 			RecordComponentVisitor s = (server == null) ? null : server.visitRecordComponent(name, descriptor, signature);
@@ -585,10 +598,10 @@ public interface JarSplitter {
 				}
 
 				private void splitOnSide(String side) {
-					if (!side.equals(CLIENT_SIDE)) {
+					if (!side.equals(CLIENT_SIDE) && c != null) {
 						((ClassNode) client).methods.remove((MethodNode) c);
 					}
-					if (!side.equals(SERVER_SIDE)) {
+					if (!side.equals(SERVER_SIDE) && s != null) {
 						((ClassNode) server).methods.remove((MethodNode) s);
 					}
 				}
@@ -625,10 +638,10 @@ public interface JarSplitter {
 				String side = e.getKey();
 				List<String> sidedInterfaces = e.getValue();
 
-				if (!side.equals(CLIENT_SIDE)) {
+				if (!side.equals(CLIENT_SIDE) && client != null) {
 					((ClassNode) client).interfaces.removeAll(sidedInterfaces);
 				}
-				if (!side.equals(SERVER_SIDE)) {
+				if (!side.equals(SERVER_SIDE) && server != null) {
 					((ClassNode) server).interfaces.removeAll(sidedInterfaces);
 				}
 			}
@@ -710,8 +723,6 @@ public interface JarSplitter {
 			public AnnotationVisitor visitArray(String name) {
 				if ("value".equals(name)) {
 					interfaces = new HashMap<>();
-					interfaces.put(CLIENT_SIDE, new ArrayList<>());
-					interfaces.put(SERVER_SIDE, new ArrayList<>());
 
 					return new AnnotationVisitor(api) {
 
@@ -740,7 +751,7 @@ public interface JarSplitter {
 									@Override
 									public void visitEnd() {
 										if (type != null && side != null) {
-											interfaces.get(side).add(type);
+											interfaces.computeIfAbsent(side, key -> new ArrayList<>()).add(type);
 										}
 
 										side = null;
