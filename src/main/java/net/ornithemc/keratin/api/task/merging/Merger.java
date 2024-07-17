@@ -34,7 +34,7 @@ public interface Merger extends TaskAware {
 			File merged = getParameters().getMerged().get();
 
 			try {
-				Merger._mergeJars(client, server, merged);
+				run(client, server, merged);
 			} catch (IOException e) {
 				throw new UncheckedIOException("error while running merger", e);
 			}
