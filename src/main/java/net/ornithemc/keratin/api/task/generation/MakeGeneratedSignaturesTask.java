@@ -20,11 +20,12 @@ public abstract class MakeGeneratedSignaturesTask extends MinecraftTask implemen
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
 		if (details.sharedMappings()) {
+			File jar = files.getGeneratedMergedJar(minecraftVersion);
 			File sigs = files.getGeneratedMergedSignatures(minecraftVersion);
 			File nests = files.getMergedNests(minecraftVersion);
 
 			extractSignatures(
-				files.getMergedJar(minecraftVersion),
+				jar,
 				sigs
 			);
 			if (nests != null) {
@@ -36,11 +37,12 @@ public abstract class MakeGeneratedSignaturesTask extends MinecraftTask implemen
 			}
 		} else {
 			if (details.client()) {
+				File jar = files.getGeneratedClientJar(minecraftVersion);
 				File sigs = files.getGeneratedClientSignatures(minecraftVersion);
 				File nests = files.getClientNests(minecraftVersion);
 
 				extractSignatures(
-					files.getClientJar(minecraftVersion),
+					jar,
 					sigs
 				);
 				if (nests != null) {
@@ -52,11 +54,12 @@ public abstract class MakeGeneratedSignaturesTask extends MinecraftTask implemen
 				}
 			}
 			if (details.server()) {
+				File jar = files.getGeneratedServerJar(minecraftVersion);
 				File sigs = files.getGeneratedServerSignatures(minecraftVersion);
 				File nests = files.getServerNests(minecraftVersion);
 
 				extractSignatures(
-					files.getServerJar(minecraftVersion),
+					jar,
 					sigs
 				);
 				if (nests != null) {

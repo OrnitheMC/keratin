@@ -20,11 +20,12 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
 		if (details.sharedMappings()) {
+			File jar = files.getGeneratedMergedJar(minecraftVersion);
 			File excs = files.getGeneratedMergedExceptions(minecraftVersion);
 			File nests = files.getMergedNests(minecraftVersion);
 
 			extractExceptions(
-				files.getMergedJar(minecraftVersion),
+				jar,
 				excs
 			);
 			if (nests != null) {
@@ -36,11 +37,12 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 			}
 		} else {
 			if (details.client()) {
+				File jar = files.getGeneratedClientJar(minecraftVersion);
 				File excs = files.getGeneratedClientExceptions(minecraftVersion);
 				File nests = files.getClientNests(minecraftVersion);
 
 				extractExceptions(
-					files.getClientJar(minecraftVersion),
+					jar,
 					excs
 				);
 				if (nests != null) {
@@ -52,11 +54,12 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 				}
 			}
 			if (details.server()) {
+				File jar = files.getGeneratedServerJar(minecraftVersion);
 				File excs = files.getGeneratedServerExceptions(minecraftVersion);
 				File nests = files.getServerNests(minecraftVersion);
 
 				extractExceptions(
-					files.getServerJar(minecraftVersion),
+					jar,
 					excs
 				);
 				if (nests != null) {
