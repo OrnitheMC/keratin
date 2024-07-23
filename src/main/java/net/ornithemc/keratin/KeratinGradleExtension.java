@@ -678,14 +678,14 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.dependsOn(splitMappings, mergeIntermediaryJars);
 				});
 				TaskProvider<?> patchSetupMappings = tasks.register("patchSetupMappings", PatchSetupMappingsTask.class, task -> {
-					task.dependsOn(makeSetupMappings);
+					task.dependsOn(mergeIntermediaryNests, makeSetupMappings);
 				});
-				TaskProvider<?> mergeSetupMappings = tasks.register("combineSetupMappings", CombineSetupMappingsTask.class, task -> {
+				TaskProvider<?> combineSetupMappings = tasks.register("combineSetupMappings", CombineSetupMappingsTask.class, task -> {
 					task.dependsOn(patchSetupMappings);
 				});
 
 				TaskProvider<?> makeSetupJars = tasks.register("makeSetupJars", MakeSetupJarsTask.class, task -> {
-					task.dependsOn(downloadNests, makeSetupExceptions, makeSetupSignatures, mergeSetupMappings);
+					task.dependsOn(makeSetupExceptions, makeSetupSignatures, combineSetupMappings);
 				});
 				TaskProvider<?> mapSetupJars = tasks.register("mapSetupJars", MapSetupJarsTask.class, task -> {
 					task.dependsOn(makeSetupJars);
@@ -715,7 +715,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.dependsOn(makeGeneratedJars);
 				});
 				TaskProvider<?> mapGeneratedJars = tasks.register("mapGeneratedJars", MapGeneratedJarsTask.class, task -> {
-					task.dependsOn(mergeSetupMappings, splitGeneratedJar);
+					task.dependsOn(combineSetupMappings, splitGeneratedJar);
 				});
 
 				TaskProvider<?> makeGeneratedExceptions = tasks.register("makeGeneratedExceptions", MakeGeneratedExceptionsTask.class, task -> {
