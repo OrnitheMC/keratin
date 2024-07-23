@@ -9,8 +9,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.gradle.api.provider.Property;
@@ -33,6 +35,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.InnerClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.RecordComponentNode;
 
@@ -84,6 +87,8 @@ public interface JarSplitter {
 		FileSystem serverFs = StitchUtil.getJarFileSystem(server, true).get();
 		FileSystem mergedFs = StitchUtil.getJarFileSystem(merged, false).get();
 
+		ClassSplitter splitter = new ClassSplitter(Opcodes.ASM9);
+
 		for (Path path : Files.walk(mergedFs.getPath("/")).toList()) {
 			if (!Files.isRegularFile(path) || !path.getFileName().toString().endsWith(".class")) {
 				continue;
@@ -91,7 +96,6 @@ public interface JarSplitter {
 
 			byte[] bytes = Files.readAllBytes(path);
 			ClassReader reader = new ClassReader(bytes);
-			ClassSplitter splitter = new ClassSplitter(Opcodes.ASM9);
 
 			// for the purposes of generating class/field/method
 			// sigs and excs, the code is not needed
@@ -135,16 +139,21 @@ public interface JarSplitter {
 	
 		private final int api;
 
+		private final Set<String> notClient;
+		private final Set<String> notServer;
+
 		private ClassNode client;
 		private ClassNode server;
+
+		private String currentClass;
 
 		public ClassSplitter(int api) {
 			super(api);
 
 			this.api = api;
 
-			this.client = new ClassNode();
-			this.server = new ClassNode();
+			this.notClient = new HashSet<>();
+			this.notServer = new HashSet<>();
 		}
 
 		public ClassNode getClient() {
@@ -157,8 +166,10 @@ public interface JarSplitter {
 
 		@Override
 		public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-			if (client != null) client.visit(version, access, name, signature, superName, interfaces);
-			if (server != null) server.visit(version, access, name, signature, superName, interfaces); 
+			(client = new ClassNode()).visit(version, access, name, signature, superName, interfaces);
+			(server = new ClassNode()).visit(version, access, name, signature, superName, interfaces); 
+
+			currentClass = name;
 		}
 
 		@Override
@@ -232,6 +243,15 @@ public interface JarSplitter {
 
 		@Override
 		public void visitOuterClass(String owner, String name, String descriptor) {
+			// anonymous classes do not have the environment annotations,
+			// so we split them based on if their outer class is split
+			if (notClient.contains(owner)) {
+				client = null;
+			}
+			if (notServer.contains(owner)) {
+				server = null;
+			}
+
 			if (client != null) client.visitOuterClass(owner, name, descriptor);
 			if (server != null) server.visitOuterClass(owner, name, descriptor);
 		}
@@ -278,6 +298,14 @@ public interface JarSplitter {
 		public void visitInnerClass(String name, String outerName, String innerName, int access) {
 			if (client != null) client.visitInnerClass(name, outerName, innerName, access);
 			if (server != null) server.visitInnerClass(name, outerName, innerName, access);
+
+			// keep track of which classes are client only or server only, and have inner classes
+			if (client == null) {
+				notClient.add(currentClass);
+			}
+			if (server == null) {
+				notServer.add(currentClass);
+			}
 		}
 
 		@Override
