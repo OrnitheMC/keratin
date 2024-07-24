@@ -20,11 +20,11 @@ public abstract class MakeSourceTask extends DecompileTask {
 		OrnitheFilesAPI files = keratin.getFiles();
 		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		File setupJar = (details.sharedMappings() || (details.client() && details.server()))
-			? files.getNamedSetupMergedJar(minecraftVersion)
+		File sourceJar = (details.sharedMappings() || (details.client() && details.server()))
+			? files.getNamedSourceMergedJar(minecraftVersion)
 			: details.client()
-				? files.getNamedSetupClientJar(minecraftVersion)
-				: files.getNamedSetupServerJar(minecraftVersion);
+				? files.getNamedSourceClientJar(minecraftVersion)
+				: files.getNamedSourceServerJar(minecraftVersion);
 		File decompSrcDir = files.getDecompiledSourceDirectory(minecraftVersion);
 
 		submitJavaExecDecompileTask(
@@ -32,7 +32,7 @@ public abstract class MakeSourceTask extends DecompileTask {
 			"org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler",
 			project.getConfigurations().getByName(Configurations.DECOMPILE_CLASSPATH),
 			new String[] {
-				setupJar.getAbsolutePath(),
+				sourceJar.getAbsolutePath(),
 				decompSrcDir.getAbsolutePath()
 			}
 		);

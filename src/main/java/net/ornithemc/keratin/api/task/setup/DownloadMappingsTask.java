@@ -27,11 +27,6 @@ public abstract class DownloadMappingsTask extends MinecraftTask implements Down
 		}
 
 		downloadAndExtract(
-			Constants.calamusGen2Url(minecraftVersion, intermediaryGen),
-			"mappings/mappings.tiny",
-			files.getMergedIntermediaryMappings(minecraftVersion)
-		);
-		downloadAndExtract(
 			Constants.featherGen2Url(minecraftVersion, intermediaryGen, featherBuild),
 			"mappings/mappings.tiny",
 			files.getFeatherMappings(minecraftVersion)

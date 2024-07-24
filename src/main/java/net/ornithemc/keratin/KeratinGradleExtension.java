@@ -89,18 +89,18 @@ import net.ornithemc.keratin.api.task.processing.DownloadNestsTask;
 import net.ornithemc.keratin.api.task.processing.DownloadSparrowTask;
 import net.ornithemc.keratin.api.task.processing.ProcessMinecraftTask;
 import net.ornithemc.keratin.api.task.processing.UpdateBuildsCacheFromMetaTask;
-import net.ornithemc.keratin.api.task.setup.CombineSetupMappingsTask;
 import net.ornithemc.keratin.api.task.setup.DownloadMappingsTask;
 import net.ornithemc.keratin.api.task.setup.MakeSetupExceptionsTask;
 import net.ornithemc.keratin.api.task.setup.MakeSetupJarsTask;
 import net.ornithemc.keratin.api.task.setup.MakeSetupMappingsTask;
 import net.ornithemc.keratin.api.task.setup.MakeSetupSignaturesTask;
+import net.ornithemc.keratin.api.task.setup.MakeSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.MakeSourceTask;
+import net.ornithemc.keratin.api.task.setup.MakeSourceMappingsTask;
 import net.ornithemc.keratin.api.task.setup.MapSetupJarsTask;
-import net.ornithemc.keratin.api.task.setup.MergeSetupJarsTask;
-import net.ornithemc.keratin.api.task.setup.PatchSetupMappingsTask;
+import net.ornithemc.keratin.api.task.setup.MapSourceJarsTask;
+import net.ornithemc.keratin.api.task.setup.MergeSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.SetUpSourceTask;
-import net.ornithemc.keratin.api.task.setup.SplitMappingsTask;
 import net.ornithemc.keratin.matching.Matches;
 import net.ornithemc.keratin.util.Versioned;
 import net.ornithemc.mappingutils.PropagationDirection;
@@ -667,35 +667,36 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				}
 			}
 			if (selection == TaskSelection.SPARROW_AND_RAVEN) {
+				TaskProvider<?> downloadMappings = tasks.register("downloadMappings", DownloadMappingsTask.class);
+
 				TaskProvider<?> makeSetupExceptions = tasks.register("makeSetupExceptions", MakeSetupExceptionsTask.class);
 				TaskProvider<?> makeSetupSignatures = tasks.register("makeSetupSignatures", MakeSetupSignaturesTask.class);
 
-				TaskProvider<?> downloadMappings = tasks.register("downloadMappings", DownloadMappingsTask.class);
-				TaskProvider<?> splitMappings = tasks.register("splitMappings", SplitMappingsTask.class, task -> {
-					task.dependsOn(downloadMappings);
-				});
 				TaskProvider<?> makeSetupMappings = tasks.register("makeSetupMappings", MakeSetupMappingsTask.class, task -> {
-					task.dependsOn(splitMappings, mergeIntermediaryJars);
+					task.dependsOn(downloadMappings, mergeIntermediaryJars, mergeIntermediaryNests);
 				});
-				TaskProvider<?> patchSetupMappings = tasks.register("patchSetupMappings", PatchSetupMappingsTask.class, task -> {
-					task.dependsOn(mergeIntermediaryNests, makeSetupMappings);
-				});
-				TaskProvider<?> combineSetupMappings = tasks.register("combineSetupMappings", CombineSetupMappingsTask.class, task -> {
-					task.dependsOn(patchSetupMappings);
-				});
-
 				TaskProvider<?> makeSetupJars = tasks.register("makeSetupJars", MakeSetupJarsTask.class, task -> {
-					task.dependsOn(makeSetupExceptions, makeSetupSignatures, combineSetupMappings);
+					task.dependsOn(downloadNests, mergeJars);
 				});
 				TaskProvider<?> mapSetupJars = tasks.register("mapSetupJars", MapSetupJarsTask.class, task -> {
-					task.dependsOn(makeSetupJars);
+					task.dependsOn(makeSetupMappings, makeSetupJars);
 				});
-				TaskProvider<?> mergeSetupJars = tasks.register("mergeSetupJars", MergeSetupJarsTask.class, task -> {
-					task.dependsOn(mapSetupJars);
+
+				TaskProvider<?> makeSourceMappings = tasks.register("makeSourceMappings", MakeSourceMappingsTask.class, task -> {
+					task.dependsOn(makeSetupMappings, makeSetupJars);
+				});
+				TaskProvider<?> makeSourceJars = tasks.register("makeSourceJars", MakeSourceJarsTask.class, task -> {
+					task.dependsOn(makeSetupExceptions, makeSetupSignatures, downloadNests, mergeJars);
+				});
+				TaskProvider<?> mapSourceJars = tasks.register("mapSourceJars", MapSourceJarsTask.class, task -> {
+					task.dependsOn(makeSourceMappings, makeSourceJars);
+				});
+				TaskProvider<?> mergeSourceJars = tasks.register("mergeSourceJars", MergeSourceJarsTask.class, task -> {
+					task.dependsOn(mapSourceJars);
 				});
 
 				TaskProvider<?> makeSource = tasks.register("makeSource", MakeSourceTask.class, task -> {
-					task.dependsOn(mergeSetupJars);
+					task.dependsOn(mergeSourceJars);
 				});
 				TaskProvider<?> setUpSource = tasks.register("setUpSource", SetUpSourceTask.class, task -> {
 					task.dependsOn(makeSource);
@@ -715,7 +716,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.dependsOn(makeGeneratedJars);
 				});
 				TaskProvider<?> mapGeneratedJars = tasks.register("mapGeneratedJars", MapGeneratedJarsTask.class, task -> {
-					task.dependsOn(combineSetupMappings, splitGeneratedJar);
+					task.dependsOn(makeSourceMappings, splitGeneratedJar);
 				});
 
 				TaskProvider<?> makeGeneratedExceptions = tasks.register("makeGeneratedExceptions", MakeGeneratedExceptionsTask.class, task -> {

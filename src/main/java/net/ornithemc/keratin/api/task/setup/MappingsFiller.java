@@ -16,11 +16,6 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import org.gradle.api.provider.ListProperty;
-import org.gradle.api.provider.Property;
-import org.gradle.workers.WorkAction;
-import org.gradle.workers.WorkParameters;
-
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Handle;
@@ -40,43 +35,6 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 public interface MappingsFiller {
 
-	interface MappingsFillerParameters extends WorkParameters {
-
-		Property<File> getJar();
-
-		ListProperty<File> getLibraries();
-
-		Property<File> getInputMappings();
-
-		Property<File> getOutputMappings();
-
-		Property<String> getTargetNamespace();
-	}
-
-	abstract class FillMappings implements WorkAction<MappingsFillerParameters>, MappingsFiller {
-
-		@Override
-		public void execute() {
-			File jar = getParameters().getJar().get();
-			Collection<File> libraries = getParameters().getLibraries().get();
-			File input = getParameters().getInputMappings().get();
-			File output = getParameters().getOutputMappings().get();
-			String targetNs = getParameters().getTargetNamespace().get();
-
-			try {
-				fillMappings(
-					input,
-					output,
-					jar,
-					libraries,
-					targetNs
-				);
-			} catch (IOException e) {
-				throw new RuntimeException("error while filling in " + targetNs + " mappings", e);
-			}
-		}
-	}
-
 	default void fillMappings(File input, File output, File jar, Collection<File> libraries, String namespace) throws IOException {
 		_fillMappings(input, output, jar, libraries, namespace);
 	}
@@ -85,14 +43,14 @@ public interface MappingsFiller {
 		MemoryMappingTree mappings = new MemoryMappingTree();
 		MappingReader.read(input.toPath(), mappings);
 
-		new Propagator(mappings, namespace).run(jar, libraries);
+		new MethodMappingPropagator(mappings, namespace).run(jar, libraries);
 
 		try (MappingWriter writer = MappingWriter.create(output.toPath(), MappingFormat.TINY_2_FILE)) {
 			mappings.accept(writer);
 		}
 	}
 
-	class Propagator {
+	class MethodMappingPropagator {
 
 		private final MemoryMappingTree mappings;
 		private final int namespace;
@@ -104,7 +62,7 @@ public interface MappingsFiller {
 		private final Map<String, Set<String>> methodsByClass;
 		private final Map<String, Map<String, String>> bridgeMethodsByClass;
 
-		public Propagator(MemoryMappingTree mappings, String dstNs) throws IOException {
+		public MethodMappingPropagator(MemoryMappingTree mappings, String dstNs) throws IOException {
 			this.mappings = mappings;
 			this.namespace = this.mappings.getNamespaceId(dstNs);
 			this.named = "named".equals(dstNs);

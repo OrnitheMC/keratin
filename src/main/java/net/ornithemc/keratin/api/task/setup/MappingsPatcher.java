@@ -23,22 +23,21 @@ import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.MappingWriter;
 import net.fabricmc.mappingio.adapter.ForwardingMappingVisitor;
+import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;
 import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
-
-import net.ornithemc.keratin.api.task.processing.Nester;
 
 public interface MappingsPatcher {
 
 	interface MappingsPatcherParameters extends WorkParameters {
 
-		Property<File> getJar();
+		Property<File> getIntermediaryMappings();
+
+		Property<File> getNamedMappings();
 
 		Property<File> getMappings();
 
-		Property<String> getTargetNamespace();
-
-		Property<File> getNests();
+		Property<File> getJar();
 
 	}
 
@@ -46,24 +45,24 @@ public interface MappingsPatcher {
 
 		@Override
 		public void execute() {
+			File intermediary = getParameters().getIntermediaryMappings().get();
+			File named = getParameters().getNamedMappings().get();
+			File out = getParameters().getMappings().get();
 			File jar = getParameters().getJar().get();
-			File mappings = getParameters().getMappings().get();
-			String targetNs = getParameters().getTargetNamespace().get();
-			File nests = getParameters().getNests().getOrNull();
 
 			try {
-				patchMappings(jar, mappings, targetNs, nests);
+				patchMappings(jar, intermediary, named, out);
 			} catch (IOException e) {
 				throw new RuntimeException("error while running mappings patcher", e);
 			}
 		}
 	}
 
-	default void patchMappings(File jarFile, File mappingsFile, String targetNamespace, File nestsFile) throws IOException {
-		_patchMappings(jarFile, mappingsFile, targetNamespace, nestsFile);
+	default void patchMappings(File jarFile, File intermediaryFile, File namedFile, File outFile) throws IOException {
+		_patchMappings(jarFile, intermediaryFile, namedFile, outFile);
 	}
 
-	static void _patchMappings(File jarFile, File mappingsFile, String targetNamespace, File nestsFile) throws IOException {
+	static void _patchMappings(File jarFile, File intermediaryFile, File namedFile, File outFile) throws IOException {
 		Map<String, String> newIndices = new HashMap<>();
 
 		try (JarInputStream js = new JarInputStream(new FileInputStream(jarFile))) {
@@ -113,15 +112,17 @@ public interface MappingsPatcher {
 			}
 		}
 
-		MemoryMappingTree mappings = new MemoryMappingTree();
-		MappingReader.read(mappingsFile.toPath(), new ForwardingMappingVisitor(mappings) {
+		MemoryMappingTree mappingsIn = new MemoryMappingTree();
+		MappingReader.read(intermediaryFile.toPath(), new MappingSourceNsSwitch(mappingsIn, "intermediary"));
+		MappingReader.read(namedFile.toPath(), mappingsIn);
 
-			private int targetNs;
+		MemoryMappingTree mappingsOut = new MemoryMappingTree();
+		mappingsIn.accept(new MappingSourceNsSwitch(new ForwardingMappingVisitor(mappingsOut) {
+
 			private List<String> newDstIndices = new ArrayList<>();
 
 			@Override
 			public void visitNamespaces(String srcNamespace, List<String> dstNamespaces) throws IOException {
-				targetNs = dstNamespaces.indexOf(targetNamespace);
 				super.visitNamespaces(srcNamespace, dstNamespaces);
 			}
 
@@ -140,7 +141,7 @@ public interface MappingsPatcher {
 
 			@Override
 			public void visitDstName(MappedElementKind targetKind, int namespace, String name) throws IOException {
-				if (namespace == targetNs && targetKind == MappedElementKind.CLASS) {
+				if (targetKind == MappedElementKind.CLASS) {
 					StringBuilder sb = new StringBuilder();
 
 					int from = 0;
@@ -169,14 +170,10 @@ public interface MappingsPatcher {
 
 				super.visitDstName(targetKind, namespace, name);
 			}
-		});
+		}, "official", true));
 
-		try (MappingWriter writer = MappingWriter.create(mappingsFile.toPath(), MappingFormat.TINY_2_FILE)) {
-			mappings.accept(writer);
-		}
-
-		if (nestsFile != null) {
-			Nester._nestMappings(mappingsFile, mappingsFile, nestsFile);
+		try (MappingWriter writer = MappingWriter.create(outFile.toPath(), MappingFormat.TINY_2_FILE)) {
+			mappingsOut.accept(writer);
 		}
 	}
 }

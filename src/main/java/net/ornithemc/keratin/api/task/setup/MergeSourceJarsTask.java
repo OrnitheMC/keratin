@@ -8,7 +8,7 @@ import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.merging.Merger;
 
-public abstract class MergeSetupJarsTask extends MinecraftTask implements Merger {
+public abstract class MergeSourceJarsTask extends MinecraftTask implements Merger {
 
 	@Override
 	public void run(WorkQueue workQueue, String minecraftVersion) {
@@ -18,9 +18,9 @@ public abstract class MergeSetupJarsTask extends MinecraftTask implements Merger
 
 		if (!details.sharedMappings() && details.client() && details.server()) {
 			workQueue.submit(MergeJars.class, parameters -> {
-				parameters.getClient().set(files.getNamedSetupClientJar(minecraftVersion));
-				parameters.getServer().set(files.getNamedSetupServerJar(minecraftVersion));
-				parameters.getMerged().set(files.getNamedSetupMergedJar(minecraftVersion));
+				parameters.getClient().set(files.getNamedSourceClientJar(minecraftVersion));
+				parameters.getServer().set(files.getNamedSourceServerJar(minecraftVersion));
+				parameters.getMerged().set(files.getNamedSourceMergedJar(minecraftVersion));
 			});
 		}
 	}

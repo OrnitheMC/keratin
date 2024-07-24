@@ -3,11 +3,41 @@ package net.ornithemc.keratin.api.task.processing;
 import java.io.File;
 import java.io.IOException;
 
+import org.gradle.api.provider.Property;
+import org.gradle.workers.WorkAction;
+import org.gradle.workers.WorkParameters;
+
 import net.ornithemc.mappingutils.MappingUtils;
 import net.ornithemc.mappingutils.io.Format;
 import net.ornithemc.nester.NesterException;
 
 public interface Nester {
+
+	interface MinecraftProcessorParameters extends WorkParameters {
+
+		Property<File> getInputJar();
+
+		Property<File> getOutputJar();
+
+		Property<File> getNestsFile();
+
+	}
+
+	abstract class NestJar implements WorkAction<MinecraftProcessorParameters>, Nester {
+
+		@Override
+		public void execute() {
+			try {
+				File jarIn = getParameters().getInputJar().get();
+				File jarOut = getParameters().getOutputJar().get();
+				File nests = getParameters().getNestsFile().get();
+
+				nestJar(jarIn, jarOut, nests);
+			} catch (Exception e) {
+				throw new RuntimeException("error while running nester", e);
+			}
+		}
+	}
 
 	default void nestJar(File input, File output, File nests) throws IOException {
 		_nestJar(input, output, nests);

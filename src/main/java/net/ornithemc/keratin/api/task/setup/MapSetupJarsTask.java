@@ -19,31 +19,31 @@ public abstract class MapSetupJarsTask extends MinecraftTask implements Mapper {
 		if (details.sharedMappings()) {
 			workQueue.submit(MapJar.class, parameters -> {
 				parameters.getInput().set(files.getSetupMergedJar(minecraftVersion));
-				parameters.getOutput().set(files.getNamedSetupMergedJar(minecraftVersion));
-				parameters.getMappings().set(files.getCombinedSetupMergedMappings(minecraftVersion));
+				parameters.getOutput().set(files.getIntermediarySetupMergedJar(minecraftVersion));
+				parameters.getMappings().set(files.getSetupMergedIntermediaryMappings(minecraftVersion));
 				parameters.getLibraries().set(files.getLibraries(minecraftVersion));
 				parameters.getSourceNamespace().set("official");
-				parameters.getTargetNamespace().set("named");
+				parameters.getTargetNamespace().set("intermediary");
 			});
 		} else {
 			if (details.client()) {
 				workQueue.submit(MapJar.class, parameters -> {
 					parameters.getInput().set(files.getSetupClientJar(minecraftVersion));
-					parameters.getOutput().set(files.getNamedSetupClientJar(minecraftVersion));
-					parameters.getMappings().set(files.getCombinedSetupClientMappings(minecraftVersion));
+					parameters.getOutput().set(files.getIntermediarySetupClientJar(minecraftVersion));
+					parameters.getMappings().set(files.getSetupClientIntermediaryMappings(minecraftVersion));
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
 					parameters.getSourceNamespace().set("official");
-					parameters.getTargetNamespace().set("named");
+					parameters.getTargetNamespace().set("intermediary");
 				});
 			}
 			if (details.server()) {
 				workQueue.submit(MapJar.class, parameters -> {
 					parameters.getInput().set(files.getSetupServerJar(minecraftVersion));
-					parameters.getOutput().set(files.getNamedSetupServerJar(minecraftVersion));
-					parameters.getMappings().set(files.getCombinedSetupServerMappings(minecraftVersion));
+					parameters.getOutput().set(files.getIntermediarySetupServerJar(minecraftVersion));
+					parameters.getMappings().set(files.getSetupServerIntermediaryMappings(minecraftVersion));
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
 					parameters.getSourceNamespace().set("official");
-					parameters.getTargetNamespace().set("named");
+					parameters.getTargetNamespace().set("intermediary");
 				});
 			}
 		}

@@ -1,4 +1,4 @@
-package net.ornithemc.keratin.api.task.generation;
+package net.ornithemc.keratin.api.task.setup;
 
 import org.gradle.workers.WorkQueue;
 
@@ -8,7 +8,7 @@ import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
 
-public abstract class MapGeneratedJarsTask extends MinecraftTask implements Mapper {
+public abstract class MapSourceJarsTask extends MinecraftTask implements Mapper {
 
 	@Override
 	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
@@ -18,32 +18,32 @@ public abstract class MapGeneratedJarsTask extends MinecraftTask implements Mapp
 
 		if (details.sharedMappings()) {
 			workQueue.submit(MapJar.class, parameters -> {
-				parameters.getInput().set(files.getNamedGeneratedMergedJar(minecraftVersion));
-				parameters.getOutput().set(files.getGeneratedMergedJar(minecraftVersion));
+				parameters.getInput().set(files.getSourceMergedJar(minecraftVersion));
+				parameters.getOutput().set(files.getNamedSourceMergedJar(minecraftVersion));
 				parameters.getMappings().set(files.getSourceMergedMappings(minecraftVersion));
 				parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-				parameters.getSourceNamespace().set("named");
-				parameters.getTargetNamespace().set("official");
+				parameters.getSourceNamespace().set("official");
+				parameters.getTargetNamespace().set("named");
 			});
 		} else {
 			if (details.client()) {
 				workQueue.submit(MapJar.class, parameters -> {
-					parameters.getInput().set(files.getNamedGeneratedClientJar(minecraftVersion));
-					parameters.getOutput().set(files.getGeneratedClientJar(minecraftVersion));
+					parameters.getInput().set(files.getSourceClientJar(minecraftVersion));
+					parameters.getOutput().set(files.getNamedSourceClientJar(minecraftVersion));
 					parameters.getMappings().set(files.getSourceClientMappings(minecraftVersion));
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-					parameters.getSourceNamespace().set("named");
-					parameters.getTargetNamespace().set("official");
+					parameters.getSourceNamespace().set("official");
+					parameters.getTargetNamespace().set("named");
 				});
 			}
 			if (details.server()) {
 				workQueue.submit(MapJar.class, parameters -> {
-					parameters.getInput().set(files.getNamedGeneratedServerJar(minecraftVersion));
-					parameters.getOutput().set(files.getGeneratedServerJar(minecraftVersion));
+					parameters.getInput().set(files.getSourceServerJar(minecraftVersion));
+					parameters.getOutput().set(files.getNamedSourceServerJar(minecraftVersion));
 					parameters.getMappings().set(files.getSourceServerMappings(minecraftVersion));
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-					parameters.getSourceNamespace().set("named");
-					parameters.getTargetNamespace().set("official");
+					parameters.getSourceNamespace().set("official");
+					parameters.getTargetNamespace().set("named");
 				});
 			}
 		}

@@ -195,6 +195,30 @@ public interface OrnitheFilesAPI {
 
 	File getMergedSignatures(String minecraftVersion);
 
+	File getSetupClientJar(String minecraftVersion);
+
+	File getSetupServerJar(String minecraftVersion);
+
+	File getSetupMergedJar(String minecraftVersion);
+
+	File getIntermediarySetupClientJar(String minecraftVersion);
+
+	File getIntermediarySetupServerJar(String minecraftVersion);
+
+	File getIntermediarySetupMergedJar(String minecraftVersion);
+
+	File getSourceClientJar(String minecraftVersion);
+
+	File getSourceServerJar(String minecraftVersion);
+
+	File getSourceMergedJar(String minecraftVersion);
+
+	File getNamedSourceClientJar(String minecraftVersion);
+
+	File getNamedSourceServerJar(String minecraftVersion);
+
+	File getNamedSourceMergedJar(String minecraftVersion);
+
 	File getSetupClientIntermediaryMappings(String minecraftVersion);
 
 	File getSetupServerIntermediaryMappings(String minecraftVersion);
@@ -207,11 +231,11 @@ public interface OrnitheFilesAPI {
 
 	File getSetupMergedNamedMappings(String minecraftVersion);
 
-	File getCombinedSetupClientMappings(String minecraftVersion);
+	File getSourceClientMappings(String minecraftVersion);
 
-	File getCombinedSetupServerMappings(String minecraftVersion);
+	File getSourceServerMappings(String minecraftVersion);
 
-	File getCombinedSetupMergedMappings(String minecraftVersion);
+	File getSourceMergedMappings(String minecraftVersion);
 
 	File getSetupClientExceptions(String minecraftVersion);
 
@@ -224,18 +248,6 @@ public interface OrnitheFilesAPI {
 	File getSetupServerSignatures(String minecraftVersion);
 
 	File getSetupMergedSignatures(String minecraftVersion);
-
-	File getSetupClientJar(String minecraftVersion);
-
-	File getSetupServerJar(String minecraftVersion);
-
-	File getSetupMergedJar(String minecraftVersion);
-
-	File getNamedSetupClientJar(String minecraftVersion);
-
-	File getNamedSetupServerJar(String minecraftVersion);
-
-	File getNamedSetupMergedJar(String minecraftVersion);
 
 	File getBaseClientExceptions(String minecraftVersion);
 
