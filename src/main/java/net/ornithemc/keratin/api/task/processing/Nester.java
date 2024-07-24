@@ -7,6 +7,8 @@ import org.gradle.api.provider.Property;
 import org.gradle.workers.WorkAction;
 import org.gradle.workers.WorkParameters;
 
+import com.google.common.io.Files;
+
 import net.ornithemc.mappingutils.MappingUtils;
 import net.ornithemc.mappingutils.io.Format;
 import net.ornithemc.nester.NesterException;
@@ -32,7 +34,11 @@ public interface Nester {
 				File jarOut = getParameters().getOutputJar().get();
 				File nests = getParameters().getNestsFile().get();
 
-				nestJar(jarIn, jarOut, nests);
+				if (nests != null) {
+					nestJar(jarIn, jarOut, nests);
+				} else {
+					Files.copy(jarIn, jarOut);
+				}
 			} catch (Exception e) {
 				throw new RuntimeException("error while running nester", e);
 			}
