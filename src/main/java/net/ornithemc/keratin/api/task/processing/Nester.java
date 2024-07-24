@@ -32,7 +32,7 @@ public interface Nester {
 			try {
 				File jarIn = getParameters().getInputJar().get();
 				File jarOut = getParameters().getOutputJar().get();
-				File nests = getParameters().getNestsFile().get();
+				File nests = getParameters().getNestsFile().getOrNull();
 
 				if (nests != null) {
 					nestJar(jarIn, jarOut, nests);
