@@ -7,6 +7,7 @@ import java.util.Map;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Internal;
 import org.gradle.workers.WorkQueue;
+
 import org.objectweb.asm.commons.Remapper;
 
 import com.google.common.io.Files;
@@ -140,7 +141,7 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 		}
 
 		Matches matches = keratin.findMatches(fromSide, fromMinecraftVersion, toSide, toMinecraftVersion);
-		Remapper mapper = MatchesUtil.makeAsmRemapper(matches.file(), matches.inverted());
+		Remapper mapper = MatchesUtil.makeRemapper(matches.file(), matches.inverted());
 
 		SigsFile fromSigs = new SigsFile();
 		SigsFile toSigs = new SigsFile();
@@ -161,12 +162,22 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 			SigsClass toCls = new SigsClass();
 
 			String fromClsSig = fromCls.signatureInfo.signature();
-			String toClsSig = mapper.mapSignature(fromClsSig, false);
-			toCls.signatureInfo = new SignatureInfo(fromCls.signatureInfo.mode(), toClsSig);
+
+			if (fromClsSig != null) {
+				String toClsSig = mapper.mapSignature(fromClsSig, false);
+
+				if (toClsSig == null) {
+					continue;
+				}
+
+				toCls.signatureInfo = new SignatureInfo(fromCls.signatureInfo.mode(), toClsSig);
+			}
 
 			toSigs.classes.put(toClsName, toCls);
 
 			for (Map.Entry<MemberReference, SignatureInfo> me : fromCls.members.entrySet()) {
+				mapper.map(fromClsName);
+
 				String fromMmbName = me.getKey().name();
 				String fromMmbDesc = me.getKey().desc().getDescriptor();
 				String toMmbName = (fromMmbDesc.charAt(0) == '(')
@@ -180,9 +191,13 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 
 				SignatureInfo fromMtd = me.getValue();
 				String fromMmbSig = fromMtd.signature();
-				String toMmbSig = mapper.mapSignature(fromMmbSig, false);
-				SignatureInfo toMtd = new SignatureInfo(fromMtd.mode(), toMmbSig);
+				String toMmbSig = mapper.mapSignature(fromMmbSig, fromMmbDesc.charAt(0) != '(');
 
+				if (toMmbSig == null) {
+					continue;
+				}
+
+				SignatureInfo toMtd = new SignatureInfo(fromMtd.mode(), toMmbSig);
 				toCls.members.put(new MemberReference(toMmbName, toMmbDesc), toMtd);
 			}
 		}

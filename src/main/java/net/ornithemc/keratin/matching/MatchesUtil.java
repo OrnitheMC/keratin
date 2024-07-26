@@ -14,7 +14,7 @@ import net.ornithemc.mappingutils.io.matcher.MatchesReader;
 
 public class MatchesUtil {
 
-	public static Remapper makeAsmRemapper(File file, boolean inverted) throws IOException {
+	public static Remapper makeRemapper(File file, boolean inverted) throws IOException {
 		Matches matches = MatchesReader.read(file.toPath());
 		MatchSide side = inverted ? MatchSide.B : MatchSide.A;
 
@@ -29,29 +29,38 @@ public class MatchesUtil {
 				currentClass = matches.getClass(className, side);
 				currentField = null;
 				currentMethod = null;
-				return currentClass == null ? className : (currentClass.matched() ? currentClass.get(side.opposite()) : null);
+				return currentClass == null ? className : (currentClass.matched() ? currentClass.name(side.opposite()) : null);
 			}
 
 			@Override
 			public String mapFieldName(String className, String name, String descriptor) {
 				currentField = (currentClass == null || !currentClass.matched()) ? null : currentClass.getField(name, descriptor, side);
 				currentMethod = null;
-				return currentField == null ? name : (currentField.matched() ? currentField.get(side.opposite()) : null);
+				return currentField == null ? name : (currentField.matched() ? currentField.name(side.opposite()) : null);
 			}
 
 			@Override
 			public String mapMethodName(String className, String name, String descriptor) {
 				currentMethod = (currentClass == null || !currentClass.matched()) ? null : currentClass.getMethod(name, descriptor, side);
 				currentField = null;
-				return currentMethod == null ? name : (currentMethod.matched() ? currentMethod.get(side.opposite()) : null);
+				return currentMethod == null ? name : (currentMethod.matched() ? currentMethod.name(side.opposite()) : null);
 			}
 
 			@Override
 			public String mapDesc(String descriptor) {
-				if (descriptor.charAt(0) != '(') {
-					return currentField == null ? descriptor : (currentField.matched() ? currentField.desc(side.opposite()) : null);
-				} else {
+				if (descriptor.charAt(0) == '(') {
 					return currentMethod == null ? descriptor : (currentMethod.matched() ? currentMethod.desc(side.opposite()) : null);
+				} else {
+					return currentField == null ? descriptor : (currentField.matched() ? currentField.desc(side.opposite()) : null);
+				}
+			}
+
+			@Override
+			public String mapSignature(String signature, boolean typeSignature) {
+				try {
+					return super.mapSignature(signature, typeSignature);
+				} catch (Throwable t) {
+					return null;
 				}
 			}
 		};

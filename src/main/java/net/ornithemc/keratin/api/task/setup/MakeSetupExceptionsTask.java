@@ -138,7 +138,7 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 		}
 
 		Matches matches = keratin.findMatches(fromSide, fromMinecraftVersion, toSide, toMinecraftVersion);
-		Remapper mapper = MatchesUtil.makeAsmRemapper(matches.file(), matches.inverted());
+		Remapper mapper = MatchesUtil.makeRemapper(matches.file(), matches.inverted());
 
 		ExceptionsFile fromExcs = ExceptorIo.read(from.toPath());
 		ExceptionsFile toExcs = new ExceptionsFile();
@@ -157,6 +157,8 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 			toExcs.classes().put(toCls.name(), toCls);
 
 			for (Map.Entry<String, MethodEntry> me : fromCls.methods().entrySet()) {
+				mapper.map(fromClsName);
+
 				String fromMtdName = me.getValue().name();
 				String fromMtdDesc = me.getValue().descriptor();
 				String toMtdName = mapper.mapMethodName(fromClsName, fromMtdName, fromMtdDesc);
@@ -167,7 +169,7 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 				}
 
 				MethodEntry fromMtd = me.getValue();
-				MethodEntry toMtd = new MethodEntry(fromMtdName, fromMtdDesc);
+				MethodEntry toMtd = new MethodEntry(toMtdName, toMtdDesc);
 
 				toCls.methods().put(toMtd.name() + toMtd.descriptor(), toMtd);
 
