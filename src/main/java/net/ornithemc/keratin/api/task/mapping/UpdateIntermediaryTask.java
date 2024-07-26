@@ -76,7 +76,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 				if (fromDetailses.size() == 1) {
 					VersionDetails fromDetails = fromDetailses.get(0);
 
-					if (!details.client() || !details.server()) {
+					if (!fromDetails.client() || !fromDetails.server()) {
 						throw new RuntimeException("update intermediary to a split-mappings version requires both a client and server to update from!");
 					}
 				} else if (fromDetailses.size() == 2) {
@@ -204,13 +204,13 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 					File fromClientFile = null;
 					File fromServerFile = null;
 
-					if (fromDetails0.client()) {
+					if (fromDetails0.client() && fromDetails1.server()) {
 						fromClientVersion = fromMinecraftVersions.get(0);
 						fromServerVersion = fromMinecraftVersions.get(1);
 						fromClientFile = fromFiles.get(0);
 						fromServerFile = fromFiles.get(1);
 					}
-					if (fromDetails0.server()) {
+					if (fromDetails0.server() && fromDetails1.client()) {
 						fromClientVersion = fromMinecraftVersions.get(1);
 						fromServerVersion = fromMinecraftVersions.get(0);
 						fromClientFile = fromFiles.get(1);

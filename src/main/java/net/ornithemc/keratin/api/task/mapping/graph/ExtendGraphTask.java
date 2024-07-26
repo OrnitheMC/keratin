@@ -2,7 +2,11 @@ package net.ornithemc.keratin.api.task.mapping.graph;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Internal;
 import org.gradle.workers.WorkQueue;
@@ -14,24 +18,24 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 public abstract class ExtendGraphTask extends MinecraftTask implements MappingsGraph {
 
 	@Internal
-	public abstract Property<String> getFromMinecraftVersion();
+	public abstract ListProperty<String> getFromMinecraftVersions();
 
-	@Internal
-	public abstract Property<String> getFromFromMinecraftVersion();
+	public void fromMinecraftVersions(String... minecraftVersions) {
+		getFromMinecraftVersions().set(Arrays.asList(minecraftVersions));
+	}
 
 	@Internal
 	public abstract Property<String> getClassNamePattern();
 
 	@Override
 	public void run(WorkQueue workQueue, String minecraftVersion) throws IOException {
-		String fromMinecraftVersion = getFromMinecraftVersion().get();
-		String fromFromMinecraftVersion = getFromFromMinecraftVersion().getOrNull();
+		List<String> fromMinecraftVersions = getFromMinecraftVersions().getOrNull();
 
-		if (fromFromMinecraftVersion == null) {
-			getProject().getLogger().lifecycle("extending the graph from Minecraft " + fromMinecraftVersion + " to " + minecraftVersion);
-		} else {
-			getProject().getLogger().lifecycle("extending the graph from Minecraft " + fromFromMinecraftVersion + "/" + fromMinecraftVersion + " to " + minecraftVersion);
+		if (fromMinecraftVersions == null || fromMinecraftVersions.isEmpty()) {
+			throw new IllegalStateException("no Minecraft version specified to extend from");
 		}
+
+		getProject().getLogger().lifecycle("extending the graph from Minecraft " + String.join("/", fromMinecraftVersions) + " to " + minecraftVersion);
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
@@ -40,9 +44,11 @@ public abstract class ExtendGraphTask extends MinecraftTask implements MappingsG
 		String classNamePattern = getClassNamePattern().getOrElse("");
 
 		File jar = files.getMainProcessedIntermediaryJar(minecraftVersion);
-		File fromJar = files.getMainProcessedIntermediaryJar(fromMinecraftVersion);
-		File fromFromJar = (fromFromMinecraftVersion == null) ? null : files.getMainProcessedIntermediaryJar(fromFromMinecraftVersion);
+		List<File> fromJars = new ArrayList<>();
+		for (String fromMinecraftVersion : fromMinecraftVersions) {
+			fromJars.add(files.getMainProcessedIntermediaryJar(fromMinecraftVersion));
+		}
 
-		extendGraph(graphDir, minecraftVersion, fromMinecraftVersion, fromFromMinecraftVersion, jar, fromJar, fromFromJar, classNamePattern);
+		extendGraph(graphDir, minecraftVersion, fromMinecraftVersions, jar, fromJars, classNamePattern);
 	}
 }

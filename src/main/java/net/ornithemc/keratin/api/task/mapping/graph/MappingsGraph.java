@@ -2,7 +2,7 @@ package net.ornithemc.keratin.api.task.mapping.graph;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
@@ -40,79 +40,82 @@ public interface MappingsGraph {
 		generateDummyMappings(rootMinecraftJar, classNamePattern, rootMappings);
 	}
 
-	default void extendGraph(File graphDir, String minecraftVersion, String fromMinecraftVersion, String fromFromMinecraftVersion, File jar, File fromJar, File fromFromJar, String classNamePattern) throws IOException {
+	default void extendGraph(File graphDir, String minecraftVersion, List<String> fromMinecraftVersions, File jar, List<File> fromJars, String classNamePattern) throws IOException {
 		VersionGraph graph = VersionGraph.of(GRAPH_FORMAT, graphDir.toPath());
 
 		if (graph.hasVersion(minecraftVersion)) {
 			throw new RuntimeException("cannot extend graph to " + minecraftVersion + "S: version already exists in graph!");
 		}
-		if (!graph.hasVersion(fromMinecraftVersion)) {
-			throw new RuntimeException("cannot extend graph from " + fromMinecraftVersion + ": version does not exist in the graph!");
-		}
-		if (fromFromMinecraftVersion != null && !graph.hasVersion(fromFromMinecraftVersion)) {
-			throw new RuntimeException("cannot extend graph from " + fromFromMinecraftVersion + ": version does not exist in the graph!");
-		}
+		for (int i = 0; i < fromMinecraftVersions.size(); i++) {
+			String fromMinecraftVersion = fromMinecraftVersions.get(i);
 
-		if (!Files.exists(fromJar.toPath())) {
-			throw new RuntimeException("cannot extend graph from " + fromMinecraftVersion + ": no processed intermediary mapped jar provided!");
-		}
-		if (fromFromMinecraftVersion != null && !Files.exists(fromFromJar.toPath())) {
-			throw new RuntimeException("cannot extend graph from " + fromFromMinecraftVersion + ": no processed intermediary mapped jar found!");
+			if (!graph.hasVersion(fromMinecraftVersion)) {
+				throw new RuntimeException("cannot extend graph from " + fromMinecraftVersion + ": version does not exist in the graph!");
+			}
+			if (!fromJars.get(i).exists()) {
+				throw new RuntimeException("cannot extend graph from " + fromMinecraftVersion + ": no processed intermediary mapped jar provided!");
+			}
 		}
 
-		File diff = new File(graphDir, "%s#%s.tinydiff".formatted(fromMinecraftVersion, minecraftVersion));
-		File diff1 = fromFromMinecraftVersion == null ? null : new File(graphDir, "%s#%s.tinydiff".formatted(fromFromMinecraftVersion, minecraftVersion));
+		File tmpDir = new File(graphDir, ".tmp");
+		File extendedMappings = new File(tmpDir, "mappings.tiny");
+		File tmpGraphDir = new File(graphDir, ".mappings");
 
-		File tmpGraphDir = new File(".mappings");
-		File dummy = new File(tmpGraphDir, "%s.tiny".formatted(minecraftVersion));
-		File fromDummy = new File(tmpGraphDir, "%s.tiny".formatted(fromMinecraftVersion));
-		File fromFromDummy = fromFromMinecraftVersion == null ? null : new File(tmpGraphDir, "%s.tiny".formatted(fromFromMinecraftVersion));
-		File tmpDiff = new File(tmpGraphDir, "%s#%s.tinydiff".formatted(fromMinecraftVersion, minecraftVersion));
-		File tmpDiff1 = fromFromMinecraftVersion == null ? null : new File(tmpGraphDir, "%s#%s.tinydiff".formatted(fromFromMinecraftVersion, minecraftVersion));
-		File tmpDiff2 = fromFromMinecraftVersion == null ? null : new File(tmpGraphDir, "%s#%s.tinydiff".formatted(fromFromMinecraftVersion, fromMinecraftVersion));
+		for (int i = 0; i < fromMinecraftVersions.size(); i++) {
+			String fromMinecraftVersion = fromMinecraftVersions.get(i);
+			File fromJar = fromJars.get(i);
 
-		if (tmpGraphDir.exists()) {
-			FileUtils.forceDelete(tmpGraphDir);
+			File tmpTiny = new File(tmpGraphDir, "%s.tiny".formatted(minecraftVersion));
+			File tmpFromTiny = new File(tmpGraphDir, "%s.tiny".formatted(fromMinecraftVersion));
+			File tmpDiff = new File(tmpGraphDir, "%s#%s.tinydiff".formatted(fromMinecraftVersion, minecraftVersion));
+
+			if (tmpGraphDir.exists()) {
+				FileUtils.forceDelete(tmpGraphDir);
+			}
+			tmpGraphDir.mkdirs();
+
+			generateDummyMappings(jar, classNamePattern, tmpTiny);
+			generateDummyMappings(fromJar, classNamePattern, tmpFromTiny);
+			diffDummyMappings(tmpFromTiny, tmpTiny, tmpDiff);
+
+			FileUtils.forceDelete(tmpTiny);
+
+			if (extendedMappings.exists()) {
+				VersionGraph tmpGraph = VersionGraph.of(GRAPH_FORMAT, tmpGraphDir.toPath());
+
+				Mappings current = MappingUtils.separateMappings(tmpGraph, minecraftVersion);
+				Mappings working = GRAPH_FORMAT.readMappings(extendedMappings.toPath());
+				MappingsDiff changes = MappingUtils.diffMappings(current, working);
+
+				saveChanges(tmpGraph, changes, minecraftVersion);
+			}
+
+			VersionGraph tmpGraph = VersionGraph.of(GRAPH_FORMAT, tmpGraphDir.toPath());
+
+			Mappings current = MappingUtils.separateMappings(tmpGraph, fromMinecraftVersion);
+			Mappings working = MappingUtils.separateMappings(graph, fromMinecraftVersion);
+			MappingsDiff changes = MappingUtils.diffMappings(current, working);
+
+			saveChanges(tmpGraph, changes, fromMinecraftVersion);
+
+			if (extendedMappings.exists()) {
+				FileUtils.forceDelete(extendedMappings);
+			}
+			tmpDir.mkdirs();
+
+			MappingUtils.separateMappings(GRAPH_FORMAT, tmpGraphDir.toPath(), extendedMappings.toPath(), minecraftVersion);
 		}
-		tmpGraphDir.mkdirs();
+		for (String fromMinecraftVersion : fromMinecraftVersions) {
+			File diffFile = new File(graphDir, "%s#%s.tinydiff".formatted(fromMinecraftVersion, minecraftVersion));
 
-		generateDummyMappings(jar, classNamePattern, dummy);
-		generateDummyMappings(fromJar, classNamePattern, fromDummy);
-		if (fromFromMinecraftVersion != null) {
-			generateDummyMappings(fromFromJar, classNamePattern, fromFromDummy);
-		}
-		diffDummyMappings(fromDummy, dummy, tmpDiff);
-		if (fromFromMinecraftVersion != null) {
-			diffDummyMappings(fromFromDummy, dummy, tmpDiff1);
-			diffDummyMappings(fromFromDummy, fromDummy, tmpDiff2);
+			Mappings fromMappings = MappingUtils.separateMappings(graph, fromMinecraftVersion);
+			Mappings mappings = GRAPH_FORMAT.readMappings(extendedMappings.toPath());
+			MappingsDiff diff = MappingUtils.diffMappings(fromMappings, mappings);
+
+			GRAPH_FORMAT.writeDiff(diffFile.toPath(), diff);
 		}
 
-		FileUtils.forceDelete(dummy);
-		if (fromFromMinecraftVersion != null) {
-			FileUtils.forceDelete(fromDummy);
-		}
-
-		VersionGraph tmpGraph = VersionGraph.of(Format.TINY_V2, tmpGraphDir.toPath());
-
-		if (fromFromMinecraftVersion != null) {
-			Mappings mappings = MappingUtils.separateMappings(graph, fromFromMinecraftVersion);
-			Mappings tmpMappings = MappingUtils.separateMappings(tmpGraph, fromFromMinecraftVersion);
-			MappingsDiff changes = MappingUtils.diffMappings(tmpMappings, mappings);
-
-			saveChanges(tmpGraph, changes, fromFromMinecraftVersion);
-		}
-
-		Mappings mappings = MappingUtils.separateMappings(graph, fromMinecraftVersion);
-		Mappings tmpMappings = MappingUtils.separateMappings(tmpGraph, fromMinecraftVersion);
-		MappingsDiff changes = MappingUtils.diffMappings(tmpMappings, mappings);
-
-		saveChanges(tmpGraph, changes, fromMinecraftVersion);
-
-		Files.copy(tmpDiff.toPath(), diff.toPath());
-		if (fromFromMinecraftVersion != null) {
-			Files.copy(tmpDiff1.toPath(), diff1.toPath());
-		}
-
+		FileUtils.forceDelete(tmpDir);
 		FileUtils.forceDelete(tmpGraphDir);
 	}
 
