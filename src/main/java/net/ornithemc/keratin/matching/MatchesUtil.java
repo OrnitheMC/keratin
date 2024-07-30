@@ -24,11 +24,17 @@ public class MatchesUtil {
 			private FieldMatch currentField;
 			private MethodMatch currentMethod;
 
+			private boolean inSignature;
+			private boolean signatureValid;
+
 			@Override
 			public String map(String className) {
 				currentClass = matches.getClass(className, side);
 				currentField = null;
 				currentMethod = null;
+				if (inSignature && (currentClass == null || !currentClass.matched())) {
+					signatureValid = false;
+				}
 				return currentClass == null ? className : (currentClass.matched() ? currentClass.name(side.opposite()) : null);
 			}
 
@@ -58,7 +64,19 @@ public class MatchesUtil {
 			@Override
 			public String mapSignature(String signature, boolean typeSignature) {
 				try {
-					return super.mapSignature(signature, typeSignature);
+					inSignature = true;
+					signatureValid = true;
+
+					signature = super.mapSignature(signature, typeSignature);
+
+					if (!signatureValid) {
+						signature = null;
+					}
+
+					inSignature = false;
+					signatureValid = false;
+
+					return signature;
 				} catch (Throwable t) {
 					return null;
 				}
