@@ -52,7 +52,6 @@ public interface Nester {
 	static void _nestJar(File input, File output, File nests) throws IOException {
 		try {
 			net.ornithemc.nester.Nester.nestJar(
-				new net.ornithemc.nester.Nester.Options().silent(true),
 				input.toPath(),
 				output.toPath(),
 				nests.toPath()
