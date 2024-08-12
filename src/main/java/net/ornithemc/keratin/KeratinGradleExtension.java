@@ -294,6 +294,13 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				cacheDir.mkdirs();
 			}
 		}
+		if (selection == TaskSelection.FEATHER) {
+			File runDir = files.getRunDirectory();
+
+			if (!runDir.exists()) {
+				runDir.mkdirs();
+			}
+		}
 
 		File versionsManifest = files.getVersionsManifest();
 
