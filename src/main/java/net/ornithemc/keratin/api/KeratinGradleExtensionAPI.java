@@ -1,5 +1,6 @@
 package net.ornithemc.keratin.api;
 
+import org.gradle.api.Action;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 
@@ -22,6 +23,10 @@ public interface KeratinGradleExtensionAPI {
 	void tasks(TaskSelection selection) throws Exception;
 
 	OrnitheFilesAPI getFiles();
+
+	PublicationsAPI getPublications();
+
+	void publications(Action<PublicationsAPI> action);
 
 	VersionsManifest getVersionsManifest();
 

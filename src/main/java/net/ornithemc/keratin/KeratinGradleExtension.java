@@ -37,6 +37,7 @@ import com.google.gson.JsonObject;
 
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.KeratinGradleExtensionAPI;
+import net.ornithemc.keratin.api.PublicationsAPI;
 import net.ornithemc.keratin.api.TaskSelection;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.manifest.VersionInfo;
@@ -120,6 +121,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private final CalamusVersions calamusVersions;
 	private final FeatherVersions featherVersions;
 
+	private final PublicationsAPI publications;
+
 	private final Property<String> globalCacheDir;
 	private final Property<String> localCacheDir;
 	private final ListProperty<String> minecraftVersions;
@@ -137,6 +140,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.files = new OrnitheFiles(this);
 		this.calamusVersions = new CalamusVersions(this);
 		this.featherVersions = new FeatherVersions(this);
+
+		this.publications = this.project.getObjects().newInstance(PublicationsAPI.class);
 
 		this.globalCacheDir = this.project.getObjects().property(String.class);
 		this.globalCacheDir.convention(Constants.ORNITHE_GLOBAL_CACHE_DIR);
@@ -379,6 +384,15 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			dependencies.add(decompileClasspath.getName(), "org.vineflower:vineflower:1.10.1");
 		}
 
+		publications.getGroupId().convention(project.provider(() -> "net.ornithemc"));
+
+		if (selection == TaskSelection.CALAMUS) {
+			publications.getArtifactId().convention(project.provider(() -> "calamus-intermediary-gen%d".formatted(intermediaryGen.get())));
+		}
+		if (selection == TaskSelection.FEATHER) {
+			publications.getArtifactId().convention(project.provider(() -> "feather-gen%d".formatted(intermediaryGen.get())));
+		}
+
 		return minecraftVersions;
 	}
 
@@ -480,8 +494,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				tasks.getByName("build").dependsOn(tinyV1Jar, tinyV2Jar);
 
 				MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
-					publication.setGroupId("net.ornithemc");
-					publication.setArtifactId("calamus-intermediary-gen%d".formatted(intermediaryGen.get()));
+					publication.setGroupId(this.publications.getGroupId().get());
+					publication.setArtifactId(this.publications.getArtifactId().get());
 					publication.setVersion(minecraftVersion);
 
 					publication.artifact(tinyV1Jar);
@@ -656,8 +670,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					tasks.getByName("build").dependsOn(mergedTinyV1Jar, tinyV2Jar, mergedTinyV2Jar, javadocJar);
 
 					MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
-						publication.setGroupId("net.ornithemc");
-						publication.setArtifactId("feather-gen%d".formatted(intermediaryGen.get()));
+						publication.setGroupId(this.publications.getGroupId().get());
+						publication.setArtifactId(this.publications.getArtifactId().get());
 						publication.setVersion("%s+build.%d".formatted(minecraftVersion, getNextFeatherBuild(minecraftVersion)));
 
 						publication.artifact(mergedTinyV1Jar);
@@ -758,6 +772,16 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	@Override
 	public OrnitheFiles getFiles() {
 		return files;
+	}
+
+	@Override
+	public PublicationsAPI getPublications() {
+		return publications;
+	}
+
+	@Override
+	public void publications(Action<PublicationsAPI> action) {
+		action.execute(publications);
 	}
 
 	@Override
