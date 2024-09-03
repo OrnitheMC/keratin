@@ -29,7 +29,7 @@ public abstract class SaveMappingsIntoGraphTask extends MinecraftTask implements
 		File input = files.getWorkingDirectory(minecraftVersion);
 		PropagationDirection propagationDir = getPropagationDirection().get();
 
-		saveMappings(minecraftVersion, graphDir, input, Format.ENIGMA_DIR, Validators.INSERT_DUMMY_MAPPINGS, propagationDir);
-		loadMappings(minecraftVersion, graphDir, input, Format.ENIGMA_DIR, Validators.REMOVE_DUMMY_MAPPINGS);
+		saveMappings(minecraftVersion, graphDir, input, Format.ENIGMA_DIR, Validators.insertDummyMappings(), propagationDir);
+		loadMappings(minecraftVersion, graphDir, input, Format.ENIGMA_DIR, Validators.removeDummyMappings(false));
 	}
 }

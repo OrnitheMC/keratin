@@ -67,7 +67,7 @@ public abstract class PrepareBuildTask extends MinecraftTask implements Mappings
 			File output = getParameters().getOutput().get();
 
 			try {
-				loadMappings(minecraftVersion, graphDir, processedOutput, Format.TINY_V2, Validators.REMOVE_DUMMY_MAPPINGS);
+				loadMappings(minecraftVersion, graphDir, processedOutput, Format.TINY_V2, Validators.removeDummyMappings(true));
 
 				if (nests == null) {
 					Files.copy(processedOutput, output);

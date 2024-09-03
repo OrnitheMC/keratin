@@ -62,7 +62,7 @@ public abstract class BuildProcessedMappingsTask extends MinecraftTask {
 			File output = getParameters().getOutput().get();
 
 			try {
-				loadMappings(minecraftVersion, graphDir, output, Format.TINY_V2, Validators.REMOVE_DUMMY_MAPPINGS);
+				loadMappings(minecraftVersion, graphDir, output, Format.TINY_V2, Validators.removeDummyMappings(true));
 
 				MemoryMappingTree mappings = new MemoryMappingTree();
 				MappingReader.read(output.toPath(), mappings);

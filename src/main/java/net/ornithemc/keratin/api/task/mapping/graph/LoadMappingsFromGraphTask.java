@@ -42,6 +42,6 @@ public abstract class LoadMappingsFromGraphTask extends MinecraftTask implements
 		File graphDir = files.getMappingsDirectory();
 		File output = files.getWorkingDirectory(minecraftVersion);
 
-		loadMappings(minecraftVersion, graphDir, output, Format.ENIGMA_DIR, Validators.REMOVE_DUMMY_MAPPINGS);
+		loadMappings(minecraftVersion, graphDir, output, Format.ENIGMA_DIR, Validators.removeDummyMappings(false));
 	}
 }
