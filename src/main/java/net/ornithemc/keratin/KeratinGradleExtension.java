@@ -280,6 +280,10 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	@SuppressWarnings("unused")
 	private Set<String> configure(TaskSelection selection) throws Exception {
+		if (intermediaryGen.get() < 2) {
+			throw new RuntimeException("gen1 is not supported at this time");
+		}
+
 		Set<String> minecraftVersions = new LinkedHashSet<>();
 
 		if (!this.minecraftVersions.get().isEmpty()) {

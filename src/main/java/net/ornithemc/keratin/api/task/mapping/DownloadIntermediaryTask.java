@@ -17,10 +17,6 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 
 		int intermediaryGen = keratin.getIntermediaryGen().get();
 
-		if (intermediaryGen == 1) {
-			throw new IllegalStateException("gen1 intermediary is not supported at this time");
-		}
-
 		downloadAndExtract(
 			Constants.calamusGen2Url(minecraftVersion, intermediaryGen),
 			"mappings/mappings.tiny",
