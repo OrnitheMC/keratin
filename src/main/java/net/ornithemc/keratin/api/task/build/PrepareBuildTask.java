@@ -12,6 +12,7 @@ import org.gradle.workers.WorkQueue;
 import com.google.common.io.Files;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.graph.MappingsGraph;
@@ -22,7 +23,7 @@ import net.ornithemc.mappingutils.io.Format;
 public abstract class PrepareBuildTask extends MinecraftTask implements MappingsGraph {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
 
@@ -33,7 +34,7 @@ public abstract class PrepareBuildTask extends MinecraftTask implements Mappings
 		}
 
 		workQueue.submit(PrepareBuild.class, parameters -> {
-			parameters.getMinecraftVersion().set(minecraftVersion);
+			parameters.getMinecraftVersion().set(minecraftVersion.id());
 			parameters.getGraphDirectory().set(files.getMappingsDirectory());
 			parameters.getNests().set(files.getMainIntermediaryNests(minecraftVersion));
 			parameters.getProcessedOutput().set(files.getProcessedNamedMappings(minecraftVersion));

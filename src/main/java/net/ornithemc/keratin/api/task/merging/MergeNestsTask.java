@@ -4,22 +4,21 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 
 public abstract class MergeNestsTask extends MergeTask {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		String namespace = getNamespace().get();
 
 		validateNamespace(namespace);
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.client() && details.server() && !details.sharedMappings()) {
+		if (!minecraftVersion.canBeMergedAsObfuscated()) {
 			int clientBuild = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
 			int serverBuild = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
 

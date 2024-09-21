@@ -5,8 +5,8 @@ import java.io.File;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.Exceptor;
 import net.ornithemc.mappingutils.MappingUtils;
@@ -14,12 +14,11 @@ import net.ornithemc.mappingutils.MappingUtils;
 public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implements Exceptor {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.sharedMappings()) {
+		if (minecraftVersion.hasSharedObfuscation()) {
 			File jar = files.getGeneratedMergedJar(minecraftVersion);
 			File excs = files.getGeneratedMergedExceptions(minecraftVersion);
 			File nests = files.getMergedNests(minecraftVersion);
@@ -36,7 +35,7 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 				);
 			}
 		} else {
-			if (details.client()) {
+			if (minecraftVersion.hasClient()) {
 				File jar = files.getGeneratedClientJar(minecraftVersion);
 				File excs = files.getGeneratedClientExceptions(minecraftVersion);
 				File nests = files.getClientNests(minecraftVersion);
@@ -53,7 +52,7 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 					);
 				}
 			}
-			if (details.server()) {
+			if (minecraftVersion.hasServer()) {
 				File jar = files.getGeneratedServerJar(minecraftVersion);
 				File excs = files.getGeneratedServerExceptions(minecraftVersion);
 				File nests = files.getServerNests(minecraftVersion);

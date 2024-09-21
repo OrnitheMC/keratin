@@ -12,8 +12,8 @@ import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
 
 import net.ornithemc.keratin.api.GameSide;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.enigma.EnigmaSession;
 import net.ornithemc.keratin.util.Versioned;
 
@@ -46,138 +46,141 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Property<File> signaturesDir;
 	private final Property<File> matchesDir;
 	private final Property<File> runDir;
-	private final Versioned<File> workingDir;
-	private final Versioned<File> enigmaSessionLock;
-	private final Versioned<File> decompiledSrcDir;
-	private final Versioned<File> fakeSrcDir;
-	private final Versioned<File> javadocDir;
+	private final Versioned<MinecraftVersion, File> workingDir;
+	private final Versioned<MinecraftVersion, File> enigmaSessionLock;
+	private final Versioned<MinecraftVersion, File> decompiledSrcDir;
+	private final Versioned<String, File> fakeSrcDir;
+	private final Versioned<String, File> javadocDir;
 
 	private final Property<File> versionsManifest;
-	private final Versioned<File> versionInfos;
-	private final Versioned<File> versionDetails;
+	private final Versioned<String, File> versionInfos;
+	private final Versioned<String, File> versionDetails;
 
-	private final Versioned<File> clientJar;
-	private final Versioned<File> serverJar;
-	private final Versioned<File> mergedJar;
-	private final Versioned<File> intermediaryClientJar;
-	private final Versioned<File> intermediaryServerJar;
-	private final Versioned<File> intermediaryMergedJar;
-	private final Versioned<File> exceptionsPatchedIntermediaryClientJar;
-	private final Versioned<File> exceptionsPatchedIntermediaryServerJar;
-	private final Versioned<File> exceptionsPatchedIntermediaryMergedJar;
-	private final Versioned<File> signaturePatchedIntermediaryClientJar;
-	private final Versioned<File> signaturePatchedIntermediaryServerJar;
-	private final Versioned<File> signaturePatchedIntermediaryMergedJar;
-	private final Versioned<File> nestedIntermediaryClientJar;
-	private final Versioned<File> nestedIntermediaryServerJar;
-	private final Versioned<File> nestedIntermediaryMergedJar;
-	private final Versioned<File> processedIntermediaryClientJar;
-	private final Versioned<File> processedIntermediaryServerJar;
-	private final Versioned<File> processedIntermediaryMergedJar;
+	private final Versioned<MinecraftVersion, File> clientJar;
+	private final Versioned<MinecraftVersion, File> serverJar;
+	private final Versioned<MinecraftVersion, File> mergedJar;
+	private final Versioned<MinecraftVersion, File> intermediaryClientJar;
+	private final Versioned<MinecraftVersion, File> intermediaryServerJar;
+	private final Versioned<MinecraftVersion, File> intermediaryMergedJar;
+	private final Versioned<MinecraftVersion, File> exceptionsPatchedIntermediaryClientJar;
+	private final Versioned<MinecraftVersion, File> exceptionsPatchedIntermediaryServerJar;
+	private final Versioned<MinecraftVersion, File> exceptionsPatchedIntermediaryMergedJar;
+	private final Versioned<MinecraftVersion, File> signaturePatchedIntermediaryClientJar;
+	private final Versioned<MinecraftVersion, File> signaturePatchedIntermediaryServerJar;
+	private final Versioned<MinecraftVersion, File> signaturePatchedIntermediaryMergedJar;
+	private final Versioned<MinecraftVersion, File> nestedIntermediaryClientJar;
+	private final Versioned<MinecraftVersion, File> nestedIntermediaryServerJar;
+	private final Versioned<MinecraftVersion, File> nestedIntermediaryMergedJar;
+	private final Versioned<MinecraftVersion, File> processedIntermediaryClientJar;
+	private final Versioned<MinecraftVersion, File> processedIntermediaryServerJar;
+	private final Versioned<MinecraftVersion, File> processedIntermediaryMergedJar;
 
-	private final Versioned<File> namedJar;
-	private final Versioned<File> processedNamedJar;
+	private final Versioned<String, File> namedJar;
+	private final Versioned<String, File> processedNamedJar;
 
-	private final Versioned<File> clientIntermediaryMappings;
-	private final Versioned<File> serverIntermediaryMappings;
-	private final Versioned<File> mergedIntermediaryMappings;
+	private final Versioned<MinecraftVersion, File> clientIntermediaryMappings;
+	private final Versioned<MinecraftVersion, File> serverIntermediaryMappings;
+	private final Versioned<MinecraftVersion, File> mergedIntermediaryMappings;
 
-	private final Versioned<File> namedMappings;
-	private final Versioned<File> processedNamedMappings;
-	private final Versioned<File> completedNamedMappings;
-	private final Versioned<File> tinyV1NamedMappings;
-	private final Versioned<File> tinyV2NamedMappings;
-	private final Versioned<File> mergedTinyV1NamedMappings;
-	private final Versioned<File> mergedTinyV2NamedMappings;
+	private final Versioned<MinecraftVersion, File> namedMappings;
+	private final Versioned<MinecraftVersion, File> processedNamedMappings;
+	private final Versioned<MinecraftVersion, File> completedNamedMappings;
+	private final Versioned<String, File> tinyV1NamedMappings;
+	private final Versioned<String, File> tinyV2NamedMappings;
+	private final Versioned<String, File> mergedTinyV1NamedMappings;
+	private final Versioned<String, File> mergedTinyV2NamedMappings;
 
-	private final Versioned<File> clientRavenFile;
-	private final Versioned<File> serverRavenFile;
-	private final Versioned<File> mergedRavenFile;
-	private final Versioned<File> intermediaryClientRavenFile;
-	private final Versioned<File> intermediaryServerRavenFile;
-	private final Versioned<File> intermediaryMergedRavenFile;
+	private final Versioned<MinecraftVersion, File> clientRavenFile;
+	private final Versioned<MinecraftVersion, File> serverRavenFile;
+	private final Versioned<MinecraftVersion, File> mergedRavenFile;
+	private final Versioned<MinecraftVersion, File> intermediaryClientRavenFile;
+	private final Versioned<MinecraftVersion, File> intermediaryServerRavenFile;
+	private final Versioned<MinecraftVersion, File> intermediaryMergedRavenFile;
 
-	private final Versioned<File> namedRavenFile;
+	private final Versioned<MinecraftVersion, File> namedRavenFile;
 
-	private final Versioned<File> clientSparrowFile;
-	private final Versioned<File> serverSparrowFile;
-	private final Versioned<File> mergedSparrowFile;
-	private final Versioned<File> intermediaryClientSparrowFile;
-	private final Versioned<File> intermediaryServerSparrowFile;
-	private final Versioned<File> intermediaryMergedSparrowFile;
+	private final Versioned<MinecraftVersion, File> clientSparrowFile;
+	private final Versioned<MinecraftVersion, File> serverSparrowFile;
+	private final Versioned<MinecraftVersion, File> mergedSparrowFile;
+	private final Versioned<MinecraftVersion, File> intermediaryClientSparrowFile;
+	private final Versioned<MinecraftVersion, File> intermediaryServerSparrowFile;
+	private final Versioned<MinecraftVersion, File> intermediaryMergedSparrowFile;
 
-	private final Versioned<File> namedSparrowFile;
+	private final Versioned<MinecraftVersion, File> namedSparrowFile;
 
-	private final Versioned<File> clientNests;
-	private final Versioned<File> serverNests;
-	private final Versioned<File> mergedNests;
-	private final Versioned<File> intermediaryClientNests;
-	private final Versioned<File> intermediaryServerNests;
-	private final Versioned<File> intermediaryMergedNests;
+	private final Versioned<MinecraftVersion, File> clientNests;
+	private final Versioned<MinecraftVersion, File> serverNests;
+	private final Versioned<MinecraftVersion, File> mergedNests;
+	private final Versioned<MinecraftVersion, File> intermediaryClientNests;
+	private final Versioned<MinecraftVersion, File> intermediaryServerNests;
+	private final Versioned<MinecraftVersion, File> intermediaryMergedNests;
 
-	private final Versioned<File> namedNests;
+	private final Versioned<MinecraftVersion, File> namedNests;
 
-	private final Versioned<File> featherMappings;
+	private final Versioned<String, File> intermediaryFile;
+	private final Versioned<String, File> intermediaryV2File;
 
-	private final Versioned<File> clientExceptions;
-	private final Versioned<File> serverExceptions;
-	private final Versioned<File> mergedExceptions;
-	private final Versioned<File> clientSignatures;
-	private final Versioned<File> serverSignatures;
-	private final Versioned<File> mergedSignatures;
+	private final Versioned<String, File> featherMappings;
 
-	private final Versioned<File> setupClientJar;
-	private final Versioned<File> setupServerJar;
-	private final Versioned<File> setupMergedJar;
-	private final Versioned<File> intermediarySetupClientJar;
-	private final Versioned<File> intermediarySetupServerJar;
-	private final Versioned<File> intermediarySetupMergedJar;
+	private final Versioned<MinecraftVersion, File> clientExceptions;
+	private final Versioned<MinecraftVersion, File> serverExceptions;
+	private final Versioned<MinecraftVersion, File> mergedExceptions;
+	private final Versioned<MinecraftVersion, File> clientSignatures;
+	private final Versioned<MinecraftVersion, File> serverSignatures;
+	private final Versioned<MinecraftVersion, File> mergedSignatures;
 
-	private final Versioned<File> sourceClientJar;
-	private final Versioned<File> sourceServerJar;
-	private final Versioned<File> sourceMergedJar;
-	private final Versioned<File> namedSourceClientJar;
-	private final Versioned<File> namedSourceServerJar;
-	private final Versioned<File> namedSourceMergedJar;
+	private final Versioned<MinecraftVersion, File> setupClientJar;
+	private final Versioned<MinecraftVersion, File> setupServerJar;
+	private final Versioned<MinecraftVersion, File> setupMergedJar;
+	private final Versioned<MinecraftVersion, File> intermediarySetupClientJar;
+	private final Versioned<MinecraftVersion, File> intermediarySetupServerJar;
+	private final Versioned<MinecraftVersion, File> intermediarySetupMergedJar;
 
-	private final Versioned<File> setupClientIntermediaryMappings;
-	private final Versioned<File> setupServerIntermediaryMappings;
-	private final Versioned<File> setupMergedIntermediaryMappings;
-	private final Versioned<File> setupClientNamedMappings;
-	private final Versioned<File> setupServerNamedMappings;
-	private final Versioned<File> setupMergedNamedMappings;
+	private final Versioned<MinecraftVersion, File> sourceClientJar;
+	private final Versioned<MinecraftVersion, File> sourceServerJar;
+	private final Versioned<MinecraftVersion, File> sourceMergedJar;
+	private final Versioned<MinecraftVersion, File> namedSourceClientJar;
+	private final Versioned<MinecraftVersion, File> namedSourceServerJar;
+	private final Versioned<MinecraftVersion, File> namedSourceMergedJar;
 
-	private final Versioned<File> sourceClientMappings;
-	private final Versioned<File> sourceServerMappings;
-	private final Versioned<File> sourceMergedMappings;
+	private final Versioned<MinecraftVersion, File> setupClientIntermediaryMappings;
+	private final Versioned<MinecraftVersion, File> setupServerIntermediaryMappings;
+	private final Versioned<MinecraftVersion, File> setupMergedIntermediaryMappings;
+	private final Versioned<MinecraftVersion, File> setupClientNamedMappings;
+	private final Versioned<MinecraftVersion, File> setupServerNamedMappings;
+	private final Versioned<MinecraftVersion, File> setupMergedNamedMappings;
 
-	private final Versioned<File> setupClientExceptions;
-	private final Versioned<File> setupServerExceptions;
-	private final Versioned<File> setupMergedExceptions;
-	private final Versioned<File> setupClientSignatures;
-	private final Versioned<File> setupServerSignatures;
-	private final Versioned<File> setupMergedSignatures;
+	private final Versioned<MinecraftVersion, File> sourceClientMappings;
+	private final Versioned<MinecraftVersion, File> sourceServerMappings;
+	private final Versioned<MinecraftVersion, File> sourceMergedMappings;
 
-	private final Versioned<File> baseClientExceptions;
-	private final Versioned<File> baseServerExceptions;
-	private final Versioned<File> baseMergedExceptions;
-	private final Versioned<File> baseClientSignatures;
-	private final Versioned<File> baseServerSignatures;
-	private final Versioned<File> baseMergedSignatures;
+	private final Versioned<MinecraftVersion, File> setupClientExceptions;
+	private final Versioned<MinecraftVersion, File> setupServerExceptions;
+	private final Versioned<MinecraftVersion, File> setupMergedExceptions;
+	private final Versioned<MinecraftVersion, File> setupClientSignatures;
+	private final Versioned<MinecraftVersion, File> setupServerSignatures;
+	private final Versioned<MinecraftVersion, File> setupMergedSignatures;
 
-	private final Versioned<File> generatedClientJar;
-	private final Versioned<File> generatedServerJar;
-	private final Versioned<File> generatedMergedJar;
-	private final Versioned<File> namedGeneratedClientJar;
-	private final Versioned<File> namedGeneratedServerJar;
-	private final Versioned<File> namedGeneratedMergedJar;
+	private final Versioned<MinecraftVersion, File> baseClientExceptions;
+	private final Versioned<MinecraftVersion, File> baseServerExceptions;
+	private final Versioned<MinecraftVersion, File> baseMergedExceptions;
+	private final Versioned<MinecraftVersion, File> baseClientSignatures;
+	private final Versioned<MinecraftVersion, File> baseServerSignatures;
+	private final Versioned<MinecraftVersion, File> baseMergedSignatures;
 
-	private final Versioned<File> generatedClientExceptions;
-	private final Versioned<File> generatedServerExceptions;
-	private final Versioned<File> generatedMergedExceptions;
-	private final Versioned<File> generatedClientSignatures;
-	private final Versioned<File> generatedServerSignatures;
-	private final Versioned<File> generatedMergedSignatures;
+	private final Versioned<MinecraftVersion, File> generatedClientJar;
+	private final Versioned<MinecraftVersion, File> generatedServerJar;
+	private final Versioned<MinecraftVersion, File> generatedMergedJar;
+	private final Versioned<MinecraftVersion, File> namedGeneratedClientJar;
+	private final Versioned<MinecraftVersion, File> namedGeneratedServerJar;
+	private final Versioned<MinecraftVersion, File> namedGeneratedMergedJar;
+
+	private final Versioned<MinecraftVersion, File> generatedClientExceptions;
+	private final Versioned<MinecraftVersion, File> generatedServerExceptions;
+	private final Versioned<MinecraftVersion, File> generatedMergedExceptions;
+	private final Versioned<MinecraftVersion, File> generatedClientSignatures;
+	private final Versioned<MinecraftVersion, File> generatedServerSignatures;
+	private final Versioned<MinecraftVersion, File> generatedMergedSignatures;
 
 	public OrnitheFiles(KeratinGradleExtension keratin) {
 		this.project = keratin.getProject();
@@ -207,9 +210,9 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.signaturesDir = fileProperty(() -> this.project.file("signatures"));
 		this.matchesDir = fileProperty(() -> this.project.file("matches/matches"));
 		this.runDir = fileProperty(() -> this.project.file("run"));
-		this.workingDir = new Versioned<>(minecraftVersion -> new File(getRunDirectory(), minecraftVersion));
+		this.workingDir = new Versioned<>(minecraftVersion -> new File(getRunDirectory(), minecraftVersion.id()));
 		this.enigmaSessionLock = new Versioned<>(minecraftVersion -> new File(getWorkingDirectory(minecraftVersion), EnigmaSession.LOCK_FILE));
-		this.decompiledSrcDir = new Versioned<>(minecraftVersion -> this.project.file("%s-decompiledSrc".formatted(minecraftVersion)));
+		this.decompiledSrcDir = new Versioned<>(minecraftVersion -> this.project.file("%s-decompiledSrc".formatted(minecraftVersion.id())));
 		this.fakeSrcDir = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-fakeSrc".formatted(minecraftVersion)));
 		this.javadocDir = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-javadoc".formatted(minecraftVersion)));
 
@@ -218,100 +221,82 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.versionDetails = new Versioned<>(minecraftVersion -> new File(getVersionJsonsCache(), "%s-details.json".formatted(minecraftVersion)));
 
 		this.clientJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
-				return new File(getGameJarsCache(), "%s-client.jar".formatted(minecraftVersion));
+				return new File(getGameJarsCache(), "%s-client.jar".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.serverJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
-				return new File(getGameJarsCache(), "%s-server.jar".formatted(minecraftVersion));
+				return new File(getGameJarsCache(), "%s-server.jar".formatted(minecraftVersion.server().id()));
 			}
 		});
 		this.mergedJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
-			} else if (!details.sharedMappings()) {
-				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion + " cannot be merged: the client and server jars do not have shared mappings!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
+			} else if (!minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: the client and server jars do not have shared mappings!");
 			} else {
-				return new File(getGameJarsCache(), "%s-merged.jar".formatted(minecraftVersion));
+				return new File(getGameJarsCache(), "%s-merged.jar".formatted(minecraftVersion.id()));
 			}
 		});
 		this.intermediaryClientJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("intermediray client jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("intermediray client jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getMappedJarsCache(), "%s-intermediary-gen%d-client.jar".formatted(minecraftVersion, getIntermediaryGen()));
+				return new File(getMappedJarsCache(), "%s-intermediary-gen%d-client.jar".formatted(minecraftVersion.client().id(), getIntermediaryGen()));
 			}
 		});
 		this.intermediaryServerJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("intermediray server jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("intermediray server jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getMappedJarsCache(), "%s-intermediary-gen%d-server.jar".formatted(minecraftVersion, getIntermediaryGen()));
+				return new File(getMappedJarsCache(), "%s-intermediary-gen%d-server.jar".formatted(minecraftVersion.server().id(), getIntermediaryGen()));
 			}
 		});
 		this.intermediaryMergedJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("intermediary jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
 			} else {
-				return new File(getMappedJarsCache(), "%s-intermediary-gen%d-merged.jar".formatted(minecraftVersion, getIntermediaryGen()));
+				return new File(getMappedJarsCache(), "%s-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), getIntermediaryGen()));
 			}
 		});
 		this.exceptionsPatchedIntermediaryClientJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || details.server()) {
-				throw new NoSuchFileException("intermediary client jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasClient() || minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
 				int build = keratin.getRavenBuild(minecraftVersion, GameSide.CLIENT);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getProcessedJarsCache(), "%s-raven+build.%d-intermediary-gen%d-client.jar".formatted(minecraftVersion, build, getIntermediaryGen()));
+					return new File(getProcessedJarsCache(), "%s-raven+build.%d-intermediary-gen%d-client.jar".formatted(minecraftVersion.client().id(), build, getIntermediaryGen()));
 				}
 			}
 		});
 		this.exceptionsPatchedIntermediaryServerJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server() || details.client()) {
-				throw new NoSuchFileException("intermediary server jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasServer() || minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("intermediary server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
 				int build = keratin.getRavenBuild(minecraftVersion, GameSide.SERVER);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getProcessedJarsCache(), "%s-raven+build.%d-intermediary-gen%d-server.jar".formatted(minecraftVersion, build, getIntermediaryGen()));
+					return new File(getProcessedJarsCache(), "%s-raven+build.%d-intermediary-gen%d-server.jar".formatted(minecraftVersion.server().id(), build, getIntermediaryGen()));
 				}
 			}
 		});
 		this.exceptionsPatchedIntermediaryMergedJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("intermediary jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
 			} else {
 				int build = keratin.getRavenBuild(minecraftVersion, GameSide.MERGED);
 				int clientBuild = keratin.getRavenBuild(minecraftVersion, GameSide.CLIENT);
@@ -321,48 +306,42 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 					if (clientBuild < 1 && serverBuild < 1) {
 						return null;
 					} else {
-						return new File(getProcessedJarsCache(), "%s-raven+build.(%d-%d)-intermediary-gen%d-merged.jar".formatted(minecraftVersion, clientBuild, serverBuild, getIntermediaryGen()));
+						return new File(getProcessedJarsCache(), "%s-raven+build.(%d-%d)-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), clientBuild, serverBuild, getIntermediaryGen()));
 					}
 				} else {
-					return new File(getProcessedJarsCache(), "%s-raven+build.%d-intermediary-gen%d-merged.jar".formatted(minecraftVersion, build, getIntermediaryGen()));
+					return new File(getProcessedJarsCache(), "%s-raven+build.%d-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), build, getIntermediaryGen()));
 				}
 			}
 		});
 		this.signaturePatchedIntermediaryClientJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || details.server()) {
-				throw new NoSuchFileException("intermediary client jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasClient() || minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
 				int build = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getProcessedJarsCache(), "%s-sparrow+build.%d-intermediary-gen%d-client.jar".formatted(minecraftVersion, build, getIntermediaryGen()));
+					return new File(getProcessedJarsCache(), "%s-sparrow+build.%d-intermediary-gen%d-client.jar".formatted(minecraftVersion.client().id(), build, getIntermediaryGen()));
 				}
 			}
 		});
 		this.signaturePatchedIntermediaryServerJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server() || details.client()) {
-				throw new NoSuchFileException("intermediary server jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasServer() || minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("intermediary server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
 				int build = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getProcessedJarsCache(), "%s-sparrow+build.%d-intermediary-gen%d-server.jar".formatted(minecraftVersion, build, getIntermediaryGen()));
+					return new File(getProcessedJarsCache(), "%s-sparrow+build.%d-intermediary-gen%d-server.jar".formatted(minecraftVersion.server().id(), build, getIntermediaryGen()));
 				}
 			}
 		});
 		this.signaturePatchedIntermediaryMergedJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("intermediary jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
 			} else {
 				int build = keratin.getSparrowBuild(minecraftVersion, GameSide.MERGED);
 				int clientBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
@@ -372,48 +351,42 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 					if (clientBuild < 1 && serverBuild < 1) {
 						return null;
 					} else {
-						return new File(getProcessedJarsCache(), "%s-sparrow+build.(%d-%d)-intermediary-gen%d-merged.jar".formatted(minecraftVersion, clientBuild, serverBuild, getIntermediaryGen()));
+						return new File(getProcessedJarsCache(), "%s-sparrow+build.(%d-%d)-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), clientBuild, serverBuild, getIntermediaryGen()));
 					}
 				} else {
-					return new File(getProcessedJarsCache(), "%s-sparrow+build.%d-intermediary-gen%d-merged.jar".formatted(minecraftVersion, build, getIntermediaryGen()));
+					return new File(getProcessedJarsCache(), "%s-sparrow+build.%d-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), build, getIntermediaryGen()));
 				}
 			}
 		});
 		this.nestedIntermediaryClientJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || details.server()) {
-				throw new NoSuchFileException("intermediary client jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasClient() || minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
 				int build = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getProcessedJarsCache(), "%s-nests+build.%d-intermediary-gen%d-client.jar".formatted(minecraftVersion, build, getIntermediaryGen()));
+					return new File(getProcessedJarsCache(), "%s-nests+build.%d-intermediary-gen%d-client.jar".formatted(minecraftVersion.client().id(), build, getIntermediaryGen()));
 				}
 			}
 		});
 		this.nestedIntermediaryServerJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server() || details.client()) {
-				throw new NoSuchFileException("intermediary server jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasServer() || minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("intermediary server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
 				int build = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getProcessedJarsCache(), "%s-nests+build.%d-intermediary-gen%d-server.jar".formatted(minecraftVersion, build, getIntermediaryGen()));
+					return new File(getProcessedJarsCache(), "%s-nests+build.%d-intermediary-gen%d-server.jar".formatted(minecraftVersion.server().id(), build, getIntermediaryGen()));
 				}
 			}
 		});
 		this.nestedIntermediaryMergedJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("intermediary jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
 			} else {
 				int build = keratin.getNestsBuild(minecraftVersion, GameSide.MERGED);
 				int clientBuild = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
@@ -423,38 +396,32 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 					if (clientBuild < 1 && serverBuild < 1) {
 						return null;
 					} else {
-						return new File(getProcessedJarsCache(), "%s-nests+build.(%d-%d)-intermediary-gen%d-merged.jar".formatted(minecraftVersion, clientBuild, serverBuild, getIntermediaryGen()));
+						return new File(getProcessedJarsCache(), "%s-nests+build.(%d-%d)-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), clientBuild, serverBuild, getIntermediaryGen()));
 					}
 				} else {
-					return new File(getProcessedJarsCache(), "%s-nests+build.%d-intermediary-gen%d-merged.jar".formatted(minecraftVersion, build, getIntermediaryGen()));
+					return new File(getProcessedJarsCache(), "%s-nests+build.%d-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), build, getIntermediaryGen()));
 				}
 			}
 		});
 		this.processedIntermediaryClientJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || details.server()) {
-				throw new NoSuchFileException("intermediary client jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasClient() || minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
-				return new File(getProcessedJarsCache(), "%s-processed-intermediary-gen%d-client.jar".formatted(minecraftVersion, getIntermediaryGen()));
+				return new File(getProcessedJarsCache(), "%s-processed-intermediary-gen%d-client.jar".formatted(minecraftVersion.client().id(), getIntermediaryGen()));
 			}
 		});
 		this.processedIntermediaryServerJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server() || details.client()) {
-				throw new NoSuchFileException("intermediary server jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasServer() || minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("intermediary server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
-				return new File(getProcessedJarsCache(), "%s-processed-intermediary-gen%d-server.jar".formatted(minecraftVersion, getIntermediaryGen()));
+				return new File(getProcessedJarsCache(), "%s-processed-intermediary-gen%d-server.jar".formatted(minecraftVersion.server().id(), getIntermediaryGen()));
 			}
 		});
 		this.processedIntermediaryMergedJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("intermediary jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
 			} else {
-				return new File(getProcessedJarsCache(), "%s-processed-intermediary-gen%d-merged.jar".formatted(minecraftVersion, getIntermediaryGen()));
+				return new File(getProcessedJarsCache(), "%s-processed-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), getIntermediaryGen()));
 			}
 		});
 
@@ -462,125 +429,109 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.processedNamedJar = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-processed-named.jar".formatted(minecraftVersion)));
 
 		this.clientIntermediaryMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client intermediary mappings for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("client intermediary mappings for Minecraft version " + minecraftVersion + " do not exist: please use the merged mappings!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return new File(getMappingsCache(), "%s-intermediary-gen%d-client.tiny".formatted(minecraftVersion, getIntermediaryGen()));
+				return new File(getMappingsCache(), "%s-intermediary-gen%d-client.tiny".formatted(minecraftVersion.client().id(), getIntermediaryGen()));
 			}
 		});
 		this.serverIntermediaryMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server intermediary mappings for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("server intermediary mappings for Minecraft version " + minecraftVersion + " do not exist: please use the merged mappings!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return new File(getMappingsCache(), "%s-intermediary-gen%d-server.tiny".formatted(minecraftVersion, getIntermediaryGen()));
+				return new File(getMappingsCache(), "%s-intermediary-gen%d-server.tiny".formatted(minecraftVersion.server().id(), getIntermediaryGen()));
 			}
 		});
-		this.mergedIntermediaryMappings = new Versioned<>(minecraftVersion -> new File(getMappingsCache(), "%s-intermediary-gen%d-merged.tiny".formatted(minecraftVersion, getIntermediaryGen())));
+		this.mergedIntermediaryMappings = new Versioned<>(minecraftVersion -> new File(getMappingsCache(), "%s-intermediary-gen%d-merged.tiny".formatted(minecraftVersion.id(), getIntermediaryGen())));
 
-		this.namedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named.tiny".formatted(minecraftVersion)));
-		this.processedNamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-processed-named.tiny".formatted(minecraftVersion)));
-		this.completedNamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-completed.tiny".formatted(minecraftVersion)));
+		this.namedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named.tiny".formatted(minecraftVersion.id())));
+		this.processedNamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-processed-named.tiny".formatted(minecraftVersion.id())));
+		this.completedNamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-completed.tiny".formatted(minecraftVersion.id())));
 		this.tinyV1NamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-tiny-v1.tiny".formatted(minecraftVersion)));
 		this.tinyV2NamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-tiny-v2.tiny".formatted(minecraftVersion)));
 		this.mergedTinyV1NamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-merged-tiny-v1.tiny".formatted(minecraftVersion)));
 		this.mergedTinyV2NamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-merged-tiny-v2.tiny".formatted(minecraftVersion)));
 
 		this.clientRavenFile = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client raven for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("client raven for Minecraft version " + minecraftVersion + " do not exist: please use the merged raven!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client raven for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client raven for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged raven!");
 			} else {
 				int build = keratin.getRavenBuild(minecraftVersion, GameSide.CLIENT);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getRavenCache(), "%s-raven+build.%d-client.excs".formatted(minecraftVersion, build));
+					return new File(getRavenCache(), "%s-raven+build.%d-client.excs".formatted(minecraftVersion.client().id(), build));
 				}
 			}
 		});
 		this.serverRavenFile = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server raven for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("server raven for Minecraft version " + minecraftVersion + " do not exist: please use the merged raven!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server raven for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server raven for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged raven!");
 			} else {
 				int build = keratin.getRavenBuild(minecraftVersion, GameSide.SERVER);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getRavenCache(), "%s-raven+build.%d-server.excs".formatted(minecraftVersion, build));
+					return new File(getRavenCache(), "%s-raven+build.%d-server.excs".formatted(minecraftVersion.server().id(), build));
 				}
 			}
 		});
 		this.mergedRavenFile = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.sharedMappings()) {
-				throw new NoSuchFileException("raven for Minecraft version " + minecraftVersion + " cannot be merged: the client and server raven do not have shared mappings!");
+			if (!minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("raven for Minecraft version " + minecraftVersion.id() + " cannot be merged: the client and server raven do not have shared mappings!");
 			} else {
 				int build = keratin.getRavenBuild(minecraftVersion, GameSide.MERGED);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getRavenCache(), "%s-raven+build.%d-merged.excs".formatted(minecraftVersion, build));
+					return new File(getRavenCache(), "%s-raven+build.%d-merged.excs".formatted(minecraftVersion.id(), build));
 				}
 			}
 		});
 		this.intermediaryClientRavenFile = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client raven for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("intermediary client raven for Minecraft version " + minecraftVersion + " do not exist: please use the merged raven!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client raven for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("intermediary client raven for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged raven!");
 			} else {
 				int build = keratin.getRavenBuild(minecraftVersion, GameSide.CLIENT);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getRavenCache(), "%s-intermediary-gen%d-raven+build.%d-client.excs".formatted(minecraftVersion, getIntermediaryGen(), build));
+					return new File(getRavenCache(), "%s-intermediary-gen%d-raven+build.%d-client.excs".formatted(minecraftVersion.client().id(), getIntermediaryGen(), build));
 				}
 			}
 		});
 		this.intermediaryServerRavenFile = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server raven for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("intermediary server raven for Minecraft version " + minecraftVersion + " do not exist: please use the merged raven!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server raven for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("intermediary server raven for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged raven!");
 			} else {
 				int build = keratin.getRavenBuild(minecraftVersion, GameSide.SERVER);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getRavenCache(), "%s-intermediary-gen%d-raven+build.%d-server.excs".formatted(minecraftVersion, getIntermediaryGen(), build));
+					return new File(getRavenCache(), "%s-intermediary-gen%d-raven+build.%d-server.excs".formatted(minecraftVersion.server().id(), getIntermediaryGen(), build));
 				}
 			}
 		});
 		this.intermediaryMergedRavenFile = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("intermediary raven for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server raven do not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary raven for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server raven do not exist!");
 			} else {
 				int build = keratin.getRavenBuild(minecraftVersion, GameSide.MERGED);
 				int clientBuild = keratin.getRavenBuild(minecraftVersion, GameSide.CLIENT);
@@ -590,104 +541,92 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 					if (clientBuild < 1 && serverBuild < 1) {
 						return null;
 					} else {
-						return new File(getRavenCache(), "%s-intermediary-gen%d-raven+build.(%d-%d)-merged.excs".formatted(minecraftVersion, getIntermediaryGen(), clientBuild, serverBuild));
+						return new File(getRavenCache(), "%s-intermediary-gen%d-raven+build.(%d-%d)-merged.excs".formatted(minecraftVersion.id(), getIntermediaryGen(), clientBuild, serverBuild));
 					}
 				} else {
-					return new File(getRavenCache(), "%s-intermediary-gen%d-raven+build.%d-merged.excs".formatted(minecraftVersion, getIntermediaryGen(), build));
+					return new File(getRavenCache(), "%s-intermediary-gen%d-raven+build.%d-merged.excs".formatted(minecraftVersion.id(), getIntermediaryGen(), build));
 				}
 			}
 		});
 
-		this.namedRavenFile = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-raven.excs".formatted(minecraftVersion)));
+		this.namedRavenFile = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-raven.excs".formatted(minecraftVersion.id())));
 
 		this.clientSparrowFile = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client sparrow for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("client sparrow for Minecraft version " + minecraftVersion + " do not exist: please use the merged sparrow!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client sparrow for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client sparrow for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged sparrow!");
 			} else {
 				int build = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getSparrowCache(), "%s-sparrow+build.%d-client.sigs".formatted(minecraftVersion, build));
+					return new File(getSparrowCache(), "%s-sparrow+build.%d-client.sigs".formatted(minecraftVersion.client().id(), build));
 				}
 			}
 		});
 		this.serverSparrowFile = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server sparrow for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("server sparrow for Minecraft version " + minecraftVersion + " do not exist: please use the merged sparrow!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server sparrow for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server sparrow for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged sparrow!");
 			} else {
 				int build = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getSparrowCache(), "%s-sparrow+build.%d-server.sigs".formatted(minecraftVersion, build));
+					return new File(getSparrowCache(), "%s-sparrow+build.%d-server.sigs".formatted(minecraftVersion.server().id(), build));
 				}
 			}
 		});
 		this.mergedSparrowFile = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.sharedMappings()) {
-				throw new NoSuchFileException("sparrow for Minecraft version " + minecraftVersion + " cannot be merged: the client and server sparrow do not have shared mappings!");
+			if (!minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("sparrow for Minecraft version " + minecraftVersion.id() + " cannot be merged: the client and server sparrow do not have shared mappings!");
 			} else {
 				int build = keratin.getSparrowBuild(minecraftVersion, GameSide.MERGED);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getSparrowCache(), "%s-sparrow+build.%d-merged.sigs".formatted(minecraftVersion, build));
+					return new File(getSparrowCache(), "%s-sparrow+build.%d-merged.sigs".formatted(minecraftVersion.id(), build));
 				}
 			}
 		});
 		this.intermediaryClientSparrowFile = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client sparrow for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("intermediary client sparrow for Minecraft version " + minecraftVersion + " do not exist: please use the merged sparrow!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client sparrow for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("intermediary client sparrow for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged sparrow!");
 			} else {
 				int build = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.%d-client.sigs".formatted(minecraftVersion, getIntermediaryGen(), build));
+					return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.%d-client.sigs".formatted(minecraftVersion.client().id(), getIntermediaryGen(), build));
 				}
 			}
 		});
 		this.intermediaryServerSparrowFile = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server sparrow for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("intermediary server sparrow for Minecraft version " + minecraftVersion + " do not exist: please use the merged sparrow!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server sparrow for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("intermediary server sparrow for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged sparrow!");
 			} else {
 				int build = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.%d-server.sigs".formatted(minecraftVersion, getIntermediaryGen(), build));
+					return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.%d-server.sigs".formatted(minecraftVersion.server().id(), getIntermediaryGen(), build));
 				}
 			}
 		});
 		this.intermediaryMergedSparrowFile = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("intermediary sparrow for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server sparrow do not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary sparrow for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server sparrow do not exist!");
 			} else {
 				int build = keratin.getSparrowBuild(minecraftVersion, GameSide.MERGED);
 				int clientBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
@@ -697,104 +636,92 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 					if (clientBuild < 1 && serverBuild < 1) {
 						return null;
 					} else {
-						return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.(%d-%d)-merged.sigs".formatted(minecraftVersion, getIntermediaryGen(), clientBuild, serverBuild));
+						return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.(%d-%d)-merged.sigs".formatted(minecraftVersion.id(), getIntermediaryGen(), clientBuild, serverBuild));
 					}
 				} else {
-					return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.%d-merged.sigs".formatted(minecraftVersion, getIntermediaryGen(), build));
+					return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.%d-merged.sigs".formatted(minecraftVersion.id(), getIntermediaryGen(), build));
 				}
 			}
 		});
 
-		this.namedSparrowFile = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-sparrow.sigs".formatted(minecraftVersion)));
+		this.namedSparrowFile = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-sparrow.sigs".formatted(minecraftVersion.id())));
 
 		this.clientNests = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client nests for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("client nests for Minecraft version " + minecraftVersion + " do not exist: please use the merged nests!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client nests for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client nests for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged nests!");
 			} else {
 				int build = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getNestsCache(), "%s-nests+build.%d-client.nest".formatted(minecraftVersion, build));
+					return new File(getNestsCache(), "%s-nests+build.%d-client.nest".formatted(minecraftVersion.client().id(), build));
 				}
 			}
 		});
 		this.serverNests = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server nests for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("server nests for Minecraft version " + minecraftVersion + " do not exist: please use the merged nests!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server nests for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server nests for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged nests!");
 			} else {
 				int build = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getNestsCache(), "%s-nests+build.%d-server.nest".formatted(minecraftVersion, build));
+					return new File(getNestsCache(), "%s-nests+build.%d-server.nest".formatted(minecraftVersion.server().id(), build));
 				}
 			}
 		});
 		this.mergedNests = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.sharedMappings()) {
-				throw new NoSuchFileException("nests for Minecraft version " + minecraftVersion + " cannot be merged: the client and server nests do not have shared mappings!");
+			if (!minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("nests for Minecraft version " + minecraftVersion.id() + " cannot be merged: the client and server nests do not have shared mappings!");
 			} else {
 				int build = keratin.getNestsBuild(minecraftVersion, GameSide.MERGED);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getNestsCache(), "%s-nests+build.%d-merged.nest".formatted(minecraftVersion, build));
+					return new File(getNestsCache(), "%s-nests+build.%d-merged.nest".formatted(minecraftVersion.id(), build));
 				}
 			}
 		});
 		this.intermediaryClientNests = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client nests for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("intermediary client nests for Minecraft version " + minecraftVersion + " do not exist: please use the merged nests!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client nests for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("intermediary client nests for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged nests!");
 			} else {
 				int build = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getNestsCache(), "%s-intermediary-gen%d-nests+build.%d-client.nest".formatted(minecraftVersion, getIntermediaryGen(), build));
+					return new File(getNestsCache(), "%s-intermediary-gen%d-nests+build.%d-client.nest".formatted(minecraftVersion.client().id(), getIntermediaryGen(), build));
 				}
 			}
 		});
 		this.intermediaryServerNests = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server nests for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("intermediary server nests for Minecraft version " + minecraftVersion + " do not exist: please use the merged nests!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server nests for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("intermediary server nests for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged nests!");
 			} else {
 				int build = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
 
 				if (build < 1) {
 					return null;
 				} else {
-					return new File(getNestsCache(), "%s-intermediary-gen%d-nests+build.%d-server.nest".formatted(minecraftVersion, getIntermediaryGen(), build));
+					return new File(getNestsCache(), "%s-intermediary-gen%d-nests+build.%d-server.nest".formatted(minecraftVersion.server().id(), getIntermediaryGen(), build));
 				}
 			}
 		});
 		this.intermediaryMergedNests = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("intermediary nests for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server nests do not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary nests for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server nests do not exist!");
 			} else {
 				int build = keratin.getNestsBuild(minecraftVersion, GameSide.MERGED);
 				int clientBuild = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
@@ -804,15 +731,18 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 					if (clientBuild < 1 && serverBuild < 1) {
 						return null;
 					} else {
-						return new File(getNestsCache(), "%s-intermediary-gen%d-nests+build.(%d-%d)-merged.nest".formatted(minecraftVersion, getIntermediaryGen(), clientBuild, serverBuild));
+						return new File(getNestsCache(), "%s-intermediary-gen%d-nests+build.(%d-%d)-merged.nest".formatted(minecraftVersion.id(), getIntermediaryGen(), clientBuild, serverBuild));
 					}
 				} else {
-					return new File(getNestsCache(), "%s-intermediary-gen%d-nests+build.%d-merged.nest".formatted(minecraftVersion, getIntermediaryGen(), build));
+					return new File(getNestsCache(), "%s-intermediary-gen%d-nests+build.%d-merged.nest".formatted(minecraftVersion.id(), getIntermediaryGen(), build));
 				}
 			}
 		});
 
-		this.namedNests = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-nests.nest".formatted(minecraftVersion)));
+		this.namedNests = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named-nests.nest".formatted(minecraftVersion.id())));
+
+		this.intermediaryFile = new Versioned<>(minecraftVersion -> new File(getMappingsDirectory(), "%s.tiny".formatted(minecraftVersion)));
+		this.intermediaryV2File = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s.tiny".formatted(minecraftVersion)));
 
 		this.featherMappings = new Versioned<>(minecraftVersion -> {
 			int build = keratin.getNextFeatherBuild(minecraftVersion) - 1;
@@ -825,464 +755,380 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		});
 
 		this.clientExceptions = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
-				return new File(getExceptionsDirectory(), "%s-client.excs".formatted(minecraftVersion));
+				return new File(getExceptionsDirectory(), "%s-client.excs".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.serverExceptions = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
-				return new File(getExceptionsDirectory(), "%s-server.excs".formatted(minecraftVersion));
+				return new File(getExceptionsDirectory(), "%s-server.excs".formatted(minecraftVersion.server().id()));
 			}
 		});
 		this.mergedExceptions = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
-			} else if (!details.sharedMappings()) {
-				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion + " cannot be merged: the client and server jars do not have shared mappings!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
+			} else if (!minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: the client and server jars do not have shared mappings!");
 			} else {
-				return new File(getExceptionsDirectory(), "%s.excs".formatted(minecraftVersion));
+				return new File(getExceptionsDirectory(), "%s.excs".formatted(minecraftVersion.id()));
 			}
 		});
 		this.clientSignatures = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
-				return new File(getSignaturesDirectory(), "%s-client.sigs".formatted(minecraftVersion));
+				return new File(getSignaturesDirectory(), "%s-client.sigs".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.serverSignatures = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion + " does not exist!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
-				return new File(getSignaturesDirectory(), "%s-server.sigs".formatted(minecraftVersion));
+				return new File(getSignaturesDirectory(), "%s-server.sigs".formatted(minecraftVersion.server().id()));
 			}
 		});
 		this.mergedSignatures = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
-			} else if (!details.sharedMappings()) {
-				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion + " cannot be merged: the client and server jars do not have shared mappings!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
+			} else if (!minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: the client and server jars do not have shared mappings!");
 			} else {
-				return new File(getSignaturesDirectory(), "%s.sigs".formatted(minecraftVersion));
+				return new File(getSignaturesDirectory(), "%s.sigs".formatted(minecraftVersion.id()));
 			}
 		});
 
 		this.setupClientJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("setup client jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("setup client jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getMappedJarsCache(), "%s-setup-client.jar".formatted(minecraftVersion));
+				return new File(getMappedJarsCache(), "%s-setup-client.jar".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.setupServerJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("setup server jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("setup server jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-setup-server.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-setup-server.jar".formatted(minecraftVersion.server().id()));
 			}
 		});
 		this.setupMergedJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("setup jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("setup jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-setup-merged.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-setup-merged.jar".formatted(minecraftVersion.id()));
 			}
 		});
 		this.intermediarySetupClientJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("setup client jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("setup client jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-intermediary-setup-client.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-intermediary-setup-client.jar".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.intermediarySetupServerJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("setup server jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("setup server jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-intermediary-setup-server.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-intermediary-setup-server.jar".formatted(minecraftVersion.server().id()));
 			}
 		});
 		this.intermediarySetupMergedJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("setup jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("setup jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-intermediary-setup-merged.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-intermediary-setup-merged.jar".formatted(minecraftVersion.id()));
 			}
 		});
 
 		this.sourceClientJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("source client jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("source client jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getMappedJarsCache(), "%s-source-client.jar".formatted(minecraftVersion));
+				return new File(getMappedJarsCache(), "%s-source-client.jar".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.sourceServerJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("source server jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("source server jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-source-server.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-source-server.jar".formatted(minecraftVersion.server().id()));
 			}
 		});
 		this.sourceMergedJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("source jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("source jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-source-merged.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-source-merged.jar".formatted(minecraftVersion.id()));
 			}
 		});
 		this.namedSourceClientJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("source client jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("source client jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-named-source-client.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-named-source-client.jar".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.namedSourceServerJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("source server jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("source server jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-named-source-server.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-named-source-server.jar".formatted(minecraftVersion.server().id()));
 			}
 		});
 		this.namedSourceMergedJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("source jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("source jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-named-source-merged.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-named-source-merged.jar".formatted(minecraftVersion.id()));
 			}
 		});
 
 		this.setupClientIntermediaryMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client intermediary mappings for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("client intermediary mappings for Minecraft version " + minecraftVersion + " do not exist: please use the merged mappings!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-setup-intermediary-gen%d-client.tiny".formatted(minecraftVersion, getIntermediaryGen()));
+				return new File(getLocalBuildCache(), "%s-setup-intermediary-gen%d-client.tiny".formatted(minecraftVersion.client().id(), getIntermediaryGen()));
 			}
 		});
 		this.setupServerIntermediaryMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server intermediary mappings for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("server intermediary mappings for Minecraft version " + minecraftVersion + " do not exist: please use the merged mappings!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-setup-intermediary-gen%d-server.tiny".formatted(minecraftVersion, getIntermediaryGen()));
+				return new File(getLocalBuildCache(), "%s-setup-intermediary-gen%d-server.tiny".formatted(minecraftVersion.server().id(), getIntermediaryGen()));
 			}
 		});
-		this.setupMergedIntermediaryMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-setup-intermediary-gen%d-merged.tiny".formatted(minecraftVersion, getIntermediaryGen())));
+		this.setupMergedIntermediaryMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-setup-intermediary-gen%d-merged.tiny".formatted(minecraftVersion.id(), getIntermediaryGen())));
 		this.setupClientNamedMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client named mappings for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("client named mappings for Minecraft version " + minecraftVersion + " do not exist: please use the merged mappings!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client named mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client named mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-setup-named-client.tiny".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-setup-named-client.tiny".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.setupServerNamedMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server named mappings for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("server named mappings for Minecraft version " + minecraftVersion + " do not exist: please use the merged mappings!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server named mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server named mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-setup-named-server.tiny".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-setup-named-server.tiny".formatted(minecraftVersion.server().id()));
 			}
 		});
-		this.setupMergedNamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-setup-named-merged.tiny".formatted(minecraftVersion)));
+		this.setupMergedNamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-setup-named-merged.tiny".formatted(minecraftVersion.id())));
 
 		this.sourceClientMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client mappings for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("client mappings for Minecraft version " + minecraftVersion + " do not exist: please use the merged mappings!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-source-client.tiny".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-source-client.tiny".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.sourceServerMappings = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server mappings for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("server mappings for Minecraft version " + minecraftVersion + " do not exist: please use the merged mappings!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-source-server.tiny".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-source-server.tiny".formatted(minecraftVersion.server().id()));
 			}
 		});
-		this.sourceMergedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-source-merged.tiny".formatted(minecraftVersion)));
+		this.sourceMergedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-source-merged.tiny".formatted(minecraftVersion.id())));
 
 		this.setupClientExceptions = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client exceptions for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("client exceptions for Minecraft version " + minecraftVersion + " do not exist: please use the merged exceptions!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client exceptions for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client exceptions for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged exceptions!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-setup-client.excs".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-setup-client.excs".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.setupServerExceptions = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server exceptions for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("server exceptions for Minecraft version " + minecraftVersion + " do not exist: please use the merged exceptions!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server exceptions for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server exceptions for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged exceptions!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-setup-server.excs".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-setup-server.excs".formatted(minecraftVersion.server().id()));
 			}
 		});
-		this.setupMergedExceptions = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-setup-merged.excs".formatted(minecraftVersion)));
+		this.setupMergedExceptions = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-setup-merged.excs".formatted(minecraftVersion.id())));
 		this.setupClientSignatures = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client signatures for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("client signatures for Minecraft version " + minecraftVersion + " do not exist: please use the merged signatures!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client signatures for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client signatures for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged signatures!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-setup-client.sigs".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-setup-client.sigs".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.setupServerSignatures = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server signatures for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("server signatures for Minecraft version " + minecraftVersion + " do not exist: please use the merged signatures!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server signatures for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server signatures for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged signatures!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-setup-server.sigs".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-setup-server.sigs".formatted(minecraftVersion.server().id()));
 			}
 		});
-		this.setupMergedSignatures = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-setup-merged.sigs".formatted(minecraftVersion)));
+		this.setupMergedSignatures = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-setup-merged.sigs".formatted(minecraftVersion.id())));
 
 		this.baseClientExceptions = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client exceptions for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("client exceptions for Minecraft version " + minecraftVersion + " do not exist: please use the merged exceptions!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client exceptions for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client exceptions for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged exceptions!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-base-client.excs".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-base-client.excs".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.baseServerExceptions = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server exceptions for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("server exceptions for Minecraft version " + minecraftVersion + " do not exist: please use the merged exceptions!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server exceptions for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server exceptions for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged exceptions!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-base-server.excs".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-base-server.excs".formatted(minecraftVersion.server().id()));
 			}
 		});
-		this.baseMergedExceptions = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-base-merged.excs".formatted(minecraftVersion)));
+		this.baseMergedExceptions = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-base-merged.excs".formatted(minecraftVersion.id())));
 		this.baseClientSignatures = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client signatures for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("client signatures for Minecraft version " + minecraftVersion + " do not exist: please use the merged signatures!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client signatures for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client signatures for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged signatures!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-base-client.sigs".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-base-client.sigs".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.baseServerSignatures = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server signatures for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("server signatures for Minecraft version " + minecraftVersion + " do not exist: please use the merged signatures!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server signatures for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server signatures for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged signatures!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-base-server.sigs".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-base-server.sigs".formatted(minecraftVersion.server().id()));
 			}
 		});
-		this.baseMergedSignatures = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-base-merged.sigs".formatted(minecraftVersion)));
+		this.baseMergedSignatures = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-base-merged.sigs".formatted(minecraftVersion.id())));
 
 		this.generatedClientJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("generated client jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("generated client jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-generated-client.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-generated-client.jar".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.generatedServerJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("generated server jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("generated server jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-generated-server.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-generated-server.jar".formatted(minecraftVersion.server().id()));
 			}
 		});
 		this.generatedMergedJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("generated jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("generated jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-generated-merged.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-generated-merged.jar".formatted(minecraftVersion.id()));
 			}
 		});
 		this.namedGeneratedClientJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("generated client jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("generated client jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-named-generated-client.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-named-generated-client.jar".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.namedGeneratedServerJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion + " does not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("generated server jar for Minecraft version " + minecraftVersion + " does not exist: please use the merged jar!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("generated server jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-named-generated-server.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-named-generated-server.jar".formatted(minecraftVersion.server().id()));
 			}
 		});
 		this.namedGeneratedMergedJar = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client() || !details.server()) {
-				throw new NoSuchFileException("generated jars for Minecraft version " + minecraftVersion + " cannot be merged: either the client or server jar does not exist!");
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("generated jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-named-generated-merged.jar".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-named-generated-merged.jar".formatted(minecraftVersion.id()));
 			}
 		});
 
 		this.generatedClientExceptions = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client exceptions for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("client exceptions for Minecraft version " + minecraftVersion + " do not exist: please use the merged exceptions!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client exceptions for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client exceptions for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged exceptions!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-generated-client.excs".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-generated-client.excs".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.generatedServerExceptions = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server exceptions for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("server exceptions for Minecraft version " + minecraftVersion + " do not exist: please use the merged exceptions!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server exceptions for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server exceptions for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged exceptions!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-generated-server.excs".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-generated-server.excs".formatted(minecraftVersion.server().id()));
 			}
 		});
-		this.generatedMergedExceptions = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-generated-merged.excs".formatted(minecraftVersion)));
+		this.generatedMergedExceptions = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-generated-merged.excs".formatted(minecraftVersion.id())));
 		this.generatedClientSignatures = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.client()) {
-				throw new NoSuchFileException("client signatures for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.server() && details.sharedMappings()) {
-				throw new NoSuchFileException("client signatures for Minecraft version " + minecraftVersion + " do not exist: please use the merged signatures!");
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client signatures for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client signatures for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged signatures!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-generated-client.sigs".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-generated-client.sigs".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.generatedServerSignatures = new Versioned<>(minecraftVersion -> {
-			VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-			if (!details.server()) {
-				throw new NoSuchFileException("server signatures for Minecraft version " + minecraftVersion + " do not exist!");
-			} else if (details.client() && details.sharedMappings()) {
-				throw new NoSuchFileException("server signatures for Minecraft version " + minecraftVersion + " do not exist: please use the merged signatures!");
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server signatures for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server signatures for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged signatures!");
 			} else {
-				return new File(getLocalBuildCache(), "%s-generated-server.sigs".formatted(minecraftVersion));
+				return new File(getLocalBuildCache(), "%s-generated-server.sigs".formatted(minecraftVersion.server().id()));
 			}
 		});
-		this.generatedMergedSignatures = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-generated-merged.sigs".formatted(minecraftVersion)));
+		this.generatedMergedSignatures = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-generated-merged.sigs".formatted(minecraftVersion.id())));
 	}
 
 	private Property<File> fileProperty(Callable<File> provider) {
@@ -1302,21 +1148,19 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		return keratin.getIntermediaryGen().get();
 	}
 
-	private File pickFileForPresentSides(String minecraftVersion, Versioned<File> client, Versioned<File> server, Versioned<File> merged) {
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
-
-		if (details.client() && details.server()) {
+	private File pickFileForPresentSides(MinecraftVersion minecraftVersion, Versioned<MinecraftVersion, File> client, Versioned<MinecraftVersion, File> server, Versioned<MinecraftVersion, File> merged) {
+		if (minecraftVersion.hasClient() && minecraftVersion.hasServer()) {
 			return merged.get(minecraftVersion);
 		} else {
-			if (details.client()) {
+			if (minecraftVersion.hasClient()) {
 				return client.get(minecraftVersion);
 			}
-			if (details.server()) {
+			if (minecraftVersion.hasServer()) {
 				return server.get(minecraftVersion);
 			}
 		}
 
-		throw new RuntimeException("somehow Minecraft version " + minecraftVersion + " is neither client nor server!");
+		throw new RuntimeException("somehow Minecraft version " + minecraftVersion.id() + " is neither client nor server!");
 	}
 
 	public Set<File> getCacheDirectories() {
@@ -1424,17 +1268,17 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
-	public File getWorkingDirectory(String minecraftVersion) {
+	public File getWorkingDirectory(MinecraftVersion minecraftVersion) {
 		return workingDir.get(minecraftVersion);
 	}
 
 	@Override
-	public File getEnigmaSessionLock(String minecraftVersion) {
+	public File getEnigmaSessionLock(MinecraftVersion minecraftVersion) {
 		return enigmaSessionLock.get(minecraftVersion);
 	}
 
 	@Override
-	public File getDecompiledSourceDirectory(String minecraftVersion) {
+	public File getDecompiledSourceDirectory(MinecraftVersion minecraftVersion) {
 		return decompiledSrcDir.get(minecraftVersion);
 	}
 
@@ -1469,117 +1313,131 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
-	public File getClientJar(String minecraftVersion) {
+	public Collection<File> getLibraries(MinecraftVersion minecraftVersion) {
+		Set<File> libraries = new LinkedHashSet<>();
+
+		if (minecraftVersion.hasClient()) {
+			libraries.addAll(getLibraries(minecraftVersion.client().id()));
+		}
+		if (minecraftVersion.hasServer()) {
+			libraries.addAll(getLibraries(minecraftVersion.server().id()));
+		}
+
+		return libraries;
+	}
+
+	@Override
+	public File getClientJar(MinecraftVersion minecraftVersion) {
 		return clientJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getServerJar(String minecraftVersion) {
+	public File getServerJar(MinecraftVersion minecraftVersion) {
 		return serverJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMergedJar(String minecraftVersion) {
+	public File getMergedJar(MinecraftVersion minecraftVersion) {
 		return mergedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediaryClientJar(String minecraftVersion) {
+	public File getIntermediaryClientJar(MinecraftVersion minecraftVersion) {
 		return intermediaryClientJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediaryServerJar(String minecraftVersion) {
+	public File getIntermediaryServerJar(MinecraftVersion minecraftVersion) {
 		return intermediaryServerJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediaryMergedJar(String minecraftVersion) {
+	public File getIntermediaryMergedJar(MinecraftVersion minecraftVersion) {
 		return intermediaryMergedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMainIntermediaryJar(String minecraftVersion) {
+	public File getMainIntermediaryJar(MinecraftVersion minecraftVersion) {
 		return pickFileForPresentSides(minecraftVersion, intermediaryClientJar, intermediaryServerJar, intermediaryMergedJar);
 	}
 
 	@Override
-	public File getExceptionsPatchedIntermediaryClientJar(String minecraftVersion) {
+	public File getExceptionsPatchedIntermediaryClientJar(MinecraftVersion minecraftVersion) {
 		return exceptionsPatchedIntermediaryClientJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getExceptionsPatchedIntermediaryServerJar(String minecraftVersion) {
+	public File getExceptionsPatchedIntermediaryServerJar(MinecraftVersion minecraftVersion) {
 		return exceptionsPatchedIntermediaryServerJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getExceptionsPatchedIntermediaryMergedJar(String minecraftVersion) {
+	public File getExceptionsPatchedIntermediaryMergedJar(MinecraftVersion minecraftVersion) {
 		return exceptionsPatchedIntermediaryMergedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMainExceptionsPatchedIntermediaryJar(String minecraftVersion) {
+	public File getMainExceptionsPatchedIntermediaryJar(MinecraftVersion minecraftVersion) {
 		return pickFileForPresentSides(minecraftVersion, exceptionsPatchedIntermediaryClientJar, exceptionsPatchedIntermediaryServerJar, exceptionsPatchedIntermediaryMergedJar);
 	}
 
 	@Override
-	public File getSignaturePatchedIntermediaryClientJar(String minecraftVersion) {
+	public File getSignaturePatchedIntermediaryClientJar(MinecraftVersion minecraftVersion) {
 		return signaturePatchedIntermediaryClientJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSignaturePatchedIntermediaryServerJar(String minecraftVersion) {
+	public File getSignaturePatchedIntermediaryServerJar(MinecraftVersion minecraftVersion) {
 		return signaturePatchedIntermediaryServerJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSignaturePatchedIntermediaryMergedJar(String minecraftVersion) {
+	public File getSignaturePatchedIntermediaryMergedJar(MinecraftVersion minecraftVersion) {
 		return signaturePatchedIntermediaryMergedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMainSignaturePatchedIntermediaryJar(String minecraftVersion) {
+	public File getMainSignaturePatchedIntermediaryJar(MinecraftVersion minecraftVersion) {
 		return pickFileForPresentSides(minecraftVersion, signaturePatchedIntermediaryClientJar, signaturePatchedIntermediaryServerJar, signaturePatchedIntermediaryMergedJar);
 	}
 
 	@Override
-	public File getNestedIntermediaryClientJar(String minecraftVersion) {
+	public File getNestedIntermediaryClientJar(MinecraftVersion minecraftVersion) {
 		return nestedIntermediaryClientJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getNestedIntermediaryServerJar(String minecraftVersion) {
+	public File getNestedIntermediaryServerJar(MinecraftVersion minecraftVersion) {
 		return nestedIntermediaryServerJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getNestedIntermediaryMergedJar(String minecraftVersion) {
+	public File getNestedIntermediaryMergedJar(MinecraftVersion minecraftVersion) {
 		return nestedIntermediaryMergedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMainNestedIntermediaryJar(String minecraftVersion) {
+	public File getMainNestedIntermediaryJar(MinecraftVersion minecraftVersion) {
 		return pickFileForPresentSides(minecraftVersion, nestedIntermediaryClientJar, nestedIntermediaryServerJar, nestedIntermediaryMergedJar);
 	}
 
 	@Override
-	public File getProcessedIntermediaryClientJar(String minecraftVersion) {
+	public File getProcessedIntermediaryClientJar(MinecraftVersion minecraftVersion) {
 		return processedIntermediaryClientJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getProcessedIntermediaryServerJar(String minecraftVersion) {
+	public File getProcessedIntermediaryServerJar(MinecraftVersion minecraftVersion) {
 		return processedIntermediaryServerJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getProcessedIntermediaryMergedJar(String minecraftVersion) {
+	public File getProcessedIntermediaryMergedJar(MinecraftVersion minecraftVersion) {
 		return processedIntermediaryMergedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMainProcessedIntermediaryJar(String minecraftVersion) {
+	public File getMainProcessedIntermediaryJar(MinecraftVersion minecraftVersion) {
 		return pickFileForPresentSides(minecraftVersion, processedIntermediaryClientJar, processedIntermediaryServerJar, processedIntermediaryMergedJar);
 	}
 
@@ -1594,32 +1452,32 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
-	public File getClientIntermediaryMappings(String minecraftVersion) {
+	public File getClientIntermediaryMappings(MinecraftVersion minecraftVersion) {
 		return clientIntermediaryMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getServerIntermediaryMappings(String minecraftVersion) {
+	public File getServerIntermediaryMappings(MinecraftVersion minecraftVersion) {
 		return serverIntermediaryMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMergedIntermediaryMappings(String minecraftVersion) {
+	public File getMergedIntermediaryMappings(MinecraftVersion minecraftVersion) {
 		return mergedIntermediaryMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getNamedMappings(String minecraftVersion) {
+	public File getNamedMappings(MinecraftVersion minecraftVersion) {
 		return namedMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getProcessedNamedMappings(String minecraftVersion) {
+	public File getProcessedNamedMappings(MinecraftVersion minecraftVersion) {
 		return processedNamedMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getCompletedNamedMappings(String minecraftVersion) {
+	public File getCompletedNamedMappings(MinecraftVersion minecraftVersion) {
 		return completedNamedMappings.get(minecraftVersion);
 	}
 
@@ -1644,123 +1502,133 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
-	public File getClientRavenFile(String minecraftVersion) {
+	public File getClientRavenFile(MinecraftVersion minecraftVersion) {
 		return clientRavenFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getServerRavenFile(String minecraftVersion) {
+	public File getServerRavenFile(MinecraftVersion minecraftVersion) {
 		return serverRavenFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMergedRavenFile(String minecraftVersion) {
+	public File getMergedRavenFile(MinecraftVersion minecraftVersion) {
 		return mergedRavenFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediaryClientRavenFile(String minecraftVersion) {
+	public File getIntermediaryClientRavenFile(MinecraftVersion minecraftVersion) {
 		return intermediaryClientRavenFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediaryServerRavenFile(String minecraftVersion) {
+	public File getIntermediaryServerRavenFile(MinecraftVersion minecraftVersion) {
 		return intermediaryServerRavenFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediaryMergedRavenFile(String minecraftVersion) {
+	public File getIntermediaryMergedRavenFile(MinecraftVersion minecraftVersion) {
 		return intermediaryMergedRavenFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMainIntermediaryRavenFile(String minecraftVersion) {
+	public File getMainIntermediaryRavenFile(MinecraftVersion minecraftVersion) {
 		return pickFileForPresentSides(minecraftVersion, intermediaryClientRavenFile, intermediaryServerRavenFile, intermediaryMergedRavenFile);
 	}
 
 	@Override
-	public File getNamedRavenFile(String minecraftVersion) {
+	public File getNamedRavenFile(MinecraftVersion minecraftVersion) {
 		return namedRavenFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getClientSparrowFile(String minecraftVersion) {
+	public File getClientSparrowFile(MinecraftVersion minecraftVersion) {
 		return clientSparrowFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getServerSparrowFile(String minecraftVersion) {
+	public File getServerSparrowFile(MinecraftVersion minecraftVersion) {
 		return serverSparrowFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMergedSparrowFile(String minecraftVersion) {
+	public File getMergedSparrowFile(MinecraftVersion minecraftVersion) {
 		return mergedSparrowFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediaryClientSparrowFile(String minecraftVersion) {
+	public File getIntermediaryClientSparrowFile(MinecraftVersion minecraftVersion) {
 		return intermediaryClientSparrowFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediaryServerSparrowFile(String minecraftVersion) {
+	public File getIntermediaryServerSparrowFile(MinecraftVersion minecraftVersion) {
 		return intermediaryServerSparrowFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediaryMergedSparrowFile(String minecraftVersion) {
+	public File getIntermediaryMergedSparrowFile(MinecraftVersion minecraftVersion) {
 		return intermediaryMergedSparrowFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMainIntermediarySparrowFile(String minecraftVersion) {
+	public File getMainIntermediarySparrowFile(MinecraftVersion minecraftVersion) {
 		return pickFileForPresentSides(minecraftVersion, intermediaryClientSparrowFile, intermediaryServerSparrowFile, intermediaryMergedSparrowFile);
 	}
 
 	@Override
-	public File getNamedSparrowFile(String minecraftVersion) {
+	public File getNamedSparrowFile(MinecraftVersion minecraftVersion) {
 		return namedSparrowFile.get(minecraftVersion);
 	}
 
 	@Override
-	public File getClientNests(String minecraftVersion) {
+	public File getClientNests(MinecraftVersion minecraftVersion) {
 		return clientNests.get(minecraftVersion);
 	}
 
 	@Override
-	public File getServerNests(String minecraftVersion) {
+	public File getServerNests(MinecraftVersion minecraftVersion) {
 		return serverNests.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMergedNests(String minecraftVersion) {
+	public File getMergedNests(MinecraftVersion minecraftVersion) {
 		return mergedNests.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediaryClientNests(String minecraftVersion) {
+	public File getIntermediaryClientNests(MinecraftVersion minecraftVersion) {
 		return intermediaryClientNests.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediaryServerNests(String minecraftVersion) {
+	public File getIntermediaryServerNests(MinecraftVersion minecraftVersion) {
 		return intermediaryServerNests.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediaryMergedNests(String minecraftVersion) {
+	public File getIntermediaryMergedNests(MinecraftVersion minecraftVersion) {
 		return intermediaryMergedNests.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMainIntermediaryNests(String minecraftVersion) {
+	public File getMainIntermediaryNests(MinecraftVersion minecraftVersion) {
 		return pickFileForPresentSides(minecraftVersion, intermediaryClientNests, intermediaryServerNests, intermediaryMergedNests);
 	}
 
 	@Override
-	public File getNamedNests(String minecraftVersion) {
+	public File getNamedNests(MinecraftVersion minecraftVersion) {
 		return namedNests.get(minecraftVersion);
+	}
+
+	@Override
+	public File getIntermediaryFile(String minecraftVersion) {
+		return intermediaryFile.get(minecraftVersion);
+	}
+
+	@Override
+	public File getIntermediaryV2File(String minecraftVersion) {
+		return intermediaryV2File.get(minecraftVersion);
 	}
 
 	@Override
@@ -1769,257 +1637,257 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
-	public File getClientExceptions(String minecraftVersion) {
+	public File getClientExceptions(MinecraftVersion minecraftVersion) {
 		return clientExceptions.get(minecraftVersion);
 	}
 
 	@Override
-	public File getServerExceptions(String minecraftVersion) {
+	public File getServerExceptions(MinecraftVersion minecraftVersion) {
 		return serverExceptions.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMergedExceptions(String minecraftVersion) {
+	public File getMergedExceptions(MinecraftVersion minecraftVersion) {
 		return mergedExceptions.get(minecraftVersion);
 	}
 
 	@Override
-	public File getClientSignatures(String minecraftVersion) {
+	public File getClientSignatures(MinecraftVersion minecraftVersion) {
 		return clientSignatures.get(minecraftVersion);
 	}
 
 	@Override
-	public File getServerSignatures(String minecraftVersion) {
+	public File getServerSignatures(MinecraftVersion minecraftVersion) {
 		return serverSignatures.get(minecraftVersion);
 	}
 
 	@Override
-	public File getMergedSignatures(String minecraftVersion) {
+	public File getMergedSignatures(MinecraftVersion minecraftVersion) {
 		return mergedSignatures.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupClientJar(String minecraftVersion) {
+	public File getSetupClientJar(MinecraftVersion minecraftVersion) {
 		return setupClientJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupServerJar(String minecraftVersion) {
+	public File getSetupServerJar(MinecraftVersion minecraftVersion) {
 		return setupServerJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupMergedJar(String minecraftVersion) {
+	public File getSetupMergedJar(MinecraftVersion minecraftVersion) {
 		return setupMergedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediarySetupClientJar(String minecraftVersion) {
+	public File getIntermediarySetupClientJar(MinecraftVersion minecraftVersion) {
 		return intermediarySetupClientJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediarySetupServerJar(String minecraftVersion) {
+	public File getIntermediarySetupServerJar(MinecraftVersion minecraftVersion) {
 		return intermediarySetupServerJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getIntermediarySetupMergedJar(String minecraftVersion) {
+	public File getIntermediarySetupMergedJar(MinecraftVersion minecraftVersion) {
 		return intermediarySetupMergedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSourceClientJar(String minecraftVersion) {
+	public File getSourceClientJar(MinecraftVersion minecraftVersion) {
 		return sourceClientJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSourceServerJar(String minecraftVersion) {
+	public File getSourceServerJar(MinecraftVersion minecraftVersion) {
 		return sourceServerJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSourceMergedJar(String minecraftVersion) {
+	public File getSourceMergedJar(MinecraftVersion minecraftVersion) {
 		return sourceMergedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getNamedSourceClientJar(String minecraftVersion) {
+	public File getNamedSourceClientJar(MinecraftVersion minecraftVersion) {
 		return namedSourceClientJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getNamedSourceServerJar(String minecraftVersion) {
+	public File getNamedSourceServerJar(MinecraftVersion minecraftVersion) {
 		return namedSourceServerJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getNamedSourceMergedJar(String minecraftVersion) {
+	public File getNamedSourceMergedJar(MinecraftVersion minecraftVersion) {
 		return namedSourceMergedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupClientIntermediaryMappings(String minecraftVersion) {
+	public File getSetupClientIntermediaryMappings(MinecraftVersion minecraftVersion) {
 		return setupClientIntermediaryMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupServerIntermediaryMappings(String minecraftVersion) {
+	public File getSetupServerIntermediaryMappings(MinecraftVersion minecraftVersion) {
 		return setupServerIntermediaryMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupMergedIntermediaryMappings(String minecraftVersion) {
+	public File getSetupMergedIntermediaryMappings(MinecraftVersion minecraftVersion) {
 		return setupMergedIntermediaryMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupClientNamedMappings(String minecraftVersion) {
+	public File getSetupClientNamedMappings(MinecraftVersion minecraftVersion) {
 		return setupClientNamedMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupServerNamedMappings(String minecraftVersion) {
+	public File getSetupServerNamedMappings(MinecraftVersion minecraftVersion) {
 		return setupServerNamedMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupMergedNamedMappings(String minecraftVersion) {
+	public File getSetupMergedNamedMappings(MinecraftVersion minecraftVersion) {
 		return setupMergedNamedMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSourceClientMappings(String minecraftVersion) {
+	public File getSourceClientMappings(MinecraftVersion minecraftVersion) {
 		return sourceClientMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSourceServerMappings(String minecraftVersion) {
+	public File getSourceServerMappings(MinecraftVersion minecraftVersion) {
 		return sourceServerMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSourceMergedMappings(String minecraftVersion) {
+	public File getSourceMergedMappings(MinecraftVersion minecraftVersion) {
 		return sourceMergedMappings.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupClientExceptions(String minecraftVersion) {
+	public File getSetupClientExceptions(MinecraftVersion minecraftVersion) {
 		return setupClientExceptions.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupServerExceptions(String minecraftVersion) {
+	public File getSetupServerExceptions(MinecraftVersion minecraftVersion) {
 		return setupServerExceptions.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupMergedExceptions(String minecraftVersion) {
+	public File getSetupMergedExceptions(MinecraftVersion minecraftVersion) {
 		return setupMergedExceptions.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupClientSignatures(String minecraftVersion) {
+	public File getSetupClientSignatures(MinecraftVersion minecraftVersion) {
 		return setupClientSignatures.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupServerSignatures(String minecraftVersion) {
+	public File getSetupServerSignatures(MinecraftVersion minecraftVersion) {
 		return setupServerSignatures.get(minecraftVersion);
 	}
 
 	@Override
-	public File getSetupMergedSignatures(String minecraftVersion) {
+	public File getSetupMergedSignatures(MinecraftVersion minecraftVersion) {
 		return setupMergedSignatures.get(minecraftVersion);
 	}
 
 	@Override
-	public File getBaseClientExceptions(String minecraftVersion) {
+	public File getBaseClientExceptions(MinecraftVersion minecraftVersion) {
 		return baseClientExceptions.get(minecraftVersion);
 	}
 
 	@Override
-	public File getBaseServerExceptions(String minecraftVersion) {
+	public File getBaseServerExceptions(MinecraftVersion minecraftVersion) {
 		return baseServerExceptions.get(minecraftVersion);
 	}
 
 	@Override
-	public File getBaseMergedExceptions(String minecraftVersion) {
+	public File getBaseMergedExceptions(MinecraftVersion minecraftVersion) {
 		return baseMergedExceptions.get(minecraftVersion);
 	}
 
 	@Override
-	public File getBaseClientSignatures(String minecraftVersion) {
+	public File getBaseClientSignatures(MinecraftVersion minecraftVersion) {
 		return baseClientSignatures.get(minecraftVersion);
 	}
 
 	@Override
-	public File getBaseServerSignatures(String minecraftVersion) {
+	public File getBaseServerSignatures(MinecraftVersion minecraftVersion) {
 		return baseServerSignatures.get(minecraftVersion);
 	}
 
 	@Override
-	public File getBaseMergedSignatures(String minecraftVersion) {
+	public File getBaseMergedSignatures(MinecraftVersion minecraftVersion) {
 		return baseMergedSignatures.get(minecraftVersion);
 	}
 
 	@Override
-	public File getGeneratedClientJar(String minecraftVersion) {
+	public File getGeneratedClientJar(MinecraftVersion minecraftVersion) {
 		return generatedClientJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getGeneratedServerJar(String minecraftVersion) {
+	public File getGeneratedServerJar(MinecraftVersion minecraftVersion) {
 		return generatedServerJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getGeneratedMergedJar(String minecraftVersion) {
+	public File getGeneratedMergedJar(MinecraftVersion minecraftVersion) {
 		return generatedMergedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getNamedGeneratedClientJar(String minecraftVersion) {
+	public File getNamedGeneratedClientJar(MinecraftVersion minecraftVersion) {
 		return namedGeneratedClientJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getNamedGeneratedServerJar(String minecraftVersion) {
+	public File getNamedGeneratedServerJar(MinecraftVersion minecraftVersion) {
 		return namedGeneratedServerJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getNamedGeneratedMergedJar(String minecraftVersion) {
+	public File getNamedGeneratedMergedJar(MinecraftVersion minecraftVersion) {
 		return namedGeneratedMergedJar.get(minecraftVersion);
 	}
 
 	@Override
-	public File getGeneratedClientExceptions(String minecraftVersion) {
+	public File getGeneratedClientExceptions(MinecraftVersion minecraftVersion) {
 		return generatedClientExceptions.get(minecraftVersion);
 	}
 
 	@Override
-	public File getGeneratedServerExceptions(String minecraftVersion) {
+	public File getGeneratedServerExceptions(MinecraftVersion minecraftVersion) {
 		return generatedServerExceptions.get(minecraftVersion);
 	}
 
 	@Override
-	public File getGeneratedMergedExceptions(String minecraftVersion) {
+	public File getGeneratedMergedExceptions(MinecraftVersion minecraftVersion) {
 		return generatedMergedExceptions.get(minecraftVersion);
 	}
 
 	@Override
-	public File getGeneratedClientSignatures(String minecraftVersion) {
+	public File getGeneratedClientSignatures(MinecraftVersion minecraftVersion) {
 		return generatedClientSignatures.get(minecraftVersion);
 	}
 
 	@Override
-	public File getGeneratedServerSignatures(String minecraftVersion) {
+	public File getGeneratedServerSignatures(MinecraftVersion minecraftVersion) {
 		return generatedServerSignatures.get(minecraftVersion);
 	}
 
 	@Override
-	public File getGeneratedMergedSignatures(String minecraftVersion) {
+	public File getGeneratedMergedSignatures(MinecraftVersion minecraftVersion) {
 		return generatedMergedSignatures.get(minecraftVersion);
 	}
 }

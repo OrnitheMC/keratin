@@ -12,6 +12,7 @@ import org.gradle.api.tasks.Internal;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
@@ -28,24 +29,30 @@ public abstract class ExtendGraphTask extends MinecraftTask implements MappingsG
 	public abstract Property<String> getClassNamePattern();
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws IOException {
-		List<String> fromMinecraftVersions = getFromMinecraftVersions().getOrNull();
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws IOException {
+		List<String> fromMinecraftVersionStrings = getFromMinecraftVersions().getOrNull();
 
-		if (fromMinecraftVersions == null || fromMinecraftVersions.isEmpty()) {
+		if (fromMinecraftVersionStrings == null || fromMinecraftVersionStrings.isEmpty()) {
 			throw new IllegalStateException("no Minecraft version specified to extend from");
 		}
 
-		getProject().getLogger().lifecycle("extending the graph from Minecraft " + String.join("/", fromMinecraftVersions) + " to " + minecraftVersion);
-
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
+
+		List<MinecraftVersion> fromMinecraftVersions = new ArrayList<>();
+
+		for (String fromMinecraftVersion : fromMinecraftVersionStrings) {
+			fromMinecraftVersions.add(MinecraftVersion.parse(keratin, fromMinecraftVersion));
+		}
+
+		getProject().getLogger().lifecycle("extending the graph from Minecraft " + String.join("/", fromMinecraftVersionStrings) + " to " + minecraftVersion.id());
 
 		File graphDir = files.getMappingsDirectory();
 		String classNamePattern = getClassNamePattern().getOrElse("");
 
 		File jar = files.getMainProcessedIntermediaryJar(minecraftVersion);
 		List<File> fromJars = new ArrayList<>();
-		for (String fromMinecraftVersion : fromMinecraftVersions) {
+		for (MinecraftVersion fromMinecraftVersion : fromMinecraftVersions) {
 			fromJars.add(files.getMainProcessedIntermediaryJar(fromMinecraftVersion));
 		}
 

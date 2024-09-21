@@ -21,6 +21,10 @@ import net.ornithemc.mappingutils.io.Format;
 
 public interface Mapper extends TaskAware {
 
+	static String OFFICIAL = "official";
+	static String INTERMEDIARY = "intermediary";
+	static String NAMED = "named";
+
 	interface MapperParameters extends WorkParameters {
 
 		Property<File> getInput();
@@ -105,7 +109,7 @@ public interface Mapper extends TaskAware {
 			.withMappings(TinyUtils.createTinyMappingProvider(mappings.toPath(), srcNs, dstNs))
 			.renameInvalidLocals(true)
 			.rebuildSourceFilenames(true)
-			.fixPackageAccess("named".equals(dstNs));
+			.fixPackageAccess(NAMED.equals(dstNs));
 		TinyRemapper remapper = remapperBuilder.build();
 
 		try {

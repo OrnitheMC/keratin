@@ -8,52 +8,54 @@ import org.gradle.workers.WorkQueue;
 import net.fabricmc.stitch.util.IntermediaryUtil;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.matching.Matches;
 
 public abstract class GenerateNewIntermediaryTask extends GenerateIntermediaryTask {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws IOException {
-		getProject().getLogger().lifecycle(":generating intermediary for Minecraft " + minecraftVersion);
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws IOException {
+		getProject().getLogger().lifecycle(":generating intermediary for Minecraft " + minecraftVersion.id());
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (!details.client() || !details.server()) {
+		if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
 			throw new IllegalStateException("generating intermediary for client-only/server-only versions is not supported");
 		}
 
 		File dir = files.getMappingsDirectory();
-		File file = new File(dir, "%s.tiny".formatted(minecraftVersion));
 
-		OptionsBuilder options = getOptions(details);
+		if (minecraftVersion.hasSharedObfuscation()) {
+			IntermediaryUtil.MergedArgsBuilder args = mergedArgs(minecraftVersion)
+				.newJarFile(files.getMergedJar(minecraftVersion))
+				.newNests(files.getMergedNests(minecraftVersion))
+				.newLibraries(files.getLibraries(minecraftVersion))
+				.newIntermediaryFile(new File(dir, "%s.tiny".formatted(minecraftVersion.id())));
 
-		if (details.sharedMappings()) {
-			IntermediaryUtil.generateIntermediary(
-				files.getMergedJar(minecraftVersion),
-				files.getMergedNests(minecraftVersion),
-				files.getLibraries(minecraftVersion),
-				file,
-				options.build()
-			);
+			IntermediaryUtil.generateMappings(args.build());
 		} else {
-			Matches matches = keratin.findMatches("client", minecraftVersion, "server", minecraftVersion);
+			Matches matches = keratin.findMatches("client", minecraftVersion.client().id(), "server", minecraftVersion.server().id());
 
-			IntermediaryUtil.generateIntermediary(
-				files.getClientJar(minecraftVersion),
-				files.getClientNests(minecraftVersion),
-				files.getLibraries(minecraftVersion),
-				files.getServerJar(minecraftVersion),
-				files.getServerNests(minecraftVersion),
-				files.getLibraries(minecraftVersion),
-				file,
-				matches.file(),
-				matches.inverted(),
-				options.build()
-			);
+			IntermediaryUtil.SplitArgsBuilder args = splitArgs(minecraftVersion)
+				.newClientJarFile(files.getClientJar(minecraftVersion))
+				.newClientNests(files.getClientNests(minecraftVersion))
+				.newClientLibraries(files.getLibraries(minecraftVersion.client().id()))
+				.newServerJarFile(files.getServerJar(minecraftVersion))
+				.newServerNests(files.getServerNests(minecraftVersion))
+				.newServerLibraries(files.getLibraries(minecraftVersion.server().id()))
+				.clientServerMatchesFile(matches.file(), matches.inverted());
+
+			if (minecraftVersion.hasSharedVersioning()) {
+				args.newIntermediaryFile(new File(dir, "%s.tiny".formatted(minecraftVersion.id())));
+			} else {
+				args
+					.newClientIntermediaryFile(new File(dir, "%s.tiny".formatted(minecraftVersion.client().id())))
+					.newServerIntermediaryFile(new File(dir, "%s.tiny".formatted(minecraftVersion.server().id())));
+			}
+
+			IntermediaryUtil.generateMappings(args.build());
 		}
 	}
 }

@@ -12,14 +12,15 @@ import org.gradle.workers.WorkQueue;
 import net.fabricmc.nameproposal.MappingNameCompleter;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class CompleteMappingsTask extends MinecraftTask {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) {
-		getProject().getLogger().lifecycle(":completing mappings for Minecraft " + minecraftVersion);
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
+		getProject().getLogger().lifecycle(":completing mappings for Minecraft " + minecraftVersion.id());
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();

@@ -11,20 +11,19 @@ import org.gradle.workers.WorkParameters;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.Nester;
 
 public abstract class MakeSetupMappingsTask extends MinecraftTask {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.sharedMappings()) {
+		if (minecraftVersion.hasSharedObfuscation()) {
 			workQueue.submit(MakeSetupMappings.class, parameters -> {
 				parameters.getInputMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
 				parameters.getOutputMappings().set(files.getSetupMergedIntermediaryMappings(minecraftVersion));
@@ -34,7 +33,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 				parameters.getNestsFile().set(files.getMergedNests(minecraftVersion));
 			});
 			workQueue.submit(MakeSetupMappings.class, parameters -> {
-				parameters.getInputMappings().set(files.getFeatherMappings(minecraftVersion));
+				parameters.getInputMappings().set(files.getFeatherMappings(minecraftVersion.id()));
 				parameters.getOutputMappings().set(files.getSetupMergedNamedMappings(minecraftVersion));
 				parameters.getJar().set(files.getIntermediaryMergedJar(minecraftVersion));
 				parameters.getLibraries().set(files.getLibraries(minecraftVersion));
@@ -42,7 +41,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 				parameters.getNestsFile().set(files.getIntermediaryMergedNests(minecraftVersion));
 			});
 		} else {
-			if (details.client()) {
+			if (minecraftVersion.hasClient()) {
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
 					parameters.getInputMappings().set(files.getClientIntermediaryMappings(minecraftVersion));
 					parameters.getOutputMappings().set(files.getSetupClientIntermediaryMappings(minecraftVersion));
@@ -52,7 +51,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 					parameters.getNestsFile().set(files.getClientNests(minecraftVersion));
 				});
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
-					parameters.getInputMappings().set(files.getFeatherMappings(minecraftVersion));
+					parameters.getInputMappings().set(files.getFeatherMappings(minecraftVersion.client().id()));
 					parameters.getOutputMappings().set(files.getSetupClientNamedMappings(minecraftVersion));
 					parameters.getJar().set(files.getIntermediaryClientJar(minecraftVersion));
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
@@ -60,7 +59,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 					parameters.getNestsFile().set(files.getIntermediaryClientNests(minecraftVersion));
 				});
 			}
-			if (details.server()) {
+			if (minecraftVersion.hasServer()) {
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
 					parameters.getInputMappings().set(files.getServerIntermediaryMappings(minecraftVersion));
 					parameters.getOutputMappings().set(files.getSetupServerIntermediaryMappings(minecraftVersion));
@@ -70,7 +69,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 					parameters.getNestsFile().set(files.getServerNests(minecraftVersion));
 				});
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
-					parameters.getInputMappings().set(files.getFeatherMappings(minecraftVersion));
+					parameters.getInputMappings().set(files.getFeatherMappings(minecraftVersion.server().id()));
 					parameters.getOutputMappings().set(files.getSetupServerNamedMappings(minecraftVersion));
 					parameters.getJar().set(files.getIntermediaryServerJar(minecraftVersion));
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));

@@ -8,13 +8,14 @@ import org.gradle.api.Project;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class SetUpSourceTask extends MinecraftTask {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		Project project = getProject();
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();

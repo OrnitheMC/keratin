@@ -17,8 +17,8 @@ import net.ornithemc.exceptor.io.ExceptionsFile;
 import net.ornithemc.exceptor.io.ExceptorIo;
 import net.ornithemc.exceptor.io.MethodEntry;
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.matching.Matches;
 import net.ornithemc.keratin.matching.MatchesUtil;
@@ -29,101 +29,86 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 	public abstract Property<String> getFromMinecraftVersion();
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.sharedMappings()) {
+		MinecraftVersion fromMinecraftVersion = getFromMinecraftVersion().isPresent()
+			? MinecraftVersion.parse(keratin, getFromMinecraftVersion().get())
+			: null;
+
+		if (minecraftVersion.hasSharedObfuscation()) {
 			File excs = files.getMergedExceptions(minecraftVersion);
 			File setup = files.getSetupMergedExceptions(minecraftVersion);
 
 			if (excs.exists()) {
 				Files.copy(excs, setup);
 			} else {
-				String fromMinecraftVersion = getFromMinecraftVersion().getOrNull();
-
 				if (fromMinecraftVersion == null) {
 					setup.createNewFile();
+				} else if (fromMinecraftVersion.hasSharedObfuscation()) {
+					File fromExcs = files.getMergedExceptions(fromMinecraftVersion);
+
+					updateExceptions(
+						fromMinecraftVersion.id(),
+						"merged",
+						minecraftVersion.id(),
+						"merged",
+						fromExcs,
+						setup
+					);
 				} else {
-					VersionDetails fromDetails = keratin.getVersionDetails(fromMinecraftVersion);
-
-					if (fromDetails.sharedMappings()) {
-						File fromExcs = files.getMergedExceptions(fromMinecraftVersion);
-
-						updateExceptions(
-							fromMinecraftVersion,
-							"merged",
-							minecraftVersion,
-							"merged",
-							fromExcs,
-							setup
-						);
-					} else {
-						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
-					}
+					throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
 				}
 			}
 		} else {
-			if (details.client()) {
+			if (minecraftVersion.hasClient()) {
 				File excs = files.getClientExceptions(minecraftVersion);
 				File setup = files.getSetupClientExceptions(minecraftVersion);
 
 				if (excs.exists()) {
 					Files.copy(excs, setup);
 				} else {
-					String fromMinecraftVersion = getFromMinecraftVersion().getOrNull();
-
 					if (fromMinecraftVersion == null) {
 						setup.createNewFile();
-					} else {
-						VersionDetails fromDetails = keratin.getVersionDetails(fromMinecraftVersion);
+					} else if (fromMinecraftVersion.hasSharedObfuscation()) {
+						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
+					} else if (fromMinecraftVersion.hasClient()) {
+						File fromExcs = files.getClientExceptions(fromMinecraftVersion);
 
-						if (fromDetails.sharedMappings()) {
-							throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
-						} else if (fromDetails.client()) {
-							File fromExcs = files.getClientExceptions(fromMinecraftVersion);
-
-							updateExceptions(
-								fromMinecraftVersion,
-								"client",
-								minecraftVersion,
-								"client",
-								fromExcs,
-								setup
-							);
-						}
+						updateExceptions(
+							fromMinecraftVersion.client().id(),
+							"client",
+							minecraftVersion.client().id(),
+							"client",
+							fromExcs,
+							setup
+						);
 					}
 				}
 			}
-			if (details.server()) {
+			if (minecraftVersion.hasServer()) {
 				File excs = files.getServerExceptions(minecraftVersion);
 				File setup = files.getSetupServerExceptions(minecraftVersion);
 
 				if (excs.exists()) {
 					Files.copy(excs, setup);
 				} else {
-					String fromMinecraftVersion = getFromMinecraftVersion().getOrNull();
-
 					if (fromMinecraftVersion == null) {
 						setup.createNewFile();
-					} else {
-						VersionDetails fromDetails = keratin.getVersionDetails(fromMinecraftVersion);
+					} else if (fromMinecraftVersion.hasSharedObfuscation()) {
+						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
+					} else if (fromMinecraftVersion.hasServer()) {
+						File fromExcs = files.getServerExceptions(fromMinecraftVersion);
 
-						if (fromDetails.sharedMappings()) {
-							throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
-						} else if (fromDetails.server()) {
-							File fromExcs = files.getServerExceptions(fromMinecraftVersion);
-
-							updateExceptions(
-								fromMinecraftVersion,
-								"server",
-								minecraftVersion,
-								"server",
-								fromExcs,
-								setup
-							);
-						}
+						updateExceptions(
+							fromMinecraftVersion.server().id(),
+							"server",
+							minecraftVersion.server().id(),
+							"server",
+							fromExcs,
+							setup
+						);
 					}
 				}
 			}

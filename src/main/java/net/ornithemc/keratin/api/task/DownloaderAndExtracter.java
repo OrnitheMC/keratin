@@ -15,10 +15,6 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 public interface DownloaderAndExtracter extends Downloader {
 
 	default void downloadAndExtract(String url, String pathInJar, File dst) throws Exception {
-		downloadAndExtract(url, pathInJar, dst, null);
-	}
-
-	default void downloadAndExtract(String url, String pathInJar, File dst, Runnable after) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		Project project = keratin.getProject();
 		String nameInJar = pathInJar.substring(pathInJar.lastIndexOf('/') + 1);
@@ -45,10 +41,6 @@ public interface DownloaderAndExtracter extends Downloader {
 					Files.copy(tmpDst, dst);
 
 					FileUtils.forceDelete(tmpDir);
-
-					if (after != null) {
-						after.run();
-					}
 				} catch (IOException e) {
 					throw new UncheckedIOException(e);
 				}

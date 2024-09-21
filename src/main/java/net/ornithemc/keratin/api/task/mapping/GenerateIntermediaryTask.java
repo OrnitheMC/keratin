@@ -4,7 +4,9 @@ import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Internal;
 
-import net.ornithemc.keratin.api.manifest.VersionDetails;
+import net.fabricmc.stitch.util.IntermediaryUtil;
+
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class GenerateIntermediaryTask extends MinecraftTask {
@@ -30,23 +32,27 @@ public abstract class GenerateIntermediaryTask extends MinecraftTask {
 		super.run();
 	}
 
-	protected OptionsBuilder getOptions(VersionDetails details) {
-		OptionsBuilder options = new OptionsBuilder();
+	protected IntermediaryUtil.MergedArgsBuilder mergedArgs(MinecraftVersion minecraftVersion) {
+		return withSharedOptions(minecraftVersion, IntermediaryUtil.mergedOptions());
+	}
 
+	protected IntermediaryUtil.SplitArgsBuilder splitArgs(MinecraftVersion minecraftVersion) {
+		return withSharedOptions(minecraftVersion, IntermediaryUtil.splitOptions());
+	}
+
+	private <T extends IntermediaryUtil.ArgsBuilder> T withSharedOptions(MinecraftVersion minecraftVersion, T options) {
 		if (getTargetNamespace().isPresent())
 			options.targetNamespace(getTargetNamespace().get());
 		if (getTargetPackage().isPresent())
-			options.targetPackage(getTargetPackage().get());
+			options.defaultPackage(getTargetPackage().get());
 		if (getObfuscationPatterns().isPresent())
-			for (String obfuscationPattern : getObfuscationPatterns().get()) {
-				options.obfuscationPattern(obfuscationPattern);
-			}
+			options.obfuscationPatterns(getObfuscationPatterns().get());
 		if (getNameLength().isPresent())
 			options.nameLength(getNameLength().get());
-		if (details.client())
-			options.clientHash(details.downloads().get("client").sha1());
-		if (details.server())
-			options.serverHash(details.downloads().get("server").sha1());
+		if (minecraftVersion.hasClient())
+			options.clientHash(minecraftVersion.client().downloads().client().sha1());
+		if (minecraftVersion.hasServer())
+			options.serverHash(minecraftVersion.server().downloads().server().sha1());
 
 		return options;
 	}

@@ -9,17 +9,19 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.workers.WorkQueue;
 import org.gradle.workers.WorkerExecutor;
 
+import net.ornithemc.keratin.api.MinecraftVersion;
+
 public abstract class MinecraftTask extends KeratinTask {
 
-	private Action<String> configureMinecraftVersionAction;
+	private Action<MinecraftVersion> configureMinecraftVersionAction;
 
 	@Inject
 	public abstract WorkerExecutor getWorkerExecutor();
 
 	@Internal
-	public abstract ListProperty<String> getMinecraftVersions();
+	public abstract ListProperty<MinecraftVersion> getMinecraftVersions();
 
-	public void configureMinecraftVersion(Action<String> configureMinecraftVersionAction) {
+	public void configureMinecraftVersion(Action<MinecraftVersion> configureMinecraftVersionAction) {
 		this.configureMinecraftVersionAction = configureMinecraftVersionAction;
 	}
 
@@ -28,7 +30,7 @@ public abstract class MinecraftTask extends KeratinTask {
 		WorkerExecutor workerExecutor = getWorkerExecutor();
 		WorkQueue workQueue = workerExecutor.noIsolation();
 
-		for (String minecraftVersion : getMinecraftVersions().get()) {
+		for (MinecraftVersion minecraftVersion : getMinecraftVersions().get()) {
 			if (configureMinecraftVersionAction != null) {
 				configureMinecraftVersionAction.execute(minecraftVersion);
 			}
@@ -37,6 +39,6 @@ public abstract class MinecraftTask extends KeratinTask {
 		}
 	}
 
-	protected abstract void run(WorkQueue workQueue, String minecraftVersion) throws Exception;
+	protected abstract void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception;
 
 }

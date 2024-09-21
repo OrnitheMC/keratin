@@ -7,6 +7,7 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.Configurations;
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.JavaExecution;
 import net.ornithemc.keratin.api.task.MinecraftTask;
@@ -18,21 +19,21 @@ public abstract class LaunchEnigmaTask extends MinecraftTask implements JavaExec
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
 
-		for (String minecraftVersion : getMinecraftVersions().get()) {
-			checkSessionLock(minecraftVersion, files.getEnigmaSessionLock(minecraftVersion));
+		for (MinecraftVersion minecraftVersion : getMinecraftVersions().get()) {
+			checkSessionLock(minecraftVersion.id(), files.getEnigmaSessionLock(minecraftVersion));
 		}
 
 		super.run();
 	}
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
 		Project project = keratin.getProject();
 		OrnitheFilesAPI files = keratin.getFiles();
 
 		workQueue.submit(EnigmaSessionAction.class, parameters -> {
-			parameters.getMinecraftVersion().set(minecraftVersion);
+			parameters.getMinecraftVersion().set(minecraftVersion.id());
 			parameters.getSessionLock().set(files.getEnigmaSessionLock(minecraftVersion));
 			parameters.getMainClass().set("cuchaz.enigma.gui.Main");
 			parameters.getClasspath().set(project.getConfigurations().getByName(Configurations.ENIGMA_RUNTIME).getFiles());

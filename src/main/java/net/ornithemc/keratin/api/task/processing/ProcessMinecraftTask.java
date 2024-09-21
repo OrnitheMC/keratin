@@ -3,13 +3,14 @@ package net.ornithemc.keratin.api.task.processing;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class ProcessMinecraftTask extends MinecraftTask implements Processor {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
 

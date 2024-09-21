@@ -45,11 +45,11 @@ public interface OrnitheFilesAPI {
 
 	File getRunDirectory();
 
-	File getWorkingDirectory(String minecraftVersion);
+	File getWorkingDirectory(MinecraftVersion minecraftVersion);
 
-	File getEnigmaSessionLock(String minecraftVersion);
+	File getEnigmaSessionLock(MinecraftVersion minecraftVersion);
 
-	File getDecompiledSourceDirectory(String minecraftVersion);
+	File getDecompiledSourceDirectory(MinecraftVersion minecraftVersion);
 
 	File getFakeSourceDirectory(String minecraftVersion);
 
@@ -63,67 +63,69 @@ public interface OrnitheFilesAPI {
 
 	Collection<File> getLibraries(String minecraftVersion);
 
-	File getClientJar(String minecraftVersion);
+	Collection<File> getLibraries(MinecraftVersion minecraftVersion);
 
-	File getServerJar(String minecraftVersion);
+	File getClientJar(MinecraftVersion minecraftVersion);
 
-	File getMergedJar(String minecraftVersion);
+	File getServerJar(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryClientJar(String minecraftVersion);
+	File getMergedJar(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryServerJar(String minecraftVersion);
+	File getIntermediaryClientJar(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryMergedJar(String minecraftVersion);
+	File getIntermediaryServerJar(MinecraftVersion minecraftVersion);
 
-	File getMainIntermediaryJar(String minecraftVersion);
+	File getIntermediaryMergedJar(MinecraftVersion minecraftVersion);
 
-	File getExceptionsPatchedIntermediaryClientJar(String minecraftVersion);
+	File getMainIntermediaryJar(MinecraftVersion minecraftVersion);
 
-	File getExceptionsPatchedIntermediaryServerJar(String minecraftVersion);
+	File getExceptionsPatchedIntermediaryClientJar(MinecraftVersion minecraftVersion);
 
-	File getExceptionsPatchedIntermediaryMergedJar(String minecraftVersion);
+	File getExceptionsPatchedIntermediaryServerJar(MinecraftVersion minecraftVersion);
 
-	File getMainExceptionsPatchedIntermediaryJar(String minecraftVersion);
+	File getExceptionsPatchedIntermediaryMergedJar(MinecraftVersion minecraftVersion);
 
-	File getSignaturePatchedIntermediaryClientJar(String minecraftVersion);
+	File getMainExceptionsPatchedIntermediaryJar(MinecraftVersion minecraftVersion);
 
-	File getSignaturePatchedIntermediaryServerJar(String minecraftVersion);
+	File getSignaturePatchedIntermediaryClientJar(MinecraftVersion minecraftVersion);
 
-	File getSignaturePatchedIntermediaryMergedJar(String minecraftVersion);
+	File getSignaturePatchedIntermediaryServerJar(MinecraftVersion minecraftVersion);
 
-	File getMainSignaturePatchedIntermediaryJar(String minecraftVersion);
+	File getSignaturePatchedIntermediaryMergedJar(MinecraftVersion minecraftVersion);
 
-	File getNestedIntermediaryClientJar(String minecraftVersion);
+	File getMainSignaturePatchedIntermediaryJar(MinecraftVersion minecraftVersion);
 
-	File getNestedIntermediaryServerJar(String minecraftVersion);
+	File getNestedIntermediaryClientJar(MinecraftVersion minecraftVersion);
 
-	File getNestedIntermediaryMergedJar(String minecraftVersion);
+	File getNestedIntermediaryServerJar(MinecraftVersion minecraftVersion);
 
-	File getMainNestedIntermediaryJar(String minecraftVersion);
+	File getNestedIntermediaryMergedJar(MinecraftVersion minecraftVersion);
 
-	File getProcessedIntermediaryClientJar(String minecraftVersion);
+	File getMainNestedIntermediaryJar(MinecraftVersion minecraftVersion);
 
-	File getProcessedIntermediaryServerJar(String minecraftVersion);
+	File getProcessedIntermediaryClientJar(MinecraftVersion minecraftVersion);
 
-	File getProcessedIntermediaryMergedJar(String minecraftVersion);
+	File getProcessedIntermediaryServerJar(MinecraftVersion minecraftVersion);
 
-	File getMainProcessedIntermediaryJar(String minecraftVersion);
+	File getProcessedIntermediaryMergedJar(MinecraftVersion minecraftVersion);
+
+	File getMainProcessedIntermediaryJar(MinecraftVersion minecraftVersion);
 
 	File getNamedJar(String minecraftVersion);
 
 	File getProcessedNamedJar(String minecraftVersion);
 
-	File getClientIntermediaryMappings(String minecraftVersion);
+	File getClientIntermediaryMappings(MinecraftVersion minecraftVersion);
 
-	File getServerIntermediaryMappings(String minecraftVersion);
+	File getServerIntermediaryMappings(MinecraftVersion minecraftVersion);
 
-	File getMergedIntermediaryMappings(String minecraftVersion);
+	File getMergedIntermediaryMappings(MinecraftVersion minecraftVersion);
 
-	File getNamedMappings(String minecraftVersion);
+	File getNamedMappings(MinecraftVersion minecraftVersion);
 
-	File getProcessedNamedMappings(String minecraftVersion);
+	File getProcessedNamedMappings(MinecraftVersion minecraftVersion);
 
-	File getCompletedNamedMappings(String minecraftVersion);
+	File getCompletedNamedMappings(MinecraftVersion minecraftVersion);
 
 	File getTinyV1NamedMappings(String minecraftVersion);
 
@@ -133,156 +135,160 @@ public interface OrnitheFilesAPI {
 
 	File getMergedTinyV2NamedMappings(String minecraftVersion);
 
-	File getClientRavenFile(String minecraftVersion);
+	File getClientRavenFile(MinecraftVersion minecraftVersion);
 
-	File getServerRavenFile(String minecraftVersion);
+	File getServerRavenFile(MinecraftVersion minecraftVersion);
 
-	File getMergedRavenFile(String minecraftVersion);
+	File getMergedRavenFile(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryClientRavenFile(String minecraftVersion);
+	File getIntermediaryClientRavenFile(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryServerRavenFile(String minecraftVersion);
+	File getIntermediaryServerRavenFile(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryMergedRavenFile(String minecraftVersion);
+	File getIntermediaryMergedRavenFile(MinecraftVersion minecraftVersion);
 
-	File getMainIntermediaryRavenFile(String minecraftVersion);
+	File getMainIntermediaryRavenFile(MinecraftVersion minecraftVersion);
 
-	File getNamedRavenFile(String minecraftVersion);
+	File getNamedRavenFile(MinecraftVersion minecraftVersion);
 
-	File getClientSparrowFile(String minecraftVersion);
+	File getClientSparrowFile(MinecraftVersion minecraftVersion);
 
-	File getServerSparrowFile(String minecraftVersion);
+	File getServerSparrowFile(MinecraftVersion minecraftVersion);
 
-	File getMergedSparrowFile(String minecraftVersion);
+	File getMergedSparrowFile(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryClientSparrowFile(String minecraftVersion);
+	File getIntermediaryClientSparrowFile(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryServerSparrowFile(String minecraftVersion);
+	File getIntermediaryServerSparrowFile(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryMergedSparrowFile(String minecraftVersion);
+	File getIntermediaryMergedSparrowFile(MinecraftVersion minecraftVersion);
 
-	File getMainIntermediarySparrowFile(String minecraftVersion);
+	File getMainIntermediarySparrowFile(MinecraftVersion minecraftVersion);
 
-	File getNamedSparrowFile(String minecraftVersion);
+	File getNamedSparrowFile(MinecraftVersion minecraftVersion);
 
-	File getClientNests(String minecraftVersion);
+	File getClientNests(MinecraftVersion minecraftVersion);
 
-	File getServerNests(String minecraftVersion);
+	File getServerNests(MinecraftVersion minecraftVersion);
 
-	File getMergedNests(String minecraftVersion);
+	File getMergedNests(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryClientNests(String minecraftVersion);
+	File getIntermediaryClientNests(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryServerNests(String minecraftVersion);
+	File getIntermediaryServerNests(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryMergedNests(String minecraftVersion);
+	File getIntermediaryMergedNests(MinecraftVersion minecraftVersion);
 
-	File getMainIntermediaryNests(String minecraftVersion);
+	File getMainIntermediaryNests(MinecraftVersion minecraftVersion);
 
-	File getNamedNests(String minecraftVersion);
+	File getNamedNests(MinecraftVersion minecraftVersion);
+
+	File getIntermediaryFile(String minecraftVersion);
+
+	File getIntermediaryV2File(String minecraftVersion);
 
 	File getFeatherMappings(String minecraftVersion);
 
-	File getClientExceptions(String minecraftVersion);
+	File getClientExceptions(MinecraftVersion minecraftVersion);
 
-	File getServerExceptions(String minecraftVersion);
+	File getServerExceptions(MinecraftVersion minecraftVersion);
 
-	File getMergedExceptions(String minecraftVersion);
+	File getMergedExceptions(MinecraftVersion minecraftVersion);
 
-	File getClientSignatures(String minecraftVersion);
+	File getClientSignatures(MinecraftVersion minecraftVersion);
 
-	File getServerSignatures(String minecraftVersion);
+	File getServerSignatures(MinecraftVersion minecraftVersion);
 
-	File getMergedSignatures(String minecraftVersion);
+	File getMergedSignatures(MinecraftVersion minecraftVersion);
 
-	File getSetupClientJar(String minecraftVersion);
+	File getSetupClientJar(MinecraftVersion minecraftVersion);
 
-	File getSetupServerJar(String minecraftVersion);
+	File getSetupServerJar(MinecraftVersion minecraftVersion);
 
-	File getSetupMergedJar(String minecraftVersion);
+	File getSetupMergedJar(MinecraftVersion minecraftVersion);
 
-	File getIntermediarySetupClientJar(String minecraftVersion);
+	File getIntermediarySetupClientJar(MinecraftVersion minecraftVersion);
 
-	File getIntermediarySetupServerJar(String minecraftVersion);
+	File getIntermediarySetupServerJar(MinecraftVersion minecraftVersion);
 
-	File getIntermediarySetupMergedJar(String minecraftVersion);
+	File getIntermediarySetupMergedJar(MinecraftVersion minecraftVersion);
 
-	File getSourceClientJar(String minecraftVersion);
+	File getSourceClientJar(MinecraftVersion minecraftVersion);
 
-	File getSourceServerJar(String minecraftVersion);
+	File getSourceServerJar(MinecraftVersion minecraftVersion);
 
-	File getSourceMergedJar(String minecraftVersion);
+	File getSourceMergedJar(MinecraftVersion minecraftVersion);
 
-	File getNamedSourceClientJar(String minecraftVersion);
+	File getNamedSourceClientJar(MinecraftVersion minecraftVersion);
 
-	File getNamedSourceServerJar(String minecraftVersion);
+	File getNamedSourceServerJar(MinecraftVersion minecraftVersion);
 
-	File getNamedSourceMergedJar(String minecraftVersion);
+	File getNamedSourceMergedJar(MinecraftVersion minecraftVersion);
 
-	File getSetupClientIntermediaryMappings(String minecraftVersion);
+	File getSetupClientIntermediaryMappings(MinecraftVersion minecraftVersion);
 
-	File getSetupServerIntermediaryMappings(String minecraftVersion);
+	File getSetupServerIntermediaryMappings(MinecraftVersion minecraftVersion);
 
-	File getSetupMergedIntermediaryMappings(String minecraftVersion);
+	File getSetupMergedIntermediaryMappings(MinecraftVersion minecraftVersion);
 
-	File getSetupClientNamedMappings(String minecraftVersion);
+	File getSetupClientNamedMappings(MinecraftVersion minecraftVersion);
 
-	File getSetupServerNamedMappings(String minecraftVersion);
+	File getSetupServerNamedMappings(MinecraftVersion minecraftVersion);
 
-	File getSetupMergedNamedMappings(String minecraftVersion);
+	File getSetupMergedNamedMappings(MinecraftVersion minecraftVersion);
 
-	File getSourceClientMappings(String minecraftVersion);
+	File getSourceClientMappings(MinecraftVersion minecraftVersion);
 
-	File getSourceServerMappings(String minecraftVersion);
+	File getSourceServerMappings(MinecraftVersion minecraftVersion);
 
-	File getSourceMergedMappings(String minecraftVersion);
+	File getSourceMergedMappings(MinecraftVersion minecraftVersion);
 
-	File getSetupClientExceptions(String minecraftVersion);
+	File getSetupClientExceptions(MinecraftVersion minecraftVersion);
 
-	File getSetupServerExceptions(String minecraftVersion);
+	File getSetupServerExceptions(MinecraftVersion minecraftVersion);
 
-	File getSetupMergedExceptions(String minecraftVersion);
+	File getSetupMergedExceptions(MinecraftVersion minecraftVersion);
 
-	File getSetupClientSignatures(String minecraftVersion);
+	File getSetupClientSignatures(MinecraftVersion minecraftVersion);
 
-	File getSetupServerSignatures(String minecraftVersion);
+	File getSetupServerSignatures(MinecraftVersion minecraftVersion);
 
-	File getSetupMergedSignatures(String minecraftVersion);
+	File getSetupMergedSignatures(MinecraftVersion minecraftVersion);
 
-	File getBaseClientExceptions(String minecraftVersion);
+	File getBaseClientExceptions(MinecraftVersion minecraftVersion);
 
-	File getBaseServerExceptions(String minecraftVersion);
+	File getBaseServerExceptions(MinecraftVersion minecraftVersion);
 
-	File getBaseMergedExceptions(String minecraftVersion);
+	File getBaseMergedExceptions(MinecraftVersion minecraftVersion);
 
-	File getBaseClientSignatures(String minecraftVersion);
+	File getBaseClientSignatures(MinecraftVersion minecraftVersion);
 
-	File getBaseServerSignatures(String minecraftVersion);
+	File getBaseServerSignatures(MinecraftVersion minecraftVersion);
 
-	File getBaseMergedSignatures(String minecraftVersion);
+	File getBaseMergedSignatures(MinecraftVersion minecraftVersion);
 
-	File getGeneratedClientJar(String minecraftVersion);
+	File getGeneratedClientJar(MinecraftVersion minecraftVersion);
 
-	File getGeneratedServerJar(String minecraftVersion);
+	File getGeneratedServerJar(MinecraftVersion minecraftVersion);
 
-	File getGeneratedMergedJar(String minecraftVersion);
+	File getGeneratedMergedJar(MinecraftVersion minecraftVersion);
 
-	File getNamedGeneratedClientJar(String minecraftVersion);
+	File getNamedGeneratedClientJar(MinecraftVersion minecraftVersion);
 
-	File getNamedGeneratedServerJar(String minecraftVersion);
+	File getNamedGeneratedServerJar(MinecraftVersion minecraftVersion);
 
-	File getNamedGeneratedMergedJar(String minecraftVersion);
+	File getNamedGeneratedMergedJar(MinecraftVersion minecraftVersion);
 
-	File getGeneratedClientExceptions(String minecraftVersion);
+	File getGeneratedClientExceptions(MinecraftVersion minecraftVersion);
 
-	File getGeneratedServerExceptions(String minecraftVersion);
+	File getGeneratedServerExceptions(MinecraftVersion minecraftVersion);
 
-	File getGeneratedMergedExceptions(String minecraftVersion);
+	File getGeneratedMergedExceptions(MinecraftVersion minecraftVersion);
 
-	File getGeneratedClientSignatures(String minecraftVersion);
+	File getGeneratedClientSignatures(MinecraftVersion minecraftVersion);
 
-	File getGeneratedServerSignatures(String minecraftVersion);
+	File getGeneratedServerSignatures(MinecraftVersion minecraftVersion);
 
-	File getGeneratedMergedSignatures(String minecraftVersion);
+	File getGeneratedMergedSignatures(MinecraftVersion minecraftVersion);
 
 }

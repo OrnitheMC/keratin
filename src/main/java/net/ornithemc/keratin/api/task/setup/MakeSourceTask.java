@@ -7,22 +7,21 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.Configurations;
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.decompiling.DecompileTask;
 
 public abstract class MakeSourceTask extends DecompileTask {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
 		Project project = keratin.getProject();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		File sourceJar = (details.sharedMappings() || (details.client() && details.server()))
+		File sourceJar = minecraftVersion.canBeMerged()
 			? files.getNamedSourceMergedJar(minecraftVersion)
-			: details.client()
+			: minecraftVersion.hasClient()
 				? files.getNamedSourceClientJar(minecraftVersion)
 				: files.getNamedSourceServerJar(minecraftVersion);
 		File decompSrcDir = files.getDecompiledSourceDirectory(minecraftVersion);

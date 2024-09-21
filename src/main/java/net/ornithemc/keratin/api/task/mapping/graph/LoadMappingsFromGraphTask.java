@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.enigma.EnigmaSession;
@@ -33,8 +34,8 @@ public abstract class LoadMappingsFromGraphTask extends MinecraftTask implements
 	}
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws IOException {
-		getProject().getLogger().lifecycle(":loading mappings from the graph for Minecraft " + minecraftVersion);
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws IOException {
+		getProject().getLogger().lifecycle(":loading mappings from the graph for Minecraft " + minecraftVersion.id());
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
@@ -42,6 +43,6 @@ public abstract class LoadMappingsFromGraphTask extends MinecraftTask implements
 		File graphDir = files.getMappingsDirectory();
 		File output = files.getWorkingDirectory(minecraftVersion);
 
-		loadMappings(minecraftVersion, graphDir, output, Format.ENIGMA_DIR, Validators.removeDummyMappings(false));
+		loadMappings(minecraftVersion.id(), graphDir, output, Format.ENIGMA_DIR, Validators.removeDummyMappings(false));
 	}
 }

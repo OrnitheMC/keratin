@@ -10,15 +10,16 @@ import org.gradle.workers.WorkQueue;
 import cuchaz.enigma.command.CheckMappingsCommand;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class CheckMappingsTask extends MinecraftTask {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 
-		getProject().getLogger().lifecycle(":checking mappings for Minecraft " + minecraftVersion);
+		getProject().getLogger().lifecycle(":checking mappings for Minecraft " + minecraftVersion.id());
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();

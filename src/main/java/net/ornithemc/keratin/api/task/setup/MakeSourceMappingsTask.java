@@ -3,19 +3,18 @@ package net.ornithemc.keratin.api.task.setup;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class MakeSourceMappingsTask extends MinecraftTask implements MappingsPatcher {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.sharedMappings()) {
+		if (minecraftVersion.hasSharedObfuscation()) {
 			workQueue.submit(PatchMappings.class, parameters -> {
 				parameters.getIntermediaryMappings().set(files.getSetupMergedIntermediaryMappings(minecraftVersion));
 				parameters.getNamedMappings().set(files.getSetupMergedNamedMappings(minecraftVersion));
@@ -23,7 +22,7 @@ public abstract class MakeSourceMappingsTask extends MinecraftTask implements Ma
 				parameters.getJar().set(files.getSetupMergedJar(minecraftVersion));
 			});
 		} else {
-			if (details.client()) {
+			if (minecraftVersion.hasClient()) {
 				workQueue.submit(PatchMappings.class, parameters -> {
 					parameters.getIntermediaryMappings().set(files.getSetupClientIntermediaryMappings(minecraftVersion));
 					parameters.getNamedMappings().set(files.getSetupClientNamedMappings(minecraftVersion));
@@ -31,7 +30,7 @@ public abstract class MakeSourceMappingsTask extends MinecraftTask implements Ma
 					parameters.getJar().set(files.getSetupClientJar(minecraftVersion));
 				});
 			}
-			if (details.server()) {
+			if (minecraftVersion.hasServer()) {
 				workQueue.submit(PatchMappings.class, parameters -> {
 					parameters.getIntermediaryMappings().set(files.getSetupServerIntermediaryMappings(minecraftVersion));
 					parameters.getNamedMappings().set(files.getSetupServerNamedMappings(minecraftVersion));

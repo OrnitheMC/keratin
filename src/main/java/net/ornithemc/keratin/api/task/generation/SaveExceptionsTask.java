@@ -14,34 +14,33 @@ import net.ornithemc.exceptor.io.ExceptionsFile;
 import net.ornithemc.exceptor.io.ExceptorIo;
 import net.ornithemc.exceptor.io.MethodEntry;
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.Exceptor;
 
 public abstract class SaveExceptionsTask extends MinecraftTask implements Exceptor {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.sharedMappings()) {
+		if (minecraftVersion.hasSharedObfuscation()) {
 			saveExceptions(
 				files.getBaseMergedExceptions(minecraftVersion),
 				files.getGeneratedMergedExceptions(minecraftVersion),
 				files.getMergedExceptions(minecraftVersion)
 			);
 		} else {
-			if (details.client()) {
+			if (minecraftVersion.hasClient()) {
 				saveExceptions(
 					files.getBaseClientExceptions(minecraftVersion),
 					files.getGeneratedClientExceptions(minecraftVersion),
 					files.getClientExceptions(minecraftVersion)
 				);
 			}
-			if (details.server()) {
+			if (minecraftVersion.hasServer()) {
 				saveExceptions(
 					files.getBaseServerExceptions(minecraftVersion),
 					files.getGeneratedServerExceptions(minecraftVersion),

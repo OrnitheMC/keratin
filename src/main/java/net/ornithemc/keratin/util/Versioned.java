@@ -4,23 +4,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public class Versioned<T> {
+public class Versioned<V, T> {
 
-	private final Map<String, T> values;
-	private final ThrowingFunction<String, T> factory;
-	private final BiFunction<String, Exception, RuntimeException> exceptions;
+	private final Map<V, T> values;
+	private final ThrowingFunction<V, T> factory;
+	private final BiFunction<V, Exception, RuntimeException> exceptions;
 
-	public Versioned(ThrowingFunction<String, T> factory) {
+	public Versioned(ThrowingFunction<V, T> factory) {
 		this(factory, (version, e) -> new RuntimeException("no such element for version " + version, e));
 	}
 
-	public Versioned(ThrowingFunction<String, T> factory, BiFunction<String, Exception, RuntimeException> exceptions) {
+	public Versioned(ThrowingFunction<V, T> factory, BiFunction<V, Exception, RuntimeException> exceptions) {
 		this.values = new HashMap<>();
 		this.factory = factory;
 		this.exceptions = exceptions;
 	}
 
-	public T get(String version) {
+	public T get(V version) {
 		T value = values.get(version);
 
 		if (value == null) {

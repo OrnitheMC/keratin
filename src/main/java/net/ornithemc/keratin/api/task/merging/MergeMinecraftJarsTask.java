@@ -3,25 +3,24 @@ package net.ornithemc.keratin.api.task.merging;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 
 public abstract class MergeMinecraftJarsTask extends MergeTask {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		String namespace = getNamespace().get();
 
 		validateNamespace(namespace);
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.client() && details.server()) {
+		if (minecraftVersion.canBeMerged()) {
 			boolean official = "official".equals(namespace);
 
-			if (official == details.sharedMappings()) {
+			if (official == minecraftVersion.hasSharedObfuscation()) {
 				workQueue.submit(MergeJars.class, parameters -> {
 					parameters.getClient().set(official ? files.getClientJar(minecraftVersion) : files.getIntermediaryClientJar(minecraftVersion));
 					parameters.getServer().set(official ? files.getServerJar(minecraftVersion) : files.getIntermediaryServerJar(minecraftVersion));

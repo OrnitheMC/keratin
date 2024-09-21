@@ -18,34 +18,33 @@ import io.github.gaming32.signaturechanger.visitor.SigsFileWriter;
 import io.github.gaming32.signaturechanger.visitor.SigsReader;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.Exceptor;
 
 public abstract class SaveSignaturesTask extends MinecraftTask implements Exceptor {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.sharedMappings()) {
+		if (minecraftVersion.hasSharedObfuscation()) {
 			saveSignatures(
 				files.getBaseMergedSignatures(minecraftVersion),
 				files.getGeneratedMergedSignatures(minecraftVersion),
 				files.getMergedSignatures(minecraftVersion)
 			);
 		} else {
-			if (details.client()) {
+			if (minecraftVersion.hasClient()) {
 				saveSignatures(
 					files.getBaseClientSignatures(minecraftVersion),
 					files.getGeneratedClientSignatures(minecraftVersion),
 					files.getClientSignatures(minecraftVersion)
 				);
 			}
-			if (details.server()) {
+			if (minecraftVersion.hasServer()) {
 				saveSignatures(
 					files.getBaseServerSignatures(minecraftVersion),
 					files.getGeneratedServerSignatures(minecraftVersion),

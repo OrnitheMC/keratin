@@ -1,85 +1,77 @@
 package net.ornithemc.keratin.api.task.processing;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 
 import org.gradle.workers.WorkQueue;
-
-import com.google.common.io.Files;
 
 import net.ornithemc.keratin.Constants;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class DownloadRavenTask extends MinecraftTask implements DownloaderAndExtracter {
 
+	private static final String PATH_IN_JAR = "exceptions/mappings.excs";
+
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		String pathInJar = "exceptions/mappings.excs";
-
-		if (details.sharedMappings()) {
+		if (minecraftVersion.hasSharedObfuscation()) {
 			int build = keratin.getRavenBuild(minecraftVersion, GameSide.MERGED);
 
 			if (build > 0) {
-				File output = files.getMergedRavenFile(minecraftVersion);
+				File output = minecraftVersion.hasClient() && minecraftVersion.hasServer()
+					? files.getMergedRavenFile(minecraftVersion)
+					: minecraftVersion.hasClient()
+						? files.getClientRavenFile(minecraftVersion)
+						: files.getServerRavenFile(minecraftVersion);
 
 				downloadAndExtract(
 					Constants.ravenUrl(
 						minecraftVersion,
 						GameSide.MERGED,
 						build),
-					pathInJar,
-					output,
-					() -> {
-						try {
-							if (!details.server()) {
-								Files.copy(output, files.getClientRavenFile(minecraftVersion));
-							}
-							if (!details.client()) {
-								Files.copy(output, files.getServerRavenFile(minecraftVersion));
-							}
-						} catch (IOException e) {
-							throw new UncheckedIOException(e);
-						}
-					}
+					PATH_IN_JAR,
+					output
 				);
 			}
 		} else {
-			int clientBuild = keratin.getRavenBuild(minecraftVersion, GameSide.CLIENT);
-			int serverBuild = keratin.getRavenBuild(minecraftVersion, GameSide.SERVER);
+			if (minecraftVersion.hasClient()) {
+				int clientBuild = keratin.getRavenBuild(minecraftVersion, GameSide.CLIENT);
 
-			if (details.client() && clientBuild > 0) {
-				File output = files.getClientRavenFile(minecraftVersion);
+				if (clientBuild > 0) {
+					File output = files.getClientRavenFile(minecraftVersion);
 
-				downloadAndExtract(
-					Constants.ravenUrl(
-						minecraftVersion,
-						GameSide.CLIENT,
-						clientBuild),
-					pathInJar,
-					output
-				);
+					downloadAndExtract(
+						Constants.ravenUrl(
+							minecraftVersion,
+							GameSide.CLIENT,
+							clientBuild),
+						PATH_IN_JAR,
+						output
+					);
+				}
 			}
-			if (details.server() && serverBuild > 0) {
-				File output = files.getServerRavenFile(minecraftVersion);
+			if (minecraftVersion.hasServer()) {
+				int serverBuild = keratin.getRavenBuild(minecraftVersion, GameSide.SERVER);
 
-				downloadAndExtract(
-					Constants.ravenUrl(
-						minecraftVersion,
-						GameSide.SERVER,
-						serverBuild),
-					pathInJar,
-					output
-				);
+				if (serverBuild > 0) {
+					File output = files.getServerRavenFile(minecraftVersion);
+
+					downloadAndExtract(
+						Constants.ravenUrl(
+							minecraftVersion,
+							GameSide.SERVER,
+							serverBuild),
+						PATH_IN_JAR,
+						output
+					);
+				}
 			}
 		}
 	}

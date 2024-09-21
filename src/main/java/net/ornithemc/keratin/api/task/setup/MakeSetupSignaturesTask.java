@@ -20,8 +20,8 @@ import io.github.gaming32.signaturechanger.visitor.SigsFileWriter;
 import io.github.gaming32.signaturechanger.visitor.SigsReader;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.matching.Matches;
 import net.ornithemc.keratin.matching.MatchesUtil;
@@ -32,96 +32,83 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 	public abstract Property<String> getFromMinecraftVersion();
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.sharedMappings()) {
+		MinecraftVersion fromMinecraftVersion = getFromMinecraftVersion().isPresent()
+			? MinecraftVersion.parse(keratin, getFromMinecraftVersion().get())
+			: null;
+
+		if (minecraftVersion.hasSharedObfuscation()) {
 			File sigs = files.getMergedSignatures(minecraftVersion);
 			File setup = files.getSetupMergedSignatures(minecraftVersion);
 
 			if (sigs.exists()) {
 				Files.copy(sigs, setup);
 			} else {
-				String fromMinecraftVersion = getFromMinecraftVersion().getOrNull();
-
 				if (fromMinecraftVersion == null) {
 					setup.createNewFile();
+				} else if (fromMinecraftVersion.hasSharedObfuscation()) {
+					File fromSigs = files.getMergedSignatures(fromMinecraftVersion);
+
+					updateSignatures(
+						fromMinecraftVersion.id(),
+						"merged",
+						minecraftVersion.id(),
+						"merged",
+						fromSigs,
+						setup
+					);
 				} else {
-					VersionDetails fromDetails = keratin.getVersionDetails(fromMinecraftVersion);
-
-					if (fromDetails.sharedMappings()) {
-						File fromSigs = files.getMergedSignatures(fromMinecraftVersion);
-
-						updateSignatures(
-							fromMinecraftVersion,
-							"merged",
-							minecraftVersion,
-							"merged",
-							fromSigs,
-							setup
-						);
-					} else {
-						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
-					}
+					throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
 				}
 			}
 		} else {
-			if (details.client()) {
+			if (minecraftVersion.hasClient()) {
 				File sigs = files.getClientSignatures(minecraftVersion);
 				File setup = files.getSetupClientSignatures(minecraftVersion);
 
 				if (sigs.exists()) {
 					Files.copy(sigs, setup);
 				} else {
-					String fromMinecraftVersion = getFromMinecraftVersion().getOrNull();
-
 					if (fromMinecraftVersion == null) {
 						setup.createNewFile();
-					} else {
-						VersionDetails fromDetails = keratin.getVersionDetails(fromMinecraftVersion);
+					} else if (fromMinecraftVersion.hasSharedObfuscation()) {
+						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
+					} else if (fromMinecraftVersion.hasClient()) {
+						File fromSigs = files.getClientSignatures(fromMinecraftVersion);
 
-						if (fromDetails.sharedMappings()) {
-							throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
-						} else if (fromDetails.client()) {
-							File fromSigs = files.getClientSignatures(fromMinecraftVersion);
-
-							updateSignatures(
-								fromMinecraftVersion,
-								"client",
-								minecraftVersion,
-								"client",
-								fromSigs,
-								setup
-							);
-						}
+						updateSignatures(
+							fromMinecraftVersion.client().id(),
+							"client",
+							minecraftVersion.client().id(),
+							"client",
+							fromSigs,
+							setup
+						);
 					}
 				}
 			}
-			if (details.server()) {
+			if (minecraftVersion.hasServer()) {
 				File sigs = files.getServerSignatures(minecraftVersion);
 				File setup = files.getSetupServerSignatures(minecraftVersion);
 
 				if (sigs.exists()) {
 					Files.copy(sigs, setup);
 				} else {
-					String fromMinecraftVersion = getFromMinecraftVersion().getOrNull();
-
 					if (fromMinecraftVersion == null) {
 						setup.createNewFile();
 					} else {
-						VersionDetails fromDetails = keratin.getVersionDetails(fromMinecraftVersion);
-
-						if (fromDetails.sharedMappings()) {
+						if (fromMinecraftVersion.hasSharedObfuscation()) {
 							throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
-						} else if (fromDetails.server()) {
+						} else if (fromMinecraftVersion.hasServer()) {
 							File fromSigs = files.getServerSignatures(fromMinecraftVersion);
 
 							updateSignatures(
-								fromMinecraftVersion,
+								fromMinecraftVersion.server().id(),
 								"server",
-								minecraftVersion,
+								minecraftVersion.server().id(),
 								"server",
 								fromSigs,
 								setup

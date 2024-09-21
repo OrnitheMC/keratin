@@ -8,6 +8,7 @@ import org.gradle.api.tasks.Internal;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
@@ -17,8 +18,8 @@ public abstract class ResetGraphTask extends MinecraftTask implements MappingsGr
 	public abstract Property<String> getClassNamePattern();
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws IOException {
-		getProject().getLogger().lifecycle(":resetting the graph with Minecraft " + minecraftVersion + " as the root");
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws IOException {
+		getProject().getLogger().lifecycle(":resetting the graph with Minecraft " + minecraftVersion.id() + " as the root");
 
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();

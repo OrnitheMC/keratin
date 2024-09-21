@@ -9,8 +9,8 @@ import org.gradle.workers.WorkParameters;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.Exceptor;
 import net.ornithemc.keratin.api.task.processing.Nester;
@@ -19,12 +19,11 @@ import net.ornithemc.keratin.api.task.processing.SignaturePatcher;
 public abstract class MakeSourceJarsTask extends MinecraftTask {
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) throws Exception {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
-		if (details.sharedMappings()) {
+		if (minecraftVersion.hasSharedObfuscation()) {
 			workQueue.submit(MakeSourceJar.class, parameters -> {
 				parameters.getInput().set(files.getMergedJar(minecraftVersion));
 				parameters.getOutput().set(files.getSourceMergedJar(minecraftVersion));
@@ -33,7 +32,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 				parameters.getNests().set(files.getMergedNests(minecraftVersion));
 			});
 		} else {
-			if (details.client()) {
+			if (minecraftVersion.hasClient()) {
 				workQueue.submit(MakeSourceJar.class, parameters -> {
 					parameters.getInput().set(files.getClientJar(minecraftVersion));
 					parameters.getOutput().set(files.getSourceClientJar(minecraftVersion));
@@ -42,7 +41,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 					parameters.getNests().set(files.getClientNests(minecraftVersion));
 				});
 			}
-			if (details.server()) {
+			if (minecraftVersion.hasServer()) {
 				workQueue.submit(MakeSourceJar.class, parameters -> {
 					parameters.getInput().set(files.getServerJar(minecraftVersion));
 					parameters.getOutput().set(files.getSourceServerJar(minecraftVersion));

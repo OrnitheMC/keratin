@@ -20,8 +20,8 @@ import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
-import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class BuildMappingsTask extends MinecraftTask {
@@ -30,28 +30,54 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 	public abstract Property<String> getClassNamePattern();
 
 	@Override
-	public void run(WorkQueue workQueue, String minecraftVersion) {
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
-		VersionDetails details = keratin.getVersionDetails(minecraftVersion);
 
 		String classNamePattern = getClassNamePattern().getOrElse("*");
 
-		workQueue.submit(BuildMappings.class, parameters -> {
-			parameters.getLegacyMerged().set(!details.sharedMappings());
-			parameters.getClassNamePattern().set(classNamePattern);
-			parameters.getIntermediaryMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
-			parameters.getCompletedMappings().set(files.getCompletedNamedMappings(minecraftVersion));
-			parameters.getNamedV1Mappings().set(files.getTinyV1NamedMappings(minecraftVersion));
-			parameters.getNamedV2Mappings().set(files.getTinyV2NamedMappings(minecraftVersion));
-			parameters.getMergedNamedV1Mappings().set(files.getMergedTinyV1NamedMappings(minecraftVersion));
-			parameters.getMergedNamedV2Mappings().set(files.getMergedTinyV2NamedMappings(minecraftVersion));
-		});
+		if (minecraftVersion.hasSharedVersioning()) {
+			workQueue.submit(BuildMappings.class, parameters -> {
+				parameters.getSharedObfuscation().set(minecraftVersion.hasSharedObfuscation());
+				parameters.getClassNamePattern().set(classNamePattern);
+				parameters.getIntermediaryMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
+				parameters.getCompletedMappings().set(files.getCompletedNamedMappings(minecraftVersion));
+				parameters.getNamedV1Mappings().set(files.getTinyV1NamedMappings(minecraftVersion.id()));
+				parameters.getNamedV2Mappings().set(files.getTinyV2NamedMappings(minecraftVersion.id()));
+				parameters.getMergedNamedV1Mappings().set(files.getMergedTinyV1NamedMappings(minecraftVersion.id()));
+				parameters.getMergedNamedV2Mappings().set(files.getMergedTinyV2NamedMappings(minecraftVersion.id()));
+			});
+		} else {
+			if (minecraftVersion.hasClient()) {
+				workQueue.submit(BuildMappings.class, parameters -> {
+					parameters.getSharedObfuscation().set(minecraftVersion.hasSharedObfuscation());
+					parameters.getClassNamePattern().set(classNamePattern);
+					parameters.getIntermediaryMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
+					parameters.getCompletedMappings().set(files.getCompletedNamedMappings(minecraftVersion));
+					parameters.getNamedV1Mappings().set(files.getTinyV1NamedMappings(minecraftVersion.client().id()));
+					parameters.getNamedV2Mappings().set(files.getTinyV2NamedMappings(minecraftVersion.client().id()));
+					parameters.getMergedNamedV1Mappings().set(files.getMergedTinyV1NamedMappings(minecraftVersion.client().id()));
+					parameters.getMergedNamedV2Mappings().set(files.getMergedTinyV2NamedMappings(minecraftVersion.client().id()));
+				});
+			}
+			if (minecraftVersion.hasServer()) {
+				workQueue.submit(BuildMappings.class, parameters -> {
+					parameters.getSharedObfuscation().set(minecraftVersion.hasSharedObfuscation());
+					parameters.getClassNamePattern().set(classNamePattern);
+					parameters.getIntermediaryMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
+					parameters.getCompletedMappings().set(files.getCompletedNamedMappings(minecraftVersion));
+					parameters.getNamedV1Mappings().set(files.getTinyV1NamedMappings(minecraftVersion.server().id()));
+					parameters.getNamedV2Mappings().set(files.getTinyV2NamedMappings(minecraftVersion.server().id()));
+					parameters.getMergedNamedV1Mappings().set(files.getMergedTinyV1NamedMappings(minecraftVersion.server().id()));
+					parameters.getMergedNamedV2Mappings().set(files.getMergedTinyV2NamedMappings(minecraftVersion.server().id()));
+				});
+			}
+		}
 	}
 
 	public interface BuildParameters extends WorkParameters {
 
-		Property<Boolean> getLegacyMerged();
+		Property<Boolean> getSharedObfuscation();
 
 		Property<String> getClassNamePattern();
 
@@ -73,7 +99,7 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 
 		@Override
 		public void execute() {
-			boolean legacyMerged = getParameters().getLegacyMerged().get();
+			boolean sharedObfuscation = getParameters().getSharedObfuscation().get();
 			String classNamePattern = getParameters().getClassNamePattern().get();
 			File intermediaryFile = getParameters().getIntermediaryMappings().get();
 			File completedMappings = getParameters().getCompletedMappings().get();
@@ -93,7 +119,7 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 					mappings.accept(writer);
 				}
 
-				if (legacyMerged) {
+				if (!sharedObfuscation) {
 					MappingReader.read(intermediaryFile.toPath(), mappings);
 
 					try (MappingWriter writer = MappingWriter.create(mergedNamedV1File.toPath(), MappingFormat.TINY_FILE)) {
@@ -106,10 +132,10 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 					MappingReader.read(intermediaryFile.toPath(), new MappingSourceNsSwitch(mappings, "intermediary"));
 
 					try (MappingWriter writer = MappingWriter.create(mergedNamedV1File.toPath(), MappingFormat.TINY_FILE)) {
-						mappings.accept(new MappingSourceNsSwitch(new MappingDstNsReorder(new MappingNsCompleter(writer, Map.of("named", "intermediary")), "intermediary", "named"), "official"));
+						mappings.accept(new MappingSourceNsSwitch(new MappingDstNsReorder(new MappingNsCompleter(writer, Map.of("named", "intermediary")), "intermediary", "named"), "official", true));
 					}
 					try (MappingWriter writer = MappingWriter.create(mergedNamedV2File.toPath(), MappingFormat.TINY_2_FILE)) {
-						mappings.accept(new MappingSourceNsSwitch(new MappingDstNsReorder(new MappingNsCompleter(writer, Map.of("named", "intermediary")), "intermediary", "named"), "official"));
+						mappings.accept(new MappingSourceNsSwitch(new MappingDstNsReorder(new MappingNsCompleter(writer, Map.of("named", "intermediary")), "intermediary", "named"), "official", true));
 					}
 				}
 			} catch (IOException e) {
