@@ -9,7 +9,6 @@ import java.util.EnumMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import org.apache.commons.io.FileUtils;
 
@@ -261,7 +260,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		return intermediaryGen;
 	}
 
-	private void findMinecraftVersions(TaskSelection selection, Consumer<MinecraftVersion> action) throws IOException {
+	private void findMinecraftVersions(TaskSelection selection) throws IOException {
 		if (selection == TaskSelection.CALAMUS) {
 			File dir = files.getMappingsDirectory();
 
@@ -282,14 +281,14 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					continue;
 				}
 
-				action.accept(MinecraftVersion.parse(this, version));
+				minecraftVersions.add(MinecraftVersion.parse(this, version));
 			}
 		}
 		if (selection == TaskSelection.FEATHER) {
 			File dir = files.getMappingsDirectory();
 			VersionGraph graph = VersionGraph.of(Format.TINY_V2, dir.toPath());
 
-			graph.walk(version -> action.accept(MinecraftVersion.parse(this, version.toString())), path -> { });
+			graph.walk(version -> minecraftVersions.add(MinecraftVersion.parse(this, version.toString())), path -> { });
 		}
 	}
 
@@ -321,7 +320,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		}
 
 		if (!minecraftVersions.isPresent()) {
-			findMinecraftVersions(selection, minecraftVersions::add);
+			findMinecraftVersions(selection);
 		}
 
 		Set<String> minecraftVersionIds = new LinkedHashSet<>();
