@@ -5,6 +5,7 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.api.task.mapping.Mapper;
 
 public abstract class MergeMinecraftJarsTask extends MergeTask {
 
@@ -18,7 +19,7 @@ public abstract class MergeMinecraftJarsTask extends MergeTask {
 		OrnitheFilesAPI files = keratin.getFiles();
 
 		if (minecraftVersion.canBeMerged()) {
-			boolean official = "official".equals(namespace);
+			boolean official = Mapper.OFFICIAL.equals(namespace);
 
 			if (official == minecraftVersion.hasSharedObfuscation()) {
 				workQueue.submit(MergeJars.class, parameters -> {
@@ -31,7 +32,7 @@ public abstract class MergeMinecraftJarsTask extends MergeTask {
 	}
 
 	private static void validateNamespace(String namespace) {
-		if (!"official".equals(namespace) && !"intermediary".equals(namespace)) {
+		if (!Mapper.OFFICIAL.equals(namespace) && !Mapper.INTERMEDIARY.equals(namespace)) {
 			throw new IllegalStateException("cannot merge Minecraft jars in the " + namespace + " namespace");
 		}
 	}

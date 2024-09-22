@@ -22,6 +22,8 @@ import net.ornithemc.mappingutils.io.Format;
 public interface Mapper extends TaskAware {
 
 	static String OFFICIAL = "official";
+	static String CLIENT_OFFICIAL = "clientOfficial";
+	static String SERVER_OFFICIAL = "serverOfficial";
 	static String INTERMEDIARY = "intermediary";
 	static String NAMED = "named";
 
