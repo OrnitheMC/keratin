@@ -39,7 +39,7 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 
 		if (minecraftVersion.hasSharedVersioning()) {
 			workQueue.submit(BuildMappings.class, parameters -> {
-				parameters.getSharedObfuscation().set(minecraftVersion.hasSharedObfuscation());
+				parameters.getMultipleOfficialNamespaces().set(!minecraftVersion.hasSharedObfuscation());
 				parameters.getClassNamePattern().set(classNamePattern);
 				parameters.getIntermediaryMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
 				parameters.getCompletedMappings().set(files.getCompletedNamedMappings(minecraftVersion));
@@ -51,7 +51,7 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 		} else {
 			if (minecraftVersion.hasClient()) {
 				workQueue.submit(BuildMappings.class, parameters -> {
-					parameters.getSharedObfuscation().set(minecraftVersion.hasSharedObfuscation());
+					parameters.getMultipleOfficialNamespaces().set(false);
 					parameters.getClassNamePattern().set(classNamePattern);
 					parameters.getIntermediaryMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
 					parameters.getCompletedMappings().set(files.getCompletedNamedMappings(minecraftVersion));
@@ -63,7 +63,7 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 			}
 			if (minecraftVersion.hasServer()) {
 				workQueue.submit(BuildMappings.class, parameters -> {
-					parameters.getSharedObfuscation().set(minecraftVersion.hasSharedObfuscation());
+					parameters.getMultipleOfficialNamespaces().set(false);
 					parameters.getClassNamePattern().set(classNamePattern);
 					parameters.getIntermediaryMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
 					parameters.getCompletedMappings().set(files.getCompletedNamedMappings(minecraftVersion));
@@ -78,7 +78,7 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 
 	public interface BuildParameters extends WorkParameters {
 
-		Property<Boolean> getSharedObfuscation();
+		Property<Boolean> getMultipleOfficialNamespaces();
 
 		Property<String> getClassNamePattern();
 
@@ -100,7 +100,7 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 
 		@Override
 		public void execute() {
-			boolean sharedObfuscation = getParameters().getSharedObfuscation().get();
+			boolean multipleOfficialNamespaces = getParameters().getMultipleOfficialNamespaces().get();
 			String classNamePattern = getParameters().getClassNamePattern().get();
 			File intermediaryFile = getParameters().getIntermediaryMappings().get();
 			File completedMappings = getParameters().getCompletedMappings().get();
@@ -120,7 +120,7 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 					mappings.accept(writer);
 				}
 
-				if (!sharedObfuscation) {
+				if (multipleOfficialNamespaces) {
 					MappingReader.read(intermediaryFile.toPath(), mappings);
 
 					try (MappingWriter writer = MappingWriter.create(mergedNamedV1File.toPath(), MappingFormat.TINY_FILE)) {
