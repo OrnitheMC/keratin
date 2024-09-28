@@ -11,7 +11,6 @@ import java.util.Map;
 
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Internal;
-import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
 import com.google.gson.JsonArray;
@@ -29,7 +28,7 @@ public abstract class UpdateBuildsCacheFromMetaTask extends KeratinTask {
 	@Internal
 	public abstract Property<String> getMetaEndpoint();
 
-	@OutputFile
+	@Internal
 	public abstract Property<File> getCacheFile();
 
 	@TaskAction
