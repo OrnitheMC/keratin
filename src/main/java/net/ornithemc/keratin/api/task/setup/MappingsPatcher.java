@@ -23,9 +23,12 @@ import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.MappingWriter;
 import net.fabricmc.mappingio.adapter.ForwardingMappingVisitor;
+import net.fabricmc.mappingio.adapter.MappingNsCompleter;
 import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;
 import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
+
+import net.ornithemc.keratin.api.task.mapping.Mapper;
 
 public interface MappingsPatcher {
 
@@ -113,11 +116,11 @@ public interface MappingsPatcher {
 		}
 
 		MemoryMappingTree mappingsIn = new MemoryMappingTree();
-		MappingReader.read(intermediaryFile.toPath(), new MappingSourceNsSwitch(mappingsIn, "intermediary"));
+		MappingReader.read(intermediaryFile.toPath(), new MappingSourceNsSwitch(mappingsIn, Mapper.INTERMEDIARY));
 		MappingReader.read(namedFile.toPath(), mappingsIn);
 
 		MemoryMappingTree mappingsOut = new MemoryMappingTree();
-		mappingsIn.accept(new MappingSourceNsSwitch(new ForwardingMappingVisitor(mappingsOut) {
+		mappingsIn.accept(new MappingNsCompleter(new MappingSourceNsSwitch(new ForwardingMappingVisitor(mappingsOut) {
 
 			private List<String> newDstIndices = new ArrayList<>();
 
@@ -170,7 +173,7 @@ public interface MappingsPatcher {
 
 				super.visitDstName(targetKind, namespace, name);
 			}
-		}, "official", true));
+		}, Mapper.OFFICIAL, true), Map.of(Mapper.NAMED, Mapper.INTERMEDIARY)));
 
 		try (MappingWriter writer = MappingWriter.create(outFile.toPath(), MappingFormat.TINY_2_FILE)) {
 			mappingsOut.accept(writer);
