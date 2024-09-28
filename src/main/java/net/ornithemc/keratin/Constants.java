@@ -49,6 +49,9 @@ public class Constants {
 		return MAVEN_URL + "/net/ornithemc/nests/" + mc.sidedId(side) + "+build." + build + "/nests-" + mc.sidedId(side) + "+build." + build + ".jar";
 	}
 
+	public static final String featherGen2Endpoint(int generation) {
+		return "/v3/versions/gen" + generation + "/feather";
+	}
 	public static final String RAVEN_ENDPOINT = "/v3/versions/raven";
 	public static final String SPARROW_ENDPOINT = "/v3/versions/sparrow";
 	public static final String NESTS_ENDPOINT = "/v3/versions/nests";

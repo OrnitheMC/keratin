@@ -37,6 +37,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Property<File> sparrowCache;
 	private final Property<File> nestsCache;
 
+	private final Property<File> featherBuildsCache;
 	private final Property<File> ravenBuildsCache;
 	private final Property<File> sparrowBuildsCache;
 	private final Property<File> nestsBuildsCache;
@@ -201,6 +202,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.sparrowCache = cacheDirectoryProperty(() -> new File(getGlobalBuildCache(), "sparrow"));
 		this.nestsCache = cacheDirectoryProperty(() -> new File(getGlobalBuildCache(), "nests"));
 
+		this.featherBuildsCache = fileProperty(() -> this.project.file("feather-builds.json"));
 		this.ravenBuildsCache = fileProperty(() -> this.project.file("raven-builds.json"));
 		this.sparrowBuildsCache = fileProperty(() -> this.project.file("sparrow-builds.json"));
 		this.nestsBuildsCache = fileProperty(() -> this.project.file("nests-builds.json"));
@@ -745,7 +747,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.intermediaryV2File = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s.tiny".formatted(minecraftVersion)));
 
 		this.featherMappings = new Versioned<>(minecraftVersion -> {
-			int build = keratin.getNextFeatherBuild(minecraftVersion) - 1;
+			int build = keratin.getFeatherBuild(minecraftVersion);
 
 			if (build < 1) {
 				throw new NoSuchFileException("no Feather builds for Minecraft version " + minecraftVersion + " exist yet!");
@@ -1220,6 +1222,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	@Override
 	public File getNestsCache() {
 		return nestsCache.get();
+	}
+
+	@Override
+	public File getFeatherBuildsCache() {
+		return featherBuildsCache.get();
 	}
 
 	@Override

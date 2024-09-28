@@ -120,7 +120,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private final Project project;
 	private final OrnitheFiles files;
 	private final CalamusVersions calamusVersions;
-	private final FeatherVersions featherVersions;
 
 	private final PublicationsAPI publications;
 
@@ -132,6 +131,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private final Property<VersionsManifest> versionsManifest;
 	private final Versioned<String, VersionInfo> versionInfos;
 	private final Versioned<String, VersionDetails> versionDetails;
+	private final Versioned<String, Integer> featherBuilds;
 	private final Versioned<MinecraftVersion, Map<GameSide, Integer>> ravenBuilds;
 	private final Versioned<MinecraftVersion, Map<GameSide, Integer>> sparrowBuilds;
 	private final Versioned<MinecraftVersion, Map<GameSide, Integer>> nestsBuilds;
@@ -140,7 +140,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.project = project;
 		this.files = new OrnitheFiles(this);
 		this.calamusVersions = new CalamusVersions(this);
-		this.featherVersions = new FeatherVersions(this);
 
 		this.publications = this.project.getObjects().newInstance(PublicationsAPI.class);
 
@@ -203,6 +202,21 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			VersionDetails details = KeratinGradleExtension.GSON.fromJson(json, VersionDetails.class);
 
 			return details;
+		});
+		this.featherBuilds = new Versioned<>(minecraftVersion -> {
+			File cacheFile = this.files.getFeatherBuildsCache();
+
+			if (cacheFile.exists()) {
+				String s = FileUtils.readFileToString(cacheFile, Charset.defaultCharset());			
+				JsonObject json = GSON.fromJson(s, JsonObject.class);
+				JsonElement buildJson = json.get(minecraftVersion);
+
+				if (buildJson != null && buildJson.isJsonPrimitive()) {
+					return buildJson.getAsInt();
+				}
+			}
+
+			return 0;
 		});
 		this.ravenBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getRavenBuildsCache()));
 		this.sparrowBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getSparrowBuildsCache()));
@@ -406,6 +420,14 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		PublishingExtension publishing = (PublishingExtension) project.getExtensions().getByName("publishing");
 		PublicationContainer publications = publishing.getPublications();
 
+		TaskProvider<?> updateFeatherBuilds = tasks.register("updateFeatherBuildsCache", UpdateBuildsCacheFromMetaTask.class, task -> {
+			task.getMetaUrl().convention(Constants.META_URL);
+			task.getMetaUrl().finalizeValueOnRead();
+			task.getMetaEndpoint().convention(Constants.featherGen2Endpoint(intermediaryGen.get()));
+			task.getMetaEndpoint().finalizeValueOnRead();
+			task.getCacheFile().convention(project.provider(() -> files.getFeatherBuildsCache()));
+			task.getCacheFile().finalizeValueOnRead();
+		});
 		TaskProvider<?> updateRavenBuilds = tasks.register("updateRavenBuildsCache", UpdateBuildsCacheFromMetaTask.class, task -> {
 			task.getMetaUrl().convention(Constants.META_URL);
 			task.getMetaUrl().finalizeValueOnRead();
@@ -666,7 +688,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
 						publication.setGroupId(this.publications.getGroupId().get());
 						publication.setArtifactId(this.publications.getArtifactId().get());
-						publication.setVersion("%s+build.%d".formatted(minecraftVersion, getNextFeatherBuild(minecraftVersion)));
+						publication.setVersion("%s+build.%d".formatted(minecraftVersion, getFeatherBuild(minecraftVersion) + 1));
 
 						publication.artifact(mergedTinyV1Jar);
 						publication.artifact(tinyV2Jar, config -> {
@@ -792,6 +814,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	}
 
 	@Override
+	public int getFeatherBuild(String minecraftVersion) {
+		return featherBuilds.get(minecraftVersion);
+	}
+
+	@Override
 	public int getRavenBuild(MinecraftVersion minecraftVersion, GameSide side) {
 		return ravenBuilds.get(minecraftVersion).getOrDefault(side, -1);
 	}
@@ -804,10 +831,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	@Override
 	public int getNestsBuild(MinecraftVersion minecraftVersion, GameSide side) {
 		return nestsBuilds.get(minecraftVersion).getOrDefault(side, -1);
-	}
-
-	public int getNextFeatherBuild(String minecraftVersion) {
-		return featherVersions.getNext(minecraftVersion);
 	}
 
 	public Matches findMatches(String sideA, String versionA, String sideB, String versionB) {

@@ -30,8 +30,7 @@ public abstract class DownloadMappingsTask extends MinecraftTask implements Down
 		OrnitheFilesAPI files = keratin.getFiles();
 
 		int intermediaryGen = keratin.getIntermediaryGen().get();
-		// we want the latest build, not the next
-		int featherBuild = keratin.getNextFeatherBuild(minecraftVersion) - 1;
+		int featherBuild = keratin.getFeatherBuild(minecraftVersion);
 
 		if (featherBuild < 1) {
 			throw new RuntimeException("no Feather gen" + intermediaryGen + " builds exist yet for " + minecraftVersion);

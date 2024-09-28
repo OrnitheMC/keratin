@@ -25,6 +25,8 @@ public interface KeratinGradleExtensionAPI {
 
 	VersionsManifest getVersionsManifest();
 
+	int getFeatherBuild(String minecraftVersion);
+
 	int getRavenBuild(MinecraftVersion minecraftVersion, GameSide side);
 
 	int getSparrowBuild(MinecraftVersion minecraftVersion, GameSide side);

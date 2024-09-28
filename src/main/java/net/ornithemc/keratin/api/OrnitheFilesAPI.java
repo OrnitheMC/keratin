@@ -27,6 +27,8 @@ public interface OrnitheFilesAPI {
 
 	File getNestsCache();
 
+	File getFeatherBuildsCache();
+
 	File getRavenBuildsCache();
 
 	File getSparrowBuildsCache();
