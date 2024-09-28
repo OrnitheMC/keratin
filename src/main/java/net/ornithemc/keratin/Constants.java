@@ -1,7 +1,6 @@
 package net.ornithemc.keratin;
 
 import net.ornithemc.keratin.api.GameSide;
-import net.ornithemc.keratin.api.MinecraftVersion;
 
 public class Constants {
 
@@ -37,16 +36,16 @@ public class Constants {
 		return MAVEN_URL + "/net/ornithemc/feather-gen" + generation + "/" + mc + "+build." + build + "/feather-gen" + generation + "-" + mc + "+build." + build + "-v2.jar";
 	}
 
-	public static String ravenUrl(MinecraftVersion mc, GameSide side, int build) {
-		return MAVEN_URL + "/net/ornithemc/raven/" + mc.sidedId(side) + "+build." + build + "/raven-" + mc.sidedId(side) + "+build." + build + ".jar";
+	public static String ravenUrl(String mc, GameSide side, int build) {
+		return MAVEN_URL + "/net/ornithemc/raven/" + mc + side.suffix() + "+build." + build + "/raven-" + mc + side.suffix() + "+build." + build + ".jar";
 	}
 
-	public static String sparrowUrl(MinecraftVersion mc, GameSide side, int build) {
-		return MAVEN_URL + "/net/ornithemc/sparrow/" + mc.sidedId(side) + "+build." + build + "/sparrow-" + mc.sidedId(side) + "+build." + build + ".jar";
+	public static String sparrowUrl(String mc, GameSide side, int build) {
+		return MAVEN_URL + "/net/ornithemc/sparrow/" + mc + side.suffix() + "+build." + build + "/sparrow-" + mc + side.suffix() + "+build." + build + ".jar";
 	}
 
-	public static String nestsUrl(MinecraftVersion mc, GameSide side, int build) {
-		return MAVEN_URL + "/net/ornithemc/nests/" + mc.sidedId(side) + "+build." + build + "/nests-" + mc.sidedId(side) + "+build." + build + ".jar";
+	public static String nestsUrl(String mc, GameSide side, int build) {
+		return MAVEN_URL + "/net/ornithemc/nests/" + mc + side.suffix() + "+build." + build + "/nests-" + mc + side.suffix() + "+build." + build + ".jar";
 	}
 
 	public static final String featherGen2Endpoint(int generation) {

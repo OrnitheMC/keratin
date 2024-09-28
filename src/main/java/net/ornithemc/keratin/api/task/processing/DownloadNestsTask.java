@@ -33,7 +33,7 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 
 				downloadAndExtract(
 					Constants.nestsUrl(
-						minecraftVersion,
+						minecraftVersion.id(),
 						GameSide.MERGED,
 						build),
 					PATH_IN_JAR,
@@ -42,32 +42,32 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 			}
 		} else {
 			if (minecraftVersion.hasClient()) {
-				int clientBuild = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
+				int build = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
 
-				if (clientBuild > 0) {
+				if (build > 0) {
 					File output = files.getClientNests(minecraftVersion);
 
 					downloadAndExtract(
 						Constants.nestsUrl(
-							minecraftVersion,
-							GameSide.CLIENT,
-							clientBuild),
+							minecraftVersion.client().id(),
+							minecraftVersion.hasSharedVersioning() ? GameSide.CLIENT : GameSide.MERGED,
+							build),
 						PATH_IN_JAR,
 						output
 					);
 				}
 			}
 			if (minecraftVersion.hasServer()) {
-				int serverBuild = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
+				int build = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
 
-				if (serverBuild > 0) {
+				if (build > 0) {
 					File output = files.getServerNests(minecraftVersion);
 
 					downloadAndExtract(
 						Constants.nestsUrl(
-							minecraftVersion,
-							GameSide.SERVER,
-							serverBuild),
+							minecraftVersion.server().id(),
+							minecraftVersion.hasSharedVersioning() ? GameSide.SERVER : GameSide.MERGED,
+							build),
 						PATH_IN_JAR,
 						output
 					);

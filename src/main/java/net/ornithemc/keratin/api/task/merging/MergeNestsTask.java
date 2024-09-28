@@ -6,6 +6,7 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.api.task.mapping.Mapper;
 
 public abstract class MergeNestsTask extends MergeTask {
 
@@ -33,7 +34,7 @@ public abstract class MergeNestsTask extends MergeTask {
 	}
 
 	private static void validateNamespace(String namespace) {
-		if (!"intermediary".equals(namespace)) {
+		if (!Mapper.INTERMEDIARY.equals(namespace)) {
 			throw new IllegalStateException("cannot merge Nests in the " + namespace + " namespace");
 		}
 	}

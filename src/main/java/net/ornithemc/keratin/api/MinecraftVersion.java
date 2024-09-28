@@ -56,24 +56,6 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 		return (client != null ? client : server).releaseTime().compareTo(Constants.RELEASE_TIME_B1_0) >= 0;
 	}
 
-	public boolean hasSide(GameSide side) {
-		return switch (side) {
-			case CLIENT -> hasClient();
-			case SERVER -> hasServer();
-			case MERGED -> hasSharedObfuscation();
-			default -> throw new IllegalArgumentException("Unexpected value: " + side);
-		};
-	}
-
-	public String sidedId(GameSide side) {
-		return switch (side) {
-			case CLIENT -> client.id();
-			case SERVER -> server.id();
-			case MERGED -> id();
-			default -> throw new IllegalArgumentException("Unexpected value: " + side);
-		} + side.suffix();
-	}
-
 	public boolean canBeMerged() {
 		return canBeMergedLikeAlpha() || canBeMergedLikeBeta() || canBeMergedLikeRelease();
 	}

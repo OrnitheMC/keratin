@@ -32,7 +32,7 @@ public abstract class DownloadSparrowTask extends MinecraftTask implements Downl
 
 				downloadAndExtract(
 					Constants.sparrowUrl(
-						minecraftVersion,
+						minecraftVersion.id(),
 						GameSide.MERGED,
 						build),
 					PATH_IN_JAR,
@@ -41,32 +41,32 @@ public abstract class DownloadSparrowTask extends MinecraftTask implements Downl
 			}
 		} else {
 			if (minecraftVersion.hasClient()) {
-				int clientBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
+				int build = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
 
-				if (clientBuild > 0) {
+				if (build > 0) {
 					File output = files.getClientSparrowFile(minecraftVersion);
 
 					downloadAndExtract(
 						Constants.sparrowUrl(
-							minecraftVersion,
-							GameSide.CLIENT,
-							clientBuild),
+							minecraftVersion.client().id(),
+							minecraftVersion.hasSharedVersioning() ? GameSide.CLIENT : GameSide.MERGED,
+							build),
 						PATH_IN_JAR,
 						output
 					);
 				}
 			}
 			if (minecraftVersion.hasServer()) {
-				int serverBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
+				int build = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
 
-				if (serverBuild > 0) {
+				if (build > 0) {
 					File output = files.getServerSparrowFile(minecraftVersion);
 
 					downloadAndExtract(
 						Constants.sparrowUrl(
-							minecraftVersion,
-							GameSide.SERVER,
-							serverBuild),
+							minecraftVersion.server().id(),
+							minecraftVersion.hasSharedVersioning() ? GameSide.SERVER : GameSide.MERGED,
+							build),
 						PATH_IN_JAR,
 						output
 					);

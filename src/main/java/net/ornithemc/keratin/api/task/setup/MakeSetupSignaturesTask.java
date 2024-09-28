@@ -66,7 +66,9 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 			}
 		} else {
 			if (minecraftVersion.hasClient()) {
-				File sigs = files.getClientSignatures(minecraftVersion);
+				File sigs = minecraftVersion.hasSharedVersioning()
+					? files.getClientSignatures(minecraftVersion)
+					: files.getMergedSignatures(minecraftVersion);
 				File setup = files.getSetupClientSignatures(minecraftVersion);
 
 				if (sigs.exists()) {
@@ -77,7 +79,9 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 					} else if (fromMinecraftVersion.hasSharedObfuscation()) {
 						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
 					} else if (fromMinecraftVersion.hasClient()) {
-						File fromSigs = files.getClientSignatures(fromMinecraftVersion);
+						File fromSigs = minecraftVersion.hasSharedVersioning()
+							? files.getClientSignatures(fromMinecraftVersion)
+							: files.getMergedSignatures(fromMinecraftVersion);
 
 						updateSignatures(
 							fromMinecraftVersion.client().id(),
@@ -91,7 +95,9 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 				}
 			}
 			if (minecraftVersion.hasServer()) {
-				File sigs = files.getServerSignatures(minecraftVersion);
+				File sigs = minecraftVersion.hasSharedVersioning()
+					? files.getServerSignatures(minecraftVersion)
+					: files.getMergedSignatures(minecraftVersion);
 				File setup = files.getSetupServerSignatures(minecraftVersion);
 
 				if (sigs.exists()) {
@@ -99,21 +105,21 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 				} else {
 					if (fromMinecraftVersion == null) {
 						setup.createNewFile();
-					} else {
-						if (fromMinecraftVersion.hasSharedObfuscation()) {
-							throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
-						} else if (fromMinecraftVersion.hasServer()) {
-							File fromSigs = files.getServerSignatures(fromMinecraftVersion);
+					} else if (fromMinecraftVersion.hasSharedObfuscation()) {
+						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
+					} else if (fromMinecraftVersion.hasServer()) {
+						File fromSigs = minecraftVersion.hasSharedVersioning()
+							? files.getServerSignatures(fromMinecraftVersion)
+							: files.getMergedSignatures(fromMinecraftVersion);
 
-							updateSignatures(
-								fromMinecraftVersion.server().id(),
-								"server",
-								minecraftVersion.server().id(),
-								"server",
-								fromSigs,
-								setup
-							);
-						}
+						updateSignatures(
+							fromMinecraftVersion.server().id(),
+							"server",
+							minecraftVersion.server().id(),
+							"server",
+							fromSigs,
+							setup
+						);
 					}
 				}
 			}

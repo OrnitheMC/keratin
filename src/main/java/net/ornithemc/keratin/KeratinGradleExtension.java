@@ -234,11 +234,24 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		JsonObject json = GSON.fromJson(s, JsonObject.class);
 
 		for (GameSide side : GameSide.values()) {
-			if (!minecraftVersion.hasSide(side)) {
+			if (minecraftVersion.hasSharedObfuscation()) {
+				if (side != GameSide.MERGED) {
+					continue;
+				}
+			} else if ((minecraftVersion.hasClient() && side != GameSide.CLIENT) || (minecraftVersion.hasServer() && side != GameSide.SERVER)) {
 				continue;
 			}
 
-			JsonElement buildJson = json.get(minecraftVersion.sidedId(side));
+			String id = minecraftVersion.hasSharedObfuscation()
+				? minecraftVersion.id()
+				: minecraftVersion.hasClient()
+					? minecraftVersion.client().id()
+					: minecraftVersion.server().id();
+			if (minecraftVersion.hasSharedVersioning()) {
+				id += side.suffix();
+			}
+
+			JsonElement buildJson = json.get(id);
 
 			if (buildJson != null && buildJson.isJsonPrimitive()) {
 				builds.put(side, buildJson.getAsInt());

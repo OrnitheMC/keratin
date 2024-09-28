@@ -37,14 +37,18 @@ public abstract class SaveExceptionsTask extends MinecraftTask implements Except
 				saveExceptions(
 					files.getBaseClientExceptions(minecraftVersion),
 					files.getGeneratedClientExceptions(minecraftVersion),
-					files.getClientExceptions(minecraftVersion)
+					minecraftVersion.hasSharedVersioning()
+						? files.getClientExceptions(minecraftVersion)
+						: files.getMergedExceptions(minecraftVersion)
 				);
 			}
 			if (minecraftVersion.hasServer()) {
 				saveExceptions(
 					files.getBaseServerExceptions(minecraftVersion),
 					files.getGeneratedServerExceptions(minecraftVersion),
-					files.getServerExceptions(minecraftVersion)
+					minecraftVersion.hasSharedVersioning()
+						? files.getServerExceptions(minecraftVersion)
+						: files.getMergedExceptions(minecraftVersion)
 				);
 			}
 		}

@@ -33,7 +33,7 @@ public abstract class DownloadRavenTask extends MinecraftTask implements Downloa
 
 				downloadAndExtract(
 					Constants.ravenUrl(
-						minecraftVersion,
+						minecraftVersion.id(),
 						GameSide.MERGED,
 						build),
 					PATH_IN_JAR,
@@ -42,32 +42,32 @@ public abstract class DownloadRavenTask extends MinecraftTask implements Downloa
 			}
 		} else {
 			if (minecraftVersion.hasClient()) {
-				int clientBuild = keratin.getRavenBuild(minecraftVersion, GameSide.CLIENT);
+				int build = keratin.getRavenBuild(minecraftVersion, GameSide.CLIENT);
 
-				if (clientBuild > 0) {
+				if (build > 0) {
 					File output = files.getClientRavenFile(minecraftVersion);
 
 					downloadAndExtract(
 						Constants.ravenUrl(
-							minecraftVersion,
-							GameSide.CLIENT,
-							clientBuild),
+							minecraftVersion.client().id(),
+							minecraftVersion.hasSharedVersioning() ? GameSide.CLIENT : GameSide.MERGED,
+							build),
 						PATH_IN_JAR,
 						output
 					);
 				}
 			}
 			if (minecraftVersion.hasServer()) {
-				int serverBuild = keratin.getRavenBuild(minecraftVersion, GameSide.SERVER);
+				int build = keratin.getRavenBuild(minecraftVersion, GameSide.SERVER);
 
-				if (serverBuild > 0) {
+				if (build > 0) {
 					File output = files.getServerRavenFile(minecraftVersion);
 
 					downloadAndExtract(
 						Constants.ravenUrl(
-							minecraftVersion,
-							GameSide.SERVER,
-							serverBuild),
+							minecraftVersion.server().id(),
+							minecraftVersion.hasSharedVersioning() ? GameSide.SERVER : GameSide.MERGED,
+							build),
 						PATH_IN_JAR,
 						output
 					);
