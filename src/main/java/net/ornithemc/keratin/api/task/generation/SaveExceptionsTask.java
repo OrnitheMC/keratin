@@ -83,6 +83,8 @@ public abstract class SaveExceptionsTask extends MinecraftTask implements Except
 				if (generatedCls.methods().isEmpty()) {
 					cit.remove();
 				}
+			} else if (generatedCls.methods().isEmpty()) {
+				cit.remove();
 			}
 		}
 

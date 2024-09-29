@@ -94,6 +94,8 @@ public abstract class SaveSignaturesTask extends MinecraftTask implements Except
 				if (generatedCls.members.isEmpty() && Objects.equals(baseCls.signatureInfo, generatedCls.signatureInfo)) {
 					cit.remove();
 				}
+			} else if (generatedCls.members.isEmpty() && generatedCls.signatureInfo.signature() == null) {
+				cit.remove();
 			}
 		}
 
