@@ -31,6 +31,7 @@ public abstract class MakeSourceTask extends DecompileTask {
 			"org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler",
 			project.getConfigurations().getByName(Configurations.DECOMPILE_CLASSPATH),
 			new String[] {
+				"--indent-string=\t",
 				sourceJar.getAbsolutePath(),
 				decompSrcDir.getAbsolutePath()
 			}
