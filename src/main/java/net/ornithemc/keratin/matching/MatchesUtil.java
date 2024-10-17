@@ -32,10 +32,14 @@ public class MatchesUtil {
 				currentClass = matches.getClass(className, side);
 				currentField = null;
 				currentMethod = null;
-				if (inSignature && (currentClass == null || !currentClass.matched())) {
+				if (inSignature && (currentClass == null ? isMinecraftClass(className) : !currentClass.matched())) {
 					signatureValid = false;
 				}
 				return currentClass == null ? className : (currentClass.matched() ? currentClass.name(side.opposite()) : null);
+			}
+
+			private boolean isMinecraftClass(String className) {
+				return className.lastIndexOf('/') < 0 || className.startsWith("net/minecraft/") || className.startsWith("com/mojang/");
 			}
 
 			@Override
