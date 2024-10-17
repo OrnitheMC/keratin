@@ -11,6 +11,8 @@ public interface KeratinGradleExtensionAPI {
 
 	Property<String> getLocalCacheDirectory();
 
+	Property<String> getVersionsManifestUrl();
+
 	void minecraftVersion(String minecraftVersion);
 
 	void minecraftVersions(String... minecraftVersions);
