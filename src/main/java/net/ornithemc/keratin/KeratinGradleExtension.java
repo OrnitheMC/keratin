@@ -243,6 +243,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	}
 
 	@Override
+	public void minecraftVersion(String minecraftVersion) {
+		minecraftVersions(minecraftVersion);
+	}
+
+	@Override
 	public void minecraftVersions(String... minecraftVersions) {
 		this.minecraftVersions.set(Arrays.asList(minecraftVersions));
 	}

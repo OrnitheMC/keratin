@@ -16,6 +16,8 @@ public interface KeratinGradleExtensionAPI {
 
 	ListProperty<String> getMinecraftVersions();
 
+	void minecraftVersion(String minecraftVersion);
+
 	void minecraftVersions(String... minecraftVersions);
 
 	Property<Integer> getIntermediaryGen();
