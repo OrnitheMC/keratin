@@ -10,7 +10,7 @@ def ENV = System.getenv()
 base {
 	archivesName = project.name
 }
-version = '16.2'
+version = '16.3'
 group = project.maven_group
 
 if (!ENV.MAVEN_URL) {
