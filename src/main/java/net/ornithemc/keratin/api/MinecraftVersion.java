@@ -75,4 +75,8 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 	public boolean canBeMergedLikeRelease() {
 		return client != null && server != null && client.releaseTime().compareTo(Constants.RELEASE_TIME_1_3) >= 0;
 	}
+
+	public boolean hasBrokenInnerClasses() {
+		return !hasSharedVersioning() || "13w07a".equals(id);
+	}
 }
