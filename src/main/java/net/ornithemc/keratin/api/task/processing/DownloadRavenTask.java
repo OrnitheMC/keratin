@@ -63,7 +63,7 @@ public abstract class DownloadRavenTask extends MinecraftTask implements Downloa
 				downloadAndExtract(
 					Constants.ravenUrl(
 						minecraftVersion,
-						GameSide.CLIENT,
+						details.isPreBeta() ? GameSide.MERGED : GameSide.CLIENT,
 						clientBuild),
 					pathInJar,
 					output
@@ -75,7 +75,7 @@ public abstract class DownloadRavenTask extends MinecraftTask implements Downloa
 				downloadAndExtract(
 					Constants.ravenUrl(
 						minecraftVersion,
-						GameSide.SERVER,
+						details.isPreBeta() ? GameSide.MERGED : GameSide.SERVER,
 						serverBuild),
 					pathInJar,
 					output

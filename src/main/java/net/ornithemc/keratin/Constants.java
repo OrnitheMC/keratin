@@ -54,4 +54,6 @@ public class Constants {
 	public static final String RAVEN_ENDPOINT = "/v3/versions/raven";
 	public static final String SPARROW_ENDPOINT = "/v3/versions/sparrow";
 	public static final String NESTS_ENDPOINT = "/v3/versions/nests";
+
+	public static final String RELEASE_TIME_B1_0 = "2010-12-20T17:28:00+00:00";
 }

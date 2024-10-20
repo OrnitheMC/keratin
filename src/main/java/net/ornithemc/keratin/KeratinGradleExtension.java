@@ -201,12 +201,12 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 			return details;
 		});
-		this.ravenBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getRavenBuildsCache()));
-		this.sparrowBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getSparrowBuildsCache()));
-		this.nestsBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getNestsBuildsCache()));
+		this.ravenBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(getVersionDetails(minecraftVersion), this.files.getRavenBuildsCache()));
+		this.sparrowBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(getVersionDetails(minecraftVersion), this.files.getSparrowBuildsCache()));
+		this.nestsBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(getVersionDetails(minecraftVersion), this.files.getNestsBuildsCache()));
 	}
 
-	private static Map<GameSide, Integer> parseBuildsFromCache(String minecraftVersion, File cacheFile) throws IOException {
+	private static Map<GameSide, Integer> parseBuildsFromCache(VersionDetails details, File cacheFile) throws IOException {
 		if (!cacheFile.exists()) {
 			return Collections.emptyMap();
 		}
@@ -217,7 +217,21 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		JsonObject json = GSON.fromJson(s, JsonObject.class);
 
 		for (GameSide side : GameSide.values()) {
-			JsonElement buildJson = json.get(minecraftVersion + side.suffix());
+			if (details.sharedMappings()) {
+				if (side != GameSide.MERGED) {
+					continue;
+				}
+			} else if ((details.client() && side != GameSide.CLIENT) || (details.server() && side != GameSide.SERVER)) {
+				continue;
+			}
+
+			String id = details.id();
+
+			if (!details.isPreBeta()) {
+				id += side.suffix();
+			}
+
+			JsonElement buildJson = json.get(id);
 
 			if (buildJson != null && buildJson.isJsonPrimitive()) {
 				builds.put(side, buildJson.getAsInt());
