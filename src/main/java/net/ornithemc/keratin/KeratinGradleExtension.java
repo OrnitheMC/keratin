@@ -125,6 +125,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	private final Property<String> globalCacheDir;
 	private final Property<String> localCacheDir;
+	private final Property<String> versionsManifestUrl;
 	private final ListProperty<String> minecraftVersions;
 	private final Property<Integer> intermediaryGen;
 
@@ -149,6 +150,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.localCacheDir = this.project.getObjects().property(String.class);
 		this.localCacheDir.convention(Constants.ORNITHE_LOCAL_CACHE_DIR);
 		this.localCacheDir.finalizeValueOnRead();
+		this.versionsManifestUrl = this.project.getObjects().property(String.class);
+		this.versionsManifestUrl.convention(Constants.VERSIONS_MANIFEST_URL);
+		this.versionsManifestUrl.finalizeValueOnRead();
 
 		this.minecraftVersions = this.project.getObjects().listProperty(String.class);
 		this.minecraftVersions.convention(this.project.provider(() -> {
@@ -238,6 +242,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	}
 
 	@Override
+	public Property<String> getVersionsManifestUrl() {
+		return versionsManifestUrl;
+	}
+
+	@Override
 	public ListProperty<String> getMinecraftVersions() {
 		return minecraftVersions;
 	}
@@ -315,7 +324,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		File versionsManifest = files.getVersionsManifest();
 
 		if (refreshDeps || !versionsManifest.exists()) {
-			FileUtils.copyURLToFile(new URL(Constants.VERSIONS_MANIFEST_URL), versionsManifest);
+			FileUtils.copyURLToFile(new URL(versionsManifestUrl.get()), versionsManifest);
 		}
 
 		for (String minecraftVersion : minecraftVersions) {

@@ -213,7 +213,14 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.fakeSrcDir = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-fakeSrc".formatted(minecraftVersion)));
 		this.javadocDir = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-javadoc".formatted(minecraftVersion)));
 
-		this.versionsManifest = fileProperty(() -> new File(getGlobalBuildCache(), "versions-manifest.json"));
+		this.versionsManifest = fileProperty(() -> {
+			String url = keratin.getVersionsManifestUrl().get();
+			if (Constants.VERSIONS_MANIFEST_URL.equals(url)) {
+				return new File(getGlobalBuildCache(), "versions-manifest.json");
+			} else {
+				return new File(getGlobalBuildCache(), "versions-manifest-" + Integer.toHexString(url.hashCode()) + ".json");
+			}
+		});
 		this.versionInfos = new Versioned<>(minecraftVersion -> new File(getVersionJsonsCache(), "%s-info.json".formatted(minecraftVersion)));
 		this.versionDetails = new Versioned<>(minecraftVersion -> new File(getVersionJsonsCache(), "%s-details.json".formatted(minecraftVersion)));
 
