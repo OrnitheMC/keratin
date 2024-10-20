@@ -23,6 +23,8 @@ public interface Mapper extends TaskAware {
 
 	interface MapperParameters extends WorkParameters {
 
+		Property<Boolean> getBrokenInnerClasses();
+
 		Property<File> getInput();
 
 		Property<File> getOutput();
@@ -42,6 +44,10 @@ public interface Mapper extends TaskAware {
 		@Override
 		public void execute() {
 			try {
+				if (getParameters().getBrokenInnerClasses().isPresent()) {
+					MappingUtils.parseInnerClasses = !getParameters().getBrokenInnerClasses().get();
+				}
+
 				run(
 					getParameters().getInput().get(),
 					getParameters().getOutput().get(),
@@ -49,6 +55,8 @@ public interface Mapper extends TaskAware {
 				);
 			} catch (IOException e) {
 				throw new UncheckedIOException("error while running mapper", e);
+			} finally {
+				MappingUtils.parseInnerClasses = true;
 			}
 		}
 

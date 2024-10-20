@@ -12,4 +12,8 @@ public record VersionDetails(String id, String releaseTime, boolean client, bool
 	public boolean isPreBeta() {
 		return releaseTime.compareTo(Constants.RELEASE_TIME_B1_0) < 0;
 	}
+
+	public boolean hasBrokenInnerClasses() {
+		return isPreBeta() || "13w07a".equals(id);
+	}
 }
