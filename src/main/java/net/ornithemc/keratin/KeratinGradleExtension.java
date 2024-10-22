@@ -242,7 +242,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				if (side != GameSide.MERGED) {
 					continue;
 				}
-			} else if ((minecraftVersion.hasClient() && side != GameSide.CLIENT) || (minecraftVersion.hasServer() && side != GameSide.SERVER)) {
+			} else if ((side == GameSide.CLIENT && !minecraftVersion.hasClient()) || (side == GameSide.SERVER && !minecraftVersion.hasServer())) {
 				continue;
 			}
 
