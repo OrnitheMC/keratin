@@ -221,7 +221,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				if (side != GameSide.MERGED) {
 					continue;
 				}
-			} else if ((details.client() && side != GameSide.CLIENT) || (details.server() && side != GameSide.SERVER)) {
+			} else if ((side == GameSide.CLIENT && !details.client()) || (side == GameSide.SERVER && !details.server())) {
 				continue;
 			}
 
