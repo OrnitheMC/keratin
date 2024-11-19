@@ -246,11 +246,16 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				continue;
 			}
 
-			String id = minecraftVersion.hasSharedObfuscation()
-				? minecraftVersion.id()
-				: minecraftVersion.hasClient()
-					? minecraftVersion.client().id()
-					: minecraftVersion.server().id();
+			String id = minecraftVersion.id();
+
+			if (!minecraftVersion.hasSharedObfuscation()) {
+				if (side == GameSide.CLIENT) {
+					id = minecraftVersion.client().id();
+				}
+				if (side == GameSide.SERVER) {
+					id = minecraftVersion.server().id();
+				}
+			}
 			if (minecraftVersion.hasSharedVersioning()) {
 				id += side.suffix();
 			}
