@@ -184,18 +184,18 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 					MinecraftVersion fromMinecraftVersion1 = fromMinecraftVersions.get(1);
 
 					if (minecraftVersion.hasClient()) {
-						if (fromMinecraftVersion0.hasClient()) {
+						if (fromMinecraftVersion0.hasClient() && fromMinecraftVersion1.hasServer()) {
 							fromClientVersion = fromMinecraftVersion0;
 						}
-						if (fromMinecraftVersion1.hasClient()) {
+						if (fromMinecraftVersion1.hasClient() && fromMinecraftVersion0.hasServer()) {
 							fromClientVersion = fromMinecraftVersion1;
 						}
 					}
 					if (minecraftVersion.hasServer()) {
-						if (fromMinecraftVersion0.hasServer()) {
+						if (fromMinecraftVersion0.hasServer() && fromMinecraftVersion1.hasClient()) {
 							fromServerVersion = fromMinecraftVersion0;
 						}
-						if (fromMinecraftVersion1.hasServer()) {
+						if (fromMinecraftVersion1.hasServer() && fromMinecraftVersion0.hasClient()) {
 							fromServerVersion = fromMinecraftVersion1;
 						}
 					}
