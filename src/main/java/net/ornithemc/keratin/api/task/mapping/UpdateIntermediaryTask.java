@@ -84,8 +84,18 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 					if (minecraftVersion.hasServer() && !fromMinecraftVersion.hasServer()) {
 						throw new RuntimeException("update intermediary to a split-mappings server-only version requires a server to update from!");
 					}
+				} else if (fromMinecraftVersions.size() == 2) {
+					MinecraftVersion fromMinecraftVersion0 = fromMinecraftVersions.get(0);
+					MinecraftVersion fromMinecraftVersion1 = fromMinecraftVersions.get(1);
+
+					if (minecraftVersion.hasClient() && !fromMinecraftVersion0.hasClient() && !fromMinecraftVersion1.hasClient()) {
+						throw new RuntimeException("update intermediary to a split-mappings client-only version requires a client to update from!");
+					}
+					if (minecraftVersion.hasServer() && !fromMinecraftVersion0.hasServer() && !fromMinecraftVersion1.hasServer()) {
+						throw new RuntimeException("update intermediary to a split-mappings server-only version requires a server to update from!");
+					}
 				} else {
-					throw new RuntimeException("updating split intermediary from more than 1 version to a client-only or server-only version is not supported");
+					throw new RuntimeException("updating split intermediary from more than 2 versions to a client-only or server-only version is not supported");
 				}
 			}
 		}
@@ -173,13 +183,21 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 					MinecraftVersion fromMinecraftVersion0 = fromMinecraftVersions.get(0);
 					MinecraftVersion fromMinecraftVersion1 = fromMinecraftVersions.get(1);
 
-					if (fromMinecraftVersion0.hasClient() && fromMinecraftVersion1.hasServer()) {
-						fromClientVersion = fromMinecraftVersion0;
-						fromServerVersion = fromMinecraftVersion1;
+					if (minecraftVersion.hasClient()) {
+						if (fromMinecraftVersion0.hasClient()) {
+							fromClientVersion = fromMinecraftVersion0;
+						}
+						if (fromMinecraftVersion1.hasClient()) {
+							fromClientVersion = fromMinecraftVersion1;
+						}
 					}
-					if (fromMinecraftVersion0.hasServer() && fromMinecraftVersion1.hasClient()) {
-						fromClientVersion = fromMinecraftVersion1;
-						fromServerVersion = fromMinecraftVersion0;
+					if (minecraftVersion.hasServer()) {
+						if (fromMinecraftVersion0.hasServer()) {
+							fromServerVersion = fromMinecraftVersion0;
+						}
+						if (fromMinecraftVersion1.hasServer()) {
+							fromServerVersion = fromMinecraftVersion1;
+						}
 					}
 				}
 
