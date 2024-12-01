@@ -371,6 +371,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 		if (selectedMinecraftVersions.isEmpty()) {
 			findMinecraftVersions(selection, minecraftVersions);
+		} else {
+			minecraftVersions.addAll(selectedMinecraftVersions);
 		}
 
 		for (MinecraftVersion minecraftVersion : minecraftVersions) {
