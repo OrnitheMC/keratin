@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -155,9 +156,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.versionsManifestUrl.finalizeValueOnRead();
 
 		this.minecraftVersions = this.project.getObjects().listProperty(MinecraftVersion.class);
-		this.minecraftVersions.convention(this.project.provider(() -> {
-			return Collections.emptyList();
-		}));
+		this.minecraftVersions.convention(Collections.emptyList());
 		this.minecraftVersions.finalizeValueOnRead();
 		this.intermediaryGen = this.project.getObjects().property(Integer.class);
 		this.intermediaryGen.convention(1);
@@ -306,7 +305,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		return intermediaryGen;
 	}
 
-	private void findMinecraftVersions(TaskSelection selection) throws IOException {
+	private void findMinecraftVersions(TaskSelection selection, Set<MinecraftVersion> minecraftVersions) throws IOException {
 		if (selection == TaskSelection.CALAMUS) {
 			File dir = files.getMappingsDirectory();
 
@@ -365,13 +364,16 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			}
 		}
 
-		if (!minecraftVersions.isPresent()) {
-			findMinecraftVersions(selection);
-		}
+		List<MinecraftVersion> selectedMinecraftVersions = minecraftVersions.get();
 
+		Set<MinecraftVersion> minecraftVersions = new LinkedHashSet<>();
 		Set<String> minecraftVersionIds = new LinkedHashSet<>();
 
-		for (MinecraftVersion minecraftVersion : minecraftVersions.get()) {
+		if (selectedMinecraftVersions.isEmpty()) {
+			findMinecraftVersions(selection, minecraftVersions);
+		}
+
+		for (MinecraftVersion minecraftVersion : minecraftVersions) {
 			if (minecraftVersion.hasClient())
 				minecraftVersionIds.add(minecraftVersion.client().id());
 			if (minecraftVersion.hasServer())
