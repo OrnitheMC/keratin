@@ -629,20 +629,18 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.dependsOn(loadMappings);
 				});
 
-				if (minecraftVersionIds.size() == 1) {
-					String classNamePattern = "^(net/minecraft/|com/mojang/).*$";
+				String classNamePattern = "^(net/minecraft/|com/mojang/).*$";
 
-					TaskProvider<?> resetGraph = tasks.register("resetGraph", ResetGraphTask.class, task -> {
-						task.dependsOn(processMinecraft);
-						task.getClassNamePattern().convention(classNamePattern);
-						task.getClassNamePattern().finalizeValueOnRead();
-					});
-					TaskProvider<?> extendGraph = tasks.register("extendGraph", ExtendGraphTask.class, task -> {
-						task.dependsOn(processMinecraft);
-						task.getClassNamePattern().convention(classNamePattern);
-						task.getClassNamePattern().finalizeValueOnRead();
-					});
-				}
+				TaskProvider<?> resetGraph = tasks.register("resetGraph", ResetGraphTask.class, task -> {
+					task.dependsOn(processMinecraft);
+					task.getClassNamePattern().convention(classNamePattern);
+					task.getClassNamePattern().finalizeValueOnRead();
+				});
+				TaskProvider<?> extendGraph = tasks.register("extendGraph", ExtendGraphTask.class, task -> {
+					task.dependsOn(processMinecraft);
+					task.getClassNamePattern().convention(classNamePattern);
+					task.getClassNamePattern().finalizeValueOnRead();
+				});
 
 				TaskProvider<?> prepareBuild = tasks.register("prepareBuild", PrepareBuildTask.class, task -> {
 					task.dependsOn(mergeIntermediaryNests);
