@@ -548,7 +548,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 				int serverBuild = keratin.getRavenBuild(minecraftVersion, GameSide.SERVER);
 
 				if (build < 1) {
-					if (clientBuild < 1 && serverBuild < 1) {
+					if (clientBuild < 1 || serverBuild < 1) {
 						return null;
 					} else {
 						return new File(getRavenCache(), "%s-intermediary-gen%d-raven+build.(%d-%d)-merged.excs".formatted(minecraftVersion.id(), getIntermediaryGen(), clientBuild, serverBuild));
@@ -643,7 +643,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 				int serverBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
 
 				if (build < 1) {
-					if (clientBuild < 1 && serverBuild < 1) {
+					if (clientBuild < 1 || serverBuild < 1) {
 						return null;
 					} else {
 						return new File(getSparrowCache(), "%s-intermediary-gen%d-sparrow+build.(%d-%d)-merged.sigs".formatted(minecraftVersion.id(), getIntermediaryGen(), clientBuild, serverBuild));
@@ -738,7 +738,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 				int serverBuild = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
 
 				if (build < 1) {
-					if (clientBuild < 1 && serverBuild < 1) {
+					if (clientBuild < 1 || serverBuild < 1) {
 						return null;
 					} else {
 						return new File(getNestsCache(), "%s-intermediary-gen%d-nests+build.(%d-%d)-merged.nest".formatted(minecraftVersion.id(), getIntermediaryGen(), clientBuild, serverBuild));
