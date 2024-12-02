@@ -66,9 +66,9 @@ public interface MappingsGraph {
 			MinecraftVersion fromMinecraftVersion = fromMinecraftVersions.get(i);
 			File fromJar = fromJars.get(i);
 
-			File tmpTiny = new File(tmpGraphDir, "%s.tiny".formatted(minecraftVersion));
-			File tmpFromTiny = new File(tmpGraphDir, "%s.tiny".formatted(fromMinecraftVersion));
-			File tmpDiff = new File(tmpGraphDir, "%s#%s.tinydiff".formatted(fromMinecraftVersion, minecraftVersion));
+			File tmpTiny = new File(tmpGraphDir, "%s.tiny".formatted(minecraftVersion.id()));
+			File tmpFromTiny = new File(tmpGraphDir, "%s.tiny".formatted(fromMinecraftVersion.id()));
+			File tmpDiff = new File(tmpGraphDir, "%s#%s.tinydiff".formatted(fromMinecraftVersion.id(), minecraftVersion.id()));
 
 			if (tmpGraphDir.exists()) {
 				FileUtils.forceDelete(tmpGraphDir);
@@ -107,7 +107,7 @@ public interface MappingsGraph {
 			MappingUtils.separateMappings(GRAPH_FORMAT, tmpGraphDir.toPath(), extendedMappings.toPath(), minecraftVersion.id());
 		}
 		for (MinecraftVersion fromMinecraftVersion : fromMinecraftVersions) {
-			File diffFile = new File(graphDir, "%s#%s.tinydiff".formatted(fromMinecraftVersion, minecraftVersion.id()));
+			File diffFile = new File(graphDir, "%s#%s.tinydiff".formatted(fromMinecraftVersion.id(), minecraftVersion.id()));
 
 			Mappings fromMappings = MappingUtils.separateMappings(graph, fromMinecraftVersion.id());
 			Mappings mappings = GRAPH_FORMAT.readMappings(extendedMappings.toPath());
