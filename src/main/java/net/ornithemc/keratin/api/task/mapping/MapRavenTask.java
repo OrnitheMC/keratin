@@ -28,7 +28,7 @@ public abstract class MapRavenTask extends MappingTask {
 		if (minecraftVersion.canBeMerged() && (!fromOfficial || minecraftVersion.hasSharedObfuscation())) {
 			if (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (clientBuild > 0 || serverBuild > 0)) {
 				workQueue.submit(MapRaven.class, parameters -> {
-					parameters.getBrokenInnerClasses().set(minecraftVersion.hasBrokenInnerClasses());
+					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
 					parameters.getInput().set(fromOfficial ? files.getMergedRavenFile(minecraftVersion) : files.getIntermediaryMergedRavenFile(minecraftVersion));
 					parameters.getOutput().set(fromOfficial ? files.getIntermediaryMergedRavenFile(minecraftVersion) : files.getNamedRavenFile(minecraftVersion));
 					parameters.getMappings().set(fromOfficial ? files.getMergedIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
@@ -37,7 +37,7 @@ public abstract class MapRavenTask extends MappingTask {
 		} else {
 			if (minecraftVersion.hasClient() && (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (clientBuild > 0))) {
 				workQueue.submit(MapRaven.class, parameters -> {
-					parameters.getBrokenInnerClasses().set(minecraftVersion.hasBrokenInnerClasses());
+					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
 					parameters.getInput().set(fromOfficial ? files.getClientRavenFile(minecraftVersion) : files.getIntermediaryClientRavenFile(minecraftVersion));
 					parameters.getOutput().set(fromOfficial ? files.getIntermediaryClientRavenFile(minecraftVersion) : files.getNamedRavenFile(minecraftVersion));
 					parameters.getMappings().set(fromOfficial ? files.getClientIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
@@ -45,7 +45,7 @@ public abstract class MapRavenTask extends MappingTask {
 			}
 			if (minecraftVersion.hasServer() && (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (serverBuild > 0))) {
 				workQueue.submit(MapRaven.class, parameters -> {
-					parameters.getBrokenInnerClasses().set(minecraftVersion.hasBrokenInnerClasses());
+					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
 					parameters.getInput().set(fromOfficial ? files.getServerRavenFile(minecraftVersion) : files.getIntermediaryServerRavenFile(minecraftVersion));
 					parameters.getOutput().set(fromOfficial ? files.getIntermediaryServerRavenFile(minecraftVersion) : files.getNamedRavenFile(minecraftVersion));
 					parameters.getMappings().set(fromOfficial ? files.getServerIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
