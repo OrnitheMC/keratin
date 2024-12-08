@@ -519,6 +519,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 						task.getObfuscationPatterns().add("^(?:(?!com/mojang/rubydung/RubyDung).)*$");
 					} else if (minecraftVersion.hasClient() && minecraftVersion.client().releaseTime().compareTo("2009-12-24T00:00:00+00:00") < 0) { // 'classic'
 						task.getObfuscationPatterns().add("^(?:(?!com/mojang/minecraft/MinecraftApplet).)*$");
+						task.getCheckSerializable().set(true); // only classic uses Java Serializable for level saving
 					}
 				});
 			};
