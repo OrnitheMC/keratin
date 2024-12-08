@@ -515,9 +515,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				task.configureMinecraftVersion(minecraftVersion -> {
 					// very old versions are only partially obfuscated
 					// so we provide a very strict obfuscation pattern
-					if (minecraftVersion.hasClient() && minecraftVersion.client().releaseTime().compareTo("2009-05-17T00:00:00+00:00") < 0) { // 'rubydung'
+					if (minecraftVersion.hasClient() && minecraftVersion.client().releaseTime().compareTo("2009-05-16T11:48:00+00:00") <= 0) { // 'rubydung'
 						task.getObfuscationPatterns().add("^(?:(?!com/mojang/rubydung/RubyDung).)*$");
-					} else if (minecraftVersion.hasClient() && minecraftVersion.client().releaseTime().compareTo("2009-12-24T00:00:00+00:00") < 0) { // 'classic'
+					} else if (minecraftVersion.hasClient() && minecraftVersion.client().releaseTime().compareTo("2009-12-22T00:00:00+00:00") <= 0) { // 'classic'
 						task.getObfuscationPatterns().add("^(?:(?!com/mojang/minecraft/MinecraftApplet).)*$");
 						task.getCheckSerializable().set(true); // only classic uses Java Serializable for level saving
 					}
