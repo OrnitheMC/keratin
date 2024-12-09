@@ -21,9 +21,6 @@ public abstract class GenerateIntermediaryTask extends MinecraftTask {
 	public abstract ListProperty<String> getObfuscationPatterns();
 
 	@Internal
-	public abstract Property<Boolean> getCheckSerializable();
-
-	@Internal
 	public abstract Property<Integer> getNameLength();
 
 	@Override
@@ -50,8 +47,6 @@ public abstract class GenerateIntermediaryTask extends MinecraftTask {
 			options.defaultPackage(getTargetPackage().get());
 		if (getObfuscationPatterns().isPresent())
 			options.obfuscationPatterns(getObfuscationPatterns().get());
-		if (getCheckSerializable().isPresent())
-			options.checkSerializable(getCheckSerializable().get());
 		if (getNameLength().isPresent())
 			options.nameLength(getNameLength().get());
 		if (minecraftVersion.hasClient())

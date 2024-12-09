@@ -1,6 +1,6 @@
 package net.ornithemc.keratin.api.manifest;
 
-public record VersionDetails(String id, String releaseTime, boolean client, boolean server, boolean sharedMappings, Downloads downloads) {
+public record VersionDetails(String id, String normalizedVersion, String releaseTime, boolean client, boolean server, boolean sharedMappings, Downloads downloads) {
 
 	public record Downloads(Download client, Download server) {
 

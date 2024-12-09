@@ -79,4 +79,12 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 	public boolean hasBrokenInnerClasses() {
 		return !hasSharedVersioning() || "13w07a".equals(id);
 	}
+
+	public boolean usesSerializableForLevelSaving() {
+		return client != null &&
+			// only some classic versions uses Java Serializable for level saving
+			((client.normalizedVersion().compareTo("0.14") >= 0 && client.normalizedVersion().compareTo("0.31") < 0)
+				// c0.0.13a-launcher is the odd one out, dunno what's up with that
+				|| client.id().equals("c0.0.13a-launcher"));
+	}
 }

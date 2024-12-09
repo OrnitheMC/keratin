@@ -107,6 +107,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 				.newJarFile(files.getMergedJar(minecraftVersion))
 				.newNests(files.getMergedNests(minecraftVersion))
 				.newLibraries(files.getLibraries(minecraftVersion))
+				.newCheckSerializable(minecraftVersion.usesSerializableForLevelSaving())
 				.newIntermediaryFile(files.getIntermediaryFile(minecraftVersion.id()));
 
 			for (MinecraftVersion fromMinecraftVersion : fromMinecraftVersions) {
@@ -115,6 +116,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 				args
 					.addOldJarFile(files.getMergedJar(fromMinecraftVersion))
 					.addOldLibraries(Collections.emptyList())
+					.addOldCheckSerializable(fromMinecraftVersion.usesSerializableForLevelSaving())
 					.addOldIntermediaryFile(files.getIntermediaryFile(fromMinecraftVersion.id()))
 					.addMatchesFile(m.file(), m.inverted());
 			}
@@ -127,13 +129,15 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 				args
 					.newClientJarFile(files.getClientJar(minecraftVersion))
 					.newClientNests(files.getClientNests(minecraftVersion))
-					.newClientLibraries(files.getLibraries(minecraftVersion.client().id()));
+					.newClientLibraries(files.getLibraries(minecraftVersion.client().id()))
+					.newClientCheckSerializable(minecraftVersion.usesSerializableForLevelSaving());
 			}
 			if (minecraftVersion.hasServer()) {
 				args
 					.newServerJarFile(files.getServerJar(minecraftVersion))
 					.newServerNests(files.getServerNests(minecraftVersion))
-					.newServerLibraries(files.getLibraries(minecraftVersion.server().id()));
+					.newServerLibraries(files.getLibraries(minecraftVersion.server().id()))
+					.newServerCheckSerializable(minecraftVersion.usesSerializableForLevelSaving());
 			}
 			if (minecraftVersion.hasSharedVersioning()) {
 				args.newIntermediaryFile(files.getIntermediaryFile(minecraftVersion.id()));
@@ -155,6 +159,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 
 				args
 					.oldJarFile(files.getMergedJar(fromMinecraftVersion))
+					.oldCheckSerializable(fromMinecraftVersion.usesSerializableForLevelSaving())
 					.oldIntermediaryFile(files.getIntermediaryFile(fromMinecraftVersion.id()));
 
 				if (minecraftVersion.hasClient()) {
@@ -206,6 +211,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 
 					args
 						.oldClientJarFile(files.getClientJar(fromClientVersion))
+						.oldClientCheckSerializable(fromClientVersion.usesSerializableForLevelSaving())
 						.oldClientIntermediaryFile(files.getIntermediaryFile(fromClientVersion.client().id()))
 						.clientMatchesFile(m.file(), m.inverted());
 				}
@@ -214,6 +220,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 
 					args
 						.oldServerJarFile(files.getServerJar(fromServerVersion))
+						.oldServerCheckSerializable(fromServerVersion.usesSerializableForLevelSaving())
 						.oldServerIntermediaryFile(files.getIntermediaryFile(fromServerVersion.server().id()))
 						.serverMatchesFile(m.file(), m.inverted());
 				}
