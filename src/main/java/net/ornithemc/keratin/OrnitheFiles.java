@@ -1494,6 +1494,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
+	public File getMainIntermediaryMappings(MinecraftVersion minecraftVersion) {
+		return pickFileForPresentSides(minecraftVersion, clientIntermediaryMappings, serverIntermediaryMappings, mergedIntermediaryMappings);
+	}
+
+	@Override
 	public File getNamedMappings(MinecraftVersion minecraftVersion) {
 		return namedMappings.get(minecraftVersion);
 	}

@@ -83,6 +83,7 @@ import net.ornithemc.keratin.api.task.mapping.graph.LoadMappingsFromGraphTask;
 import net.ornithemc.keratin.api.task.mapping.graph.ResetGraphTask;
 import net.ornithemc.keratin.api.task.mapping.graph.SaveMappingsIntoGraphTask;
 import net.ornithemc.keratin.api.task.merging.MergeRavenTask;
+import net.ornithemc.keratin.api.task.merging.MergeIntermediaryTask;
 import net.ornithemc.keratin.api.task.merging.MergeMinecraftJarsTask;
 import net.ornithemc.keratin.api.task.merging.MergeNestsTask;
 import net.ornithemc.keratin.api.task.merging.MergeSparrowTask;
@@ -558,8 +559,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			TaskProvider<?> downloadIntermediary = tasks.register("downloadIntermediary", DownloadIntermediaryTask.class, task -> {
 				task.dependsOn(mergeJars);
 			});
-			TaskProvider<?> splitIntermediary = tasks.register("splitIntermediary", SplitIntermediaryTask.class, task -> {
+			TaskProvider<?> mergeIntermediary = tasks.register("mergeIntermediary", MergeIntermediaryTask.class, task -> {
 				task.dependsOn(downloadIntermediary);
+			});
+			TaskProvider<?> splitIntermediary = tasks.register("splitIntermediary", SplitIntermediaryTask.class, task -> {
+				task.dependsOn(mergeIntermediary);
 			});
 			TaskProvider<?> mapMinecraftToIntermediary = tasks.register("mapMinecraftToIntermediary", MapMinecraftTask.class, task -> {
 				task.dependsOn(syncLibraries, splitIntermediary);

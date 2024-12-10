@@ -53,7 +53,7 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 				workQueue.submit(BuildMappings.class, parameters -> {
 					parameters.getMultipleOfficialNamespaces().set(false);
 					parameters.getClassNamePattern().set(classNamePattern);
-					parameters.getIntermediaryMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
+					parameters.getIntermediaryMappings().set(files.getClientIntermediaryMappings(minecraftVersion));
 					parameters.getCompletedMappings().set(files.getCompletedNamedMappings(minecraftVersion));
 					parameters.getNamedV1Mappings().set(files.getTinyV1NamedMappings(minecraftVersion.client().id()));
 					parameters.getNamedV2Mappings().set(files.getTinyV2NamedMappings(minecraftVersion.client().id()));
@@ -65,7 +65,7 @@ public abstract class BuildMappingsTask extends MinecraftTask {
 				workQueue.submit(BuildMappings.class, parameters -> {
 					parameters.getMultipleOfficialNamespaces().set(false);
 					parameters.getClassNamePattern().set(classNamePattern);
-					parameters.getIntermediaryMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
+					parameters.getIntermediaryMappings().set(files.getServerIntermediaryMappings(minecraftVersion));
 					parameters.getCompletedMappings().set(files.getCompletedNamedMappings(minecraftVersion));
 					parameters.getNamedV1Mappings().set(files.getTinyV1NamedMappings(minecraftVersion.server().id()));
 					parameters.getNamedV2Mappings().set(files.getTinyV2NamedMappings(minecraftVersion.server().id()));

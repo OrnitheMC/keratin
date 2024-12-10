@@ -3,14 +3,22 @@ package net.ornithemc.keratin.api.task.merging;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Map;
 
 import org.gradle.api.provider.Property;
 import org.gradle.workers.WorkAction;
 import org.gradle.workers.WorkParameters;
 
+import net.fabricmc.mappingio.MappingReader;
+import net.fabricmc.mappingio.MappingWriter;
+import net.fabricmc.mappingio.adapter.MappingNsRenamer;
+import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;
+import net.fabricmc.mappingio.format.MappingFormat;
+import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.fabricmc.stitch.merge.JarMerger;
 
 import net.ornithemc.keratin.api.task.TaskAware;
+import net.ornithemc.keratin.api.task.mapping.Mapper;
 import net.ornithemc.mappingutils.MappingUtils;
 
 public interface Merger extends TaskAware {
@@ -42,6 +50,21 @@ public interface Merger extends TaskAware {
 
 		protected abstract void run(File client, File server, File merged) throws IOException;
 
+	}
+
+	abstract class MergeIntermediary extends MergeAction {
+
+		@Override
+		protected void run(File client, File server, File merged) throws IOException {
+			MemoryMappingTree mappings = new MemoryMappingTree();
+
+			MappingReader.read(client.toPath(), new MappingNsRenamer(new MappingSourceNsSwitch(mappings, Mapper.INTERMEDIARY, true), Map.of(Mapper.OFFICIAL, Mapper.CLIENT_OFFICIAL)));
+			MappingReader.read(server.toPath(), new MappingNsRenamer(new MappingSourceNsSwitch(mappings, Mapper.INTERMEDIARY, true), Map.of(Mapper.OFFICIAL, Mapper.SERVER_OFFICIAL)));
+
+			try (MappingWriter writer = MappingWriter.create(merged.toPath(), MappingFormat.TINY_2_FILE)) {
+				mappings.accept(writer);
+			}
+		}
 	}
 
 	abstract class MergeJars extends MergeAction {
