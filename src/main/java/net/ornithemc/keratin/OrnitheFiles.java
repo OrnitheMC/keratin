@@ -78,6 +78,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 
 	private final Versioned<String, File> namedJar;
 	private final Versioned<String, File> processedNamedJar;
+	private final Versioned<String, File> javadocNamedJar;
 
 	private final Versioned<MinecraftVersion, File> clientIntermediaryMappings;
 	private final Versioned<MinecraftVersion, File> serverIntermediaryMappings;
@@ -437,6 +438,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 
 		this.namedJar = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named.jar".formatted(minecraftVersion)));
 		this.processedNamedJar = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-processed-named.jar".formatted(minecraftVersion)));
+		this.javadocNamedJar = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-javadoc-named.jar".formatted(minecraftVersion)));
 
 		this.clientIntermediaryMappings = new Versioned<>(minecraftVersion -> {
 			if (!minecraftVersion.hasClient()) {
@@ -1476,6 +1478,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	@Override
 	public File getProcessedNamedJar(String minecraftVersion) {
 		return processedNamedJar.get(minecraftVersion);
+	}
+
+	@Override
+	public File getJavadocNamedJar(String minecraftVersion) {
+		return javadocNamedJar.get(minecraftVersion);
 	}
 
 	@Override

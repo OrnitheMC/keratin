@@ -117,6 +117,8 @@ public interface OrnitheFilesAPI {
 
 	File getProcessedNamedJar(String minecraftVersion);
 
+	File getJavadocNamedJar(String minecraftVersion);
+
 	File getClientIntermediaryMappings(MinecraftVersion minecraftVersion);
 
 	File getServerIntermediaryMappings(MinecraftVersion minecraftVersion);
