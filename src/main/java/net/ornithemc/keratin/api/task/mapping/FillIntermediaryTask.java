@@ -23,7 +23,7 @@ public abstract class FillIntermediaryTask extends MinecraftTask {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
 
-		if (minecraftVersion.hasSharedVersioning()) {
+		if (minecraftVersion.hasSharedObfuscation()) {
 			workQueue.submit(FillIntermediary.class, parameters -> {
 				parameters.getInputMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
 				parameters.getOutputMappings().set(files.getFilledMergedIntermediaryMappings(minecraftVersion));
