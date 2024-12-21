@@ -91,6 +91,8 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 							fromSigs,
 							setup
 						);
+					} else {
+						setup.createNewFile();
 					}
 				}
 			}
@@ -120,6 +122,8 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 							fromSigs,
 							setup
 						);
+					} else {
+						setup.createNewFile();
 					}
 				}
 			}

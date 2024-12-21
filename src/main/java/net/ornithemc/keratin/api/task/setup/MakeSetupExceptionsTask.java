@@ -88,6 +88,8 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 							fromExcs,
 							setup
 						);
+					} else {
+						setup.createNewFile();
 					}
 				}
 			}
@@ -117,6 +119,8 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 							fromExcs,
 							setup
 						);
+					} else {
+						setup.createNewFile();
 					}
 				}
 			}
