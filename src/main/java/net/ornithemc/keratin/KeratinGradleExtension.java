@@ -68,6 +68,7 @@ import net.ornithemc.keratin.api.task.javadoc.GenerateFakeSourceTask;
 import net.ornithemc.keratin.api.task.javadoc.MapMinecraftForJavadocTask;
 import net.ornithemc.keratin.api.task.mapping.ConvertMappingsFromTinyV1ToTinyV2Task;
 import net.ornithemc.keratin.api.task.mapping.DownloadIntermediaryTask;
+import net.ornithemc.keratin.api.task.mapping.FillIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.GenerateIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.GenerateNewIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.MapRavenTask;
@@ -565,6 +566,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			TaskProvider<?> splitIntermediary = tasks.register("splitIntermediary", SplitIntermediaryTask.class, task -> {
 				task.dependsOn(mergeIntermediary);
 			});
+			TaskProvider<?> fillIntermediary = tasks.register("fillIntermediary", FillIntermediaryTask.class, task -> {
+				task.dependsOn(splitIntermediary);
+			});
 			TaskProvider<?> mapMinecraftToIntermediary = tasks.register("mapMinecraftToIntermediary", MapMinecraftTask.class, task -> {
 				task.dependsOn(syncLibraries, splitIntermediary);
 				task.getSourceNamespace().set(Mapper.OFFICIAL);
@@ -588,7 +592,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 			if (selection == TaskSelection.FEATHER) {
 				TaskProvider<?> mapRavenToIntermediary = tasks.register("mapRavenToIntermediary", MapRavenTask.class, task -> {
-					task.dependsOn(downloadRaven, splitIntermediary);
+					task.dependsOn(downloadRaven, fillIntermediary);
 					task.getSourceNamespace().set(Mapper.OFFICIAL);
 					task.getTargetNamespace().set(Mapper.INTERMEDIARY);
 					
@@ -598,7 +602,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.getNamespace().set(Mapper.INTERMEDIARY);
 				});
 				TaskProvider<?> mapSparrowToIntermediary = tasks.register("mapSparrowToIntermediary", MapSparrowTask.class, task -> {
-					task.dependsOn(downloadSparrow, splitIntermediary);
+					task.dependsOn(downloadSparrow, fillIntermediary);
 					task.getSourceNamespace().set(Mapper.OFFICIAL);
 					task.getTargetNamespace().set(Mapper.INTERMEDIARY);
 					

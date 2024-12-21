@@ -127,6 +127,14 @@ public interface OrnitheFilesAPI {
 
 	File getMainIntermediaryMappings(MinecraftVersion minecraftVersion);
 
+	File getFilledClientIntermediaryMappings(MinecraftVersion minecraftVersion);
+
+	File getFilledServerIntermediaryMappings(MinecraftVersion minecraftVersion);
+
+	File getFilledMergedIntermediaryMappings(MinecraftVersion minecraftVersion);
+
+	File getMainFilledIntermediaryMappings(MinecraftVersion minecraftVersion);
+
 	File getNamedMappings(MinecraftVersion minecraftVersion);
 
 	File getProcessedNamedMappings(MinecraftVersion minecraftVersion);

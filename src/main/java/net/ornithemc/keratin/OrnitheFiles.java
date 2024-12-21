@@ -83,6 +83,9 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Versioned<MinecraftVersion, File> clientIntermediaryMappings;
 	private final Versioned<MinecraftVersion, File> serverIntermediaryMappings;
 	private final Versioned<MinecraftVersion, File> mergedIntermediaryMappings;
+	private final Versioned<MinecraftVersion, File> filledClientIntermediaryMappings;
+	private final Versioned<MinecraftVersion, File> filledServerIntermediaryMappings;
+	private final Versioned<MinecraftVersion, File> filledMergedIntermediaryMappings;
 
 	private final Versioned<MinecraftVersion, File> namedMappings;
 	private final Versioned<MinecraftVersion, File> processedNamedMappings;
@@ -459,6 +462,25 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 			}
 		});
 		this.mergedIntermediaryMappings = new Versioned<>(minecraftVersion -> new File(getMappingsCache(), "%s-intermediary-gen%d-merged.tiny".formatted(minecraftVersion.id(), getIntermediaryGen())));
+		this.filledClientIntermediaryMappings = new Versioned<>(minecraftVersion -> {
+			if (!minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("client intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("client intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
+			} else {
+				return new File(getMappingsCache(), "%s-filled-intermediary-gen%d-client.tiny".formatted(minecraftVersion.client().id(), getIntermediaryGen()));
+			}
+		});
+		this.filledServerIntermediaryMappings = new Versioned<>(minecraftVersion -> {
+			if (!minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("server intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new NoSuchFileException("server intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
+			} else {
+				return new File(getMappingsCache(), "%s-filled-intermediary-gen%d-server.tiny".formatted(minecraftVersion.server().id(), getIntermediaryGen()));
+			}
+		});
+		this.filledMergedIntermediaryMappings = new Versioned<>(minecraftVersion -> new File(getMappingsCache(), "%s-filled-intermediary-gen%d-merged.tiny".formatted(minecraftVersion.id(), getIntermediaryGen())));
 
 		this.namedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-named.tiny".formatted(minecraftVersion.id())));
 		this.processedNamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-processed-named.tiny".formatted(minecraftVersion.id())));
@@ -1503,6 +1525,26 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	@Override
 	public File getMainIntermediaryMappings(MinecraftVersion minecraftVersion) {
 		return pickFileForPresentSides(minecraftVersion, clientIntermediaryMappings, serverIntermediaryMappings, mergedIntermediaryMappings);
+	}
+
+	@Override
+	public File getFilledClientIntermediaryMappings(MinecraftVersion minecraftVersion) {
+		return filledClientIntermediaryMappings.get(minecraftVersion);
+	}
+
+	@Override
+	public File getFilledServerIntermediaryMappings(MinecraftVersion minecraftVersion) {
+		return filledServerIntermediaryMappings.get(minecraftVersion);
+	}
+
+	@Override
+	public File getFilledMergedIntermediaryMappings(MinecraftVersion minecraftVersion) {
+		return filledMergedIntermediaryMappings.get(minecraftVersion);
+	}
+
+	@Override
+	public File getMainFilledIntermediaryMappings(MinecraftVersion minecraftVersion) {
+		return pickFileForPresentSides(minecraftVersion, filledClientIntermediaryMappings, filledServerIntermediaryMappings, filledMergedIntermediaryMappings);
 	}
 
 	@Override
