@@ -63,9 +63,7 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 			}
 		} else {
 			if (minecraftVersion.hasClient()) {
-				File excs = minecraftVersion.hasSharedVersioning()
-					? files.getClientExceptions(minecraftVersion)
-					: files.getMergedExceptions(minecraftVersion);
+				File excs = files.getClientExceptions(minecraftVersion);
 				File setup = files.getSetupClientExceptions(minecraftVersion);
 
 				if (excs.exists()) {
@@ -76,9 +74,7 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 					} else if (fromMinecraftVersion.hasSharedObfuscation()) {
 						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
 					} else if (fromMinecraftVersion.hasClient()) {
-						File fromExcs = minecraftVersion.hasSharedVersioning()
-							? files.getClientExceptions(fromMinecraftVersion)
-							: files.getMergedExceptions(fromMinecraftVersion);
+						File fromExcs = files.getClientExceptions(fromMinecraftVersion);
 
 						updateExceptions(
 							fromMinecraftVersion.client().id(),
@@ -94,9 +90,7 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 				}
 			}
 			if (minecraftVersion.hasServer()) {
-				File excs = minecraftVersion.hasSharedVersioning()
-					? files.getServerExceptions(minecraftVersion)
-					: files.getMergedExceptions(minecraftVersion);
+				File excs = files.getServerExceptions(minecraftVersion);
 				File setup = files.getSetupServerExceptions(minecraftVersion);
 
 				if (excs.exists()) {
@@ -107,9 +101,7 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 					} else if (fromMinecraftVersion.hasSharedObfuscation()) {
 						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
 					} else if (fromMinecraftVersion.hasServer()) {
-						File fromExcs = minecraftVersion.hasSharedVersioning()
-							? files.getServerExceptions(fromMinecraftVersion)
-							: files.getMergedExceptions(fromMinecraftVersion);
+						File fromExcs = files.getServerExceptions(fromMinecraftVersion);
 
 						updateExceptions(
 							fromMinecraftVersion.server().id(),

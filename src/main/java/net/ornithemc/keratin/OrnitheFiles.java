@@ -789,58 +789,58 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		});
 
 		this.clientExceptions = new Versioned<>(minecraftVersion -> {
-			if (!minecraftVersion.hasSharedVersioning()) {
-				throw new NoSuchFileException("there is no shared versioning for Minecraft version " + minecraftVersion.id() + " - please use the merged exceptions!");
-			} else if (minecraftVersion.hasSharedObfuscation()) {
+			if (minecraftVersion.hasSharedObfuscation()) {
 				throw new NoSuchFileException("there are no shared mappings for Minecraft version " + minecraftVersion.id() + " - please use the merged exceptions!");
 			} else if (!minecraftVersion.hasClient()) {
 				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
-			} else {
+			} else if (minecraftVersion.hasSharedVersioning()) {
 				return new File(getExceptionsDirectory(), "%s-client.excs".formatted(minecraftVersion.client().id()));
+			} else {
+				return new File(getExceptionsDirectory(), "%s.excs".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.serverExceptions = new Versioned<>(minecraftVersion -> {
-			if (!minecraftVersion.hasSharedVersioning()) {
-				throw new NoSuchFileException("there is no shared versioning for Minecraft version " + minecraftVersion.id() + " - please use the merged exceptions!");
-			} else if (minecraftVersion.hasSharedObfuscation()) {
+			if (minecraftVersion.hasSharedObfuscation()) {
 				throw new NoSuchFileException("there are no shared mappings for Minecraft version " + minecraftVersion.id() + " - please use the merged exceptions!");
 			} else if (!minecraftVersion.hasServer()) {
 				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
-			} else {
+			} else if (minecraftVersion.hasSharedVersioning()) {
 				return new File(getExceptionsDirectory(), "%s-server.excs".formatted(minecraftVersion.server().id()));
+			} else {
+				return new File(getExceptionsDirectory(), "%s.excs".formatted(minecraftVersion.server().id()));
 			}
 		});
 		this.mergedExceptions = new Versioned<>(minecraftVersion -> {
-			if (!minecraftVersion.hasSharedObfuscation() && minecraftVersion.hasSharedVersioning()) {
+			if (!minecraftVersion.hasSharedObfuscation()) {
 				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: the client and server jars do not have shared mappings!");
 			} else {
 				return new File(getExceptionsDirectory(), "%s.excs".formatted(minecraftVersion.id()));
 			}
 		});
 		this.clientSignatures = new Versioned<>(minecraftVersion -> {
-			if (!minecraftVersion.hasSharedVersioning()) {
-				throw new NoSuchFileException("there is no shared versioning for Minecraft version " + minecraftVersion.id() + " - please use the merged signatures!");
-			} else if (minecraftVersion.hasSharedObfuscation()) {
+			if (minecraftVersion.hasSharedObfuscation()) {
 				throw new NoSuchFileException("there are no shared mappings for Minecraft version " + minecraftVersion.id() + " - please use the merged signatures!");
 			} else if (!minecraftVersion.hasClient()) {
 				throw new NoSuchFileException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
-			} else {
+			} else if (minecraftVersion.hasSharedVersioning()) {
 				return new File(getSignaturesDirectory(), "%s-client.sigs".formatted(minecraftVersion.client().id()));
+			} else {
+				return new File(getSignaturesDirectory(), "%s.sigs".formatted(minecraftVersion.client().id()));
 			}
 		});
 		this.serverSignatures = new Versioned<>(minecraftVersion -> {
-			if (!minecraftVersion.hasSharedVersioning()) {
-				throw new NoSuchFileException("there is no shared versioning for Minecraft version " + minecraftVersion.id() + " - please use the merged signatures!");
-			} else if (minecraftVersion.hasSharedObfuscation()) {
+			if (minecraftVersion.hasSharedObfuscation()) {
 				throw new NoSuchFileException("there are no shared mappings for Minecraft version " + minecraftVersion.id() + " - please use the merged signatures!");
 			} else if (!minecraftVersion.hasServer()) {
 				throw new NoSuchFileException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
-			} else {
+			} else if (minecraftVersion.hasSharedVersioning()) {
 				return new File(getSignaturesDirectory(), "%s-server.sigs".formatted(minecraftVersion.server().id()));
+			} else {
+				return new File(getSignaturesDirectory(), "%s.sigs".formatted(minecraftVersion.server().id()));
 			}
 		});
 		this.mergedSignatures = new Versioned<>(minecraftVersion -> {
-			if (!minecraftVersion.hasSharedObfuscation() && minecraftVersion.hasSharedVersioning()) {
+			if (!minecraftVersion.hasSharedObfuscation()) {
 				throw new NoSuchFileException("game jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: the client and server jars do not have shared mappings!");
 			} else {
 				return new File(getSignaturesDirectory(), "%s.sigs".formatted(minecraftVersion.id()));

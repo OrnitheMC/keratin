@@ -41,18 +41,14 @@ public abstract class SaveSignaturesTask extends MinecraftTask implements Except
 				saveSignatures(
 					files.getBaseClientSignatures(minecraftVersion),
 					files.getGeneratedClientSignatures(minecraftVersion),
-					minecraftVersion.hasSharedVersioning()
-						? files.getClientSignatures(minecraftVersion)
-						: files.getMergedSignatures(minecraftVersion)
+					files.getClientSignatures(minecraftVersion)
 				);
 			}
 			if (minecraftVersion.hasServer()) {
 				saveSignatures(
 					files.getBaseServerSignatures(minecraftVersion),
 					files.getGeneratedServerSignatures(minecraftVersion),
-					minecraftVersion.hasSharedVersioning()
-						? files.getServerSignatures(minecraftVersion)
-						: files.getMergedSignatures(minecraftVersion)
+					files.getServerSignatures(minecraftVersion)
 				);
 			}
 		}

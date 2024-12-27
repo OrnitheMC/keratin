@@ -66,9 +66,7 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 			}
 		} else {
 			if (minecraftVersion.hasClient()) {
-				File sigs = minecraftVersion.hasSharedVersioning()
-					? files.getClientSignatures(minecraftVersion)
-					: files.getMergedSignatures(minecraftVersion);
+				File sigs = files.getClientSignatures(minecraftVersion);
 				File setup = files.getSetupClientSignatures(minecraftVersion);
 
 				if (sigs.exists()) {
@@ -79,9 +77,7 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 					} else if (fromMinecraftVersion.hasSharedObfuscation()) {
 						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
 					} else if (fromMinecraftVersion.hasClient()) {
-						File fromSigs = minecraftVersion.hasSharedVersioning()
-							? files.getClientSignatures(fromMinecraftVersion)
-							: files.getMergedSignatures(fromMinecraftVersion);
+						File fromSigs = files.getClientSignatures(fromMinecraftVersion);
 
 						updateSignatures(
 							fromMinecraftVersion.client().id(),
@@ -97,9 +93,7 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 				}
 			}
 			if (minecraftVersion.hasServer()) {
-				File sigs = minecraftVersion.hasSharedVersioning()
-					? files.getServerSignatures(minecraftVersion)
-					: files.getMergedSignatures(minecraftVersion);
+				File sigs = files.getServerSignatures(minecraftVersion);
 				File setup = files.getSetupServerSignatures(minecraftVersion);
 
 				if (sigs.exists()) {
@@ -110,9 +104,7 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 					} else if (fromMinecraftVersion.hasSharedObfuscation()) {
 						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
 					} else if (fromMinecraftVersion.hasServer()) {
-						File fromSigs = minecraftVersion.hasSharedVersioning()
-							? files.getServerSignatures(fromMinecraftVersion)
-							: files.getMergedSignatures(fromMinecraftVersion);
+						File fromSigs = files.getServerSignatures(fromMinecraftVersion);
 
 						updateSignatures(
 							fromMinecraftVersion.server().id(),
