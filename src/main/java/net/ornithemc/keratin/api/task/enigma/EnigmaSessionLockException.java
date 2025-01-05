@@ -13,7 +13,7 @@ public class EnigmaSessionLockException extends Exception {
 	}
 
 	public static EnigmaSessionLockException check(String minecraftVersion) {
-		return new EnigmaSessionLockException("Enigma session lock found: another Enigma session for " + minecraftVersion + " is already running!");
+		return new EnigmaSessionLockException("Enigma session lock found: an Enigma session for " + minecraftVersion + " is running!");
 	}
 
 	public static EnigmaSessionLockException acquire(String minecraftVersion, Throwable cause) {

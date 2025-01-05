@@ -11,13 +11,26 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.api.task.enigma.EnigmaSession;
 import net.ornithemc.mappingutils.PropagationDirection;
 import net.ornithemc.mappingutils.io.Format;
 
-public abstract class SaveMappingsIntoGraphTask extends MinecraftTask implements MappingsGraph {
+public abstract class SaveMappingsIntoGraphTask extends MinecraftTask implements MappingsGraph, EnigmaSession {
 
 	@Internal
 	public abstract Property<PropagationDirection> getPropagationDirection();
+
+	@Override
+	public void run() throws Exception {
+		KeratinGradleExtension keratin = getExtension();
+		OrnitheFilesAPI files = keratin.getFiles();
+
+		for (MinecraftVersion minecraftVersion : getMinecraftVersions().get()) {
+			checkSessionLock(minecraftVersion.id(), files.getEnigmaSessionLock(minecraftVersion));
+		}
+
+		super.run();
+	}
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws IOException {
@@ -31,6 +44,5 @@ public abstract class SaveMappingsIntoGraphTask extends MinecraftTask implements
 		PropagationDirection propagationDir = getPropagationDirection().get();
 
 		saveMappings(minecraftVersion.id(), graphDir, input, Format.ENIGMA_DIR, Validators.insertDummyMappings(), propagationDir);
-		loadMappings(minecraftVersion.id(), graphDir, input, Format.ENIGMA_DIR, Validators.removeDummyMappings(false));
 	}
 }
