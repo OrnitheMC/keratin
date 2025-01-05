@@ -35,7 +35,7 @@ public abstract class LaunchEnigmaTask extends MinecraftTask implements JavaExec
 		workQueue.submit(EnigmaSessionAction.class, parameters -> {
 			parameters.getMinecraftVersion().set(minecraftVersion.id());
 			parameters.getSessionLock().set(files.getEnigmaSessionLock(minecraftVersion));
-			parameters.getMainClass().set("cuchaz.enigma.gui.Main");
+			parameters.getMainClass().set("org.quiltmc.enigma.gui.Main");
 			parameters.getClasspath().set(project.getConfigurations().getByName(Configurations.ENIGMA_RUNTIME).getFiles());
 			parameters.getArgs().set(Arrays.asList(
 				"-jar"     , files.getMainProcessedIntermediaryJar(minecraftVersion).getAbsolutePath(),
