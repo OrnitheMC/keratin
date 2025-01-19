@@ -22,6 +22,10 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 	@Internal
 	public abstract ListProperty<String> getFromMinecraftVersions();
 
+	public void fromMinecraftVersion(String minecraftVersion) {
+		fromMinecraftVersions(minecraftVersion);
+	}
+
 	public void fromMinecraftVersions(String... minecraftVersions) {
 		getFromMinecraftVersions().set(Arrays.asList(minecraftVersions));
 	}
