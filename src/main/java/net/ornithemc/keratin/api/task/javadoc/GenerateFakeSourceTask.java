@@ -29,7 +29,7 @@ public abstract class GenerateFakeSourceTask extends MinecraftTask implements Ja
 			submit(
 				workQueue,
 				files.getMergedTinyV2NamedMappings(minecraftVersion.id()),
-				files.getNamedJar(minecraftVersion.id()),
+				files.getJavadocNamedJar(minecraftVersion.id()),
 				files.getFakeSourceDirectory(minecraftVersion.id()),
 				libraries,
 				classpath
@@ -39,7 +39,7 @@ public abstract class GenerateFakeSourceTask extends MinecraftTask implements Ja
 				submit(
 					workQueue,
 					files.getMergedTinyV2NamedMappings(minecraftVersion.client().id()),
-					files.getNamedJar(minecraftVersion.client().id()),
+					files.getJavadocNamedJar(minecraftVersion.client().id()),
 					files.getFakeSourceDirectory(minecraftVersion.client().id()),
 					libraries,
 					classpath
@@ -49,7 +49,7 @@ public abstract class GenerateFakeSourceTask extends MinecraftTask implements Ja
 				submit(
 					workQueue,
 					files.getMergedTinyV2NamedMappings(minecraftVersion.server().id()),
-					files.getNamedJar(minecraftVersion.server().id()),
+					files.getJavadocNamedJar(minecraftVersion.server().id()),
 					files.getFakeSourceDirectory(minecraftVersion.server().id()),
 					libraries,
 					classpath

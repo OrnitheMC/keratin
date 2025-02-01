@@ -692,7 +692,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				TaskProvider<?> mapMinecraftForJavadoc = tasks.register("mapMinecraftForJavadoc", MapMinecraftForJavadocTask.class, task -> {
 					task.dependsOn(mergeIntermediaryJars, buildMappings);
 				});
-				TaskProvider<?> genFakeSource = tasks.register("generakeFakeSource", GenerateFakeSourceTask.class, task -> {
+				TaskProvider<?> genFakeSource = tasks.register("generateFakeSource", GenerateFakeSourceTask.class, task -> {
 					task.dependsOn(buildMappings, mapMinecraftForJavadoc);
 				});
 
