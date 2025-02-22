@@ -22,6 +22,8 @@ public interface Processor {
 
 		Property<File> getSignaturePatchedJar();
 
+		Property<File> getPreenedJar();
+
 		Property<File> getNestsFile();
 
 		Property<File> getNestedJar();
@@ -30,7 +32,7 @@ public interface Processor {
 
 	}
 
-	abstract class ProcessMinecraft implements WorkAction<MinecraftProcessorParameters>, Exceptor, SignaturePatcher, Nester {
+	abstract class ProcessMinecraft implements WorkAction<MinecraftProcessorParameters>, Exceptor, SignaturePatcher, Preen, Nester {
 
 		@Override
 		public void execute() {
@@ -55,6 +57,15 @@ public interface Processor {
 					jarOut = getParameters().getSignaturePatchedJar().get();
 
 					signaturePatchJar(jarIn, jarOut, data);
+				}
+
+				data = null;
+
+				{
+					jarIn = jarOut;
+					jarOut = getParameters().getPreenedJar().get();
+
+					modifyMergedBridgeMethodsAccess(jarIn, jarOut);
 				}
 
 				data = getParameters().getNestsFile().getOrNull();

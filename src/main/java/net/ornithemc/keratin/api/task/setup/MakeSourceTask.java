@@ -19,11 +19,7 @@ public abstract class MakeSourceTask extends DecompileTask {
 		Project project = keratin.getProject();
 		OrnitheFilesAPI files = keratin.getFiles();
 
-		File sourceJar = minecraftVersion.canBeMerged()
-			? files.getNamedSourceMergedJar(minecraftVersion)
-			: minecraftVersion.hasClient()
-				? files.getNamedSourceClientJar(minecraftVersion)
-				: files.getNamedSourceServerJar(minecraftVersion);
+		File sourceJar = files.getProcessedNamedSourceJar(minecraftVersion);
 		File decompSrcDir = files.getDecompiledSourceDirectory(minecraftVersion);
 
 		submitJavaExecDecompileTask(

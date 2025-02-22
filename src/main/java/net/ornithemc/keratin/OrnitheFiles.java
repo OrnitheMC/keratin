@@ -69,6 +69,9 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Versioned<MinecraftVersion, File> signaturePatchedIntermediaryClientJar;
 	private final Versioned<MinecraftVersion, File> signaturePatchedIntermediaryServerJar;
 	private final Versioned<MinecraftVersion, File> signaturePatchedIntermediaryMergedJar;
+	private final Versioned<MinecraftVersion, File> preenedIntermediaryClientJar;
+	private final Versioned<MinecraftVersion, File> preenedIntermediaryServerJar;
+	private final Versioned<MinecraftVersion, File> preenedIntermediaryMergedJar;
 	private final Versioned<MinecraftVersion, File> nestedIntermediaryClientJar;
 	private final Versioned<MinecraftVersion, File> nestedIntermediaryServerJar;
 	private final Versioned<MinecraftVersion, File> nestedIntermediaryMergedJar;
@@ -147,6 +150,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Versioned<MinecraftVersion, File> namedSourceClientJar;
 	private final Versioned<MinecraftVersion, File> namedSourceServerJar;
 	private final Versioned<MinecraftVersion, File> namedSourceMergedJar;
+	private final Versioned<MinecraftVersion, File> processedNamedSourceJar;
 
 	private final Versioned<MinecraftVersion, File> setupClientIntermediaryMappings;
 	private final Versioned<MinecraftVersion, File> setupServerIntermediaryMappings;
@@ -370,6 +374,27 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 				} else {
 					return new File(getProcessedJarsCache(), "%s-sparrow+build.%d-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), build, getIntermediaryGen()));
 				}
+			}
+		});
+		this.preenedIntermediaryClientJar = new Versioned<>(minecraftVersion -> {
+			if (!minecraftVersion.hasClient() || minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else {
+				return new File(getProcessedJarsCache(), "%s-preened-intermediary-gen%d-client.jar".formatted(minecraftVersion.client().id(), getIntermediaryGen()));
+			}
+		});
+		this.preenedIntermediaryServerJar = new Versioned<>(minecraftVersion -> {
+			if (!minecraftVersion.hasServer() || minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("intermediary server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else {
+				return new File(getProcessedJarsCache(), "%s-preened-intermediary-gen%d-server.jar".formatted(minecraftVersion.server().id(), getIntermediaryGen()));
+			}
+		});
+		this.preenedIntermediaryMergedJar = new Versioned<>(minecraftVersion -> {
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
+			} else {
+				return new File(getProcessedJarsCache(), "%s-preened-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), getIntermediaryGen()));
 			}
 		});
 		this.nestedIntermediaryClientJar = new Versioned<>(minecraftVersion -> {
@@ -948,6 +973,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 				return new File(getLocalBuildCache(), "%s-named-source-merged.jar".formatted(minecraftVersion.id()));
 			}
 		});
+		this.processedNamedSourceJar = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-processed-named-source.jar".formatted(minecraftVersion.id())));
 
 		this.setupClientIntermediaryMappings = new Versioned<>(minecraftVersion -> {
 			if (!minecraftVersion.hasClient()) {
@@ -1453,6 +1479,26 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	}
 
 	@Override
+	public File getPreenedIntermediaryClientJar(MinecraftVersion minecraftVersion) {
+		return preenedIntermediaryClientJar.get(minecraftVersion);
+	}
+
+	@Override
+	public File getPreenedIntermediaryServerJar(MinecraftVersion minecraftVersion) {
+		return preenedIntermediaryServerJar.get(minecraftVersion);
+	}
+
+	@Override
+	public File getPreenedIntermediaryMergedJar(MinecraftVersion minecraftVersion) {
+		return preenedIntermediaryMergedJar.get(minecraftVersion);
+	}
+
+	@Override
+	public File getMainPreenedIntermediaryJar(MinecraftVersion minecraftVersion) {
+		return pickFileForPresentSides(minecraftVersion, preenedIntermediaryClientJar, preenedIntermediaryServerJar, preenedIntermediaryMergedJar);
+	}
+
+	@Override
 	public File getNestedIntermediaryClientJar(MinecraftVersion minecraftVersion) {
 		return nestedIntermediaryClientJar.get(minecraftVersion);
 	}
@@ -1805,6 +1851,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	@Override
 	public File getNamedSourceMergedJar(MinecraftVersion minecraftVersion) {
 		return namedSourceMergedJar.get(minecraftVersion);
+	}
+
+	@Override
+	public File getProcessedNamedSourceJar(MinecraftVersion minecraftVersion) {
+		return processedNamedSourceJar.get(minecraftVersion);
 	}
 
 	@Override

@@ -105,6 +105,7 @@ import net.ornithemc.keratin.api.task.setup.MakeSourceMappingsTask;
 import net.ornithemc.keratin.api.task.setup.MapSetupJarsTask;
 import net.ornithemc.keratin.api.task.setup.MapSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.MergeSourceJarsTask;
+import net.ornithemc.keratin.api.task.setup.ProcessSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.SetUpSourceTask;
 import net.ornithemc.keratin.matching.Matches;
 import net.ornithemc.keratin.util.Versioned;
@@ -773,9 +774,12 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				TaskProvider<?> mergeSourceJars = tasks.register("mergeSourceJars", MergeSourceJarsTask.class, task -> {
 					task.dependsOn(mapSourceJars);
 				});
+				TaskProvider<?> processSourceJars = tasks.register("processSourceJars", ProcessSourceJarsTask.class, task -> {
+					task.dependsOn(mergeSourceJars);
+				});
 
 				TaskProvider<?> makeSource = tasks.register("makeSource", MakeSourceTask.class, task -> {
-					task.dependsOn(mergeSourceJars);
+					task.dependsOn(processSourceJars);
 				});
 				TaskProvider<?> setUpSource = tasks.register("setUpSource", SetUpSourceTask.class, task -> {
 					task.dependsOn(makeSource);

@@ -97,6 +97,14 @@ public interface OrnitheFilesAPI {
 
 	File getMainSignaturePatchedIntermediaryJar(MinecraftVersion minecraftVersion);
 
+	File getPreenedIntermediaryClientJar(MinecraftVersion minecraftVersion);
+
+	File getPreenedIntermediaryServerJar(MinecraftVersion minecraftVersion);
+
+	File getPreenedIntermediaryMergedJar(MinecraftVersion minecraftVersion);
+
+	File getMainPreenedIntermediaryJar(MinecraftVersion minecraftVersion);
+
 	File getNestedIntermediaryClientJar(MinecraftVersion minecraftVersion);
 
 	File getNestedIntermediaryServerJar(MinecraftVersion minecraftVersion);
@@ -238,6 +246,8 @@ public interface OrnitheFilesAPI {
 	File getNamedSourceServerJar(MinecraftVersion minecraftVersion);
 
 	File getNamedSourceMergedJar(MinecraftVersion minecraftVersion);
+
+	File getProcessedNamedSourceJar(MinecraftVersion minecraftVersion);
 
 	File getSetupClientIntermediaryMappings(MinecraftVersion minecraftVersion);
 
