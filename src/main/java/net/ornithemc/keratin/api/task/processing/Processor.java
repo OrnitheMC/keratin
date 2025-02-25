@@ -96,6 +96,10 @@ public interface Processor {
 				jarIn = jarOut;
 				jarOut = getParameters().getOutputJar().get();
 
+				if (jarOut.exists()) {
+					jarOut.delete();
+				}
+
 				Files.copy(jarIn, jarOut);
 			} catch (Exception e) {
 				throw new RuntimeException("error while processing Minecraft", e);
