@@ -423,7 +423,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				configuration.setTransitive(true);
 			}).get();
 
-			dependencies.add(decompileClasspath.getName(), "org.vineflower:vineflower:1.10.1");
+			dependencies.add(decompileClasspath.getName(), "org.vineflower:vineflower:1.11.0");
 			dependencies.add(decompileClasspath.getName(), "net.fabricmc:cfr:0.0.9");
 			dependencies.add(enigmaRuntime.getName(), "net.ornithemc:enigma-swing:2.6.0");
 			dependencies.add(enigmaRuntime.getName(), "org.quiltmc:quilt-enigma-plugin:2.3.1");
@@ -434,7 +434,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			Configuration decompileClasspath = configurations.register(Configurations.DECOMPILE_CLASSPATH).get();
 
 			dependencies.add(Configurations.IMPLEMENTATION, "net.fabricmc:fabric-loader:0.15.11");
-			dependencies.add(decompileClasspath.getName(), "org.vineflower:vineflower:1.10.1");
+			dependencies.add(decompileClasspath.getName(), "org.vineflower:vineflower:1.11.0");
 		}
 
 		publications.getGroupId().convention(project.provider(() -> "net.ornithemc"));
