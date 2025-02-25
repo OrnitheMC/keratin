@@ -165,6 +165,8 @@ public interface OrnitheFilesAPI {
 
 	File getMergedTinyV2NamedMappings(String minecraftVersion);
 
+	File getCompressedMergedTinyV1NamedMappings(String minecraftVersion);
+
 	File getClientRavenFile(MinecraftVersion minecraftVersion);
 
 	File getServerRavenFile(MinecraftVersion minecraftVersion);

@@ -100,6 +100,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Versioned<String, File> tinyV2NamedMappings;
 	private final Versioned<String, File> mergedTinyV1NamedMappings;
 	private final Versioned<String, File> mergedTinyV2NamedMappings;
+	private final Versioned<String, File> compressedMergedTinyV1NamedMappings;
 
 	private final Versioned<MinecraftVersion, File> clientRavenFile;
 	private final Versioned<MinecraftVersion, File> serverRavenFile;
@@ -538,6 +539,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.tinyV2NamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-tiny-v2.tiny".formatted(minecraftVersion)));
 		this.mergedTinyV1NamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-merged-tiny-v1.tiny".formatted(minecraftVersion)));
 		this.mergedTinyV2NamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-merged-tiny-v2.tiny".formatted(minecraftVersion)));
+		this.compressedMergedTinyV1NamedMappings = new Versioned<>(minecraftVersion -> new File(getLocalBuildCache(), "%s-merged-tiny-v1.gz".formatted(minecraftVersion)));
 
 		this.clientRavenFile = new Versioned<>(minecraftVersion -> {
 			if (!minecraftVersion.hasClient()) {
@@ -1670,6 +1672,11 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	@Override
 	public File getMergedTinyV2NamedMappings(String minecraftVersion) {
 		return mergedTinyV2NamedMappings.get(minecraftVersion);
+	}
+
+	@Override
+	public File getCompressedMergedTinyV1NamedMappings(String minecraftVersion) {
+		return compressedMergedTinyV1NamedMappings.get(minecraftVersion);
 	}
 
 	@Override

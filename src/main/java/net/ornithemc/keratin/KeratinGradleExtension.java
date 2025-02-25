@@ -51,6 +51,7 @@ import net.ornithemc.keratin.api.task.build.BuildMappingsTask;
 import net.ornithemc.keratin.api.task.build.BuildProcessedMappingsTask;
 import net.ornithemc.keratin.api.task.build.CheckMappingsTask;
 import net.ornithemc.keratin.api.task.build.CompleteMappingsTask;
+import net.ornithemc.keratin.api.task.build.CompressMappingsTask;
 import net.ornithemc.keratin.api.task.build.PrepareBuildTask;
 import net.ornithemc.keratin.api.task.decompiling.DecompileMinecraftWithCfrTask;
 import net.ornithemc.keratin.api.task.decompiling.DecompileMinecraftWithVineflowerTask;
@@ -719,6 +720,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 						task.dependsOn(buildMappings);
 						task.configure(minecraftVersion, files.getMergedTinyV2NamedMappings(minecraftVersion), "%s-merged-tiny-v2.jar");
 					});
+					TaskProvider<?> compressTinyV1 = tasks.register("%s_compressTinyV1".formatted(minecraftVersion), CompressMappingsTask.class, task -> {
+						task.dependsOn(buildMappings);
+						task.getMappings().set(files.getMergedTinyV1NamedMappings(minecraftVersion));
+						task.getCompressedMappings().set(files.getCompressedMergedTinyV1NamedMappings(minecraftVersion));
+					});
 					TaskProvider<?> javadocJar = tasks.register("%s_javadocJar".formatted(minecraftVersion), Jar.class, task -> {
 						task.dependsOn(javadoc);
 						task.from(javadoc.get().getDestinationDir());
@@ -726,7 +732,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 						task.getDestinationDirectory().set(project.file("build/libs"));
 					});
 
-					tasks.getByName("build").dependsOn(mergedTinyV1Jar, tinyV2Jar, mergedTinyV2Jar, javadocJar);
+					tasks.getByName("build").dependsOn(mergedTinyV1Jar, tinyV2Jar, mergedTinyV2Jar, compressTinyV1, javadocJar);
 
 					MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
 						publication.setGroupId(this.publications.getGroupId().get());
@@ -739,6 +745,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 						});
 						publication.artifact(mergedTinyV2Jar, config -> {
 							config.setClassifier("mergedv2");
+						});
+						publication.artifact(compressTinyV1, config -> {
+							config.setClassifier("tiny"); // for backwards compat with gen1
 						});
 						publication.artifact(javadocJar, config -> {
 							config.setClassifier("javadoc");
