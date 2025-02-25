@@ -63,6 +63,9 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	private final Versioned<MinecraftVersion, File> intermediaryClientJar;
 	private final Versioned<MinecraftVersion, File> intermediaryServerJar;
 	private final Versioned<MinecraftVersion, File> intermediaryMergedJar;
+	private final Versioned<MinecraftVersion, File> lvtPatchedIntermediaryClientJar;
+	private final Versioned<MinecraftVersion, File> lvtPatchedIntermediaryServerJar;
+	private final Versioned<MinecraftVersion, File> lvtPatchedIntermediaryMergedJar;
 	private final Versioned<MinecraftVersion, File> exceptionsPatchedIntermediaryClientJar;
 	private final Versioned<MinecraftVersion, File> exceptionsPatchedIntermediaryServerJar;
 	private final Versioned<MinecraftVersion, File> exceptionsPatchedIntermediaryMergedJar;
@@ -284,6 +287,27 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 				throw new NoSuchFileException("intermediary jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
 			} else {
 				return new File(getMappedJarsCache(), "%s-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), getIntermediaryGen()));
+			}
+		});
+		this.lvtPatchedIntermediaryClientJar = new Versioned<>(minecraftVersion -> {
+			if (!minecraftVersion.hasClient() || minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else {
+				return new File(getProcessedJarsCache(), "%s-condor-intermediary-gen%d-client.jar".formatted(minecraftVersion.client().id(), getIntermediaryGen()));
+			}
+		});
+		this.lvtPatchedIntermediaryServerJar = new Versioned<>(minecraftVersion -> {
+			if (!minecraftVersion.hasServer() || minecraftVersion.hasClient()) {
+				throw new NoSuchFileException("intermediary server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else {
+				return new File(getProcessedJarsCache(), "%s-condor-intermediary-gen%d-server.jar".formatted(minecraftVersion.server().id(), getIntermediaryGen()));
+			}
+		});
+		this.lvtPatchedIntermediaryMergedJar = new Versioned<>(minecraftVersion -> {
+			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+				throw new NoSuchFileException("intermediary jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
+			} else {
+				return new File(getProcessedJarsCache(), "%s-condor-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), getIntermediaryGen()));
 			}
 		});
 		this.exceptionsPatchedIntermediaryClientJar = new Versioned<>(minecraftVersion -> {
@@ -1436,6 +1460,26 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 	@Override
 	public File getMainIntermediaryJar(MinecraftVersion minecraftVersion) {
 		return pickFileForPresentSides(minecraftVersion, intermediaryClientJar, intermediaryServerJar, intermediaryMergedJar);
+	}
+
+	@Override
+	public File getLvtPatchedIntermediaryClientJar(MinecraftVersion minecraftVersion) {
+		return lvtPatchedIntermediaryClientJar.get(minecraftVersion);
+	}
+
+	@Override
+	public File getLvtPatchedIntermediaryServerJar(MinecraftVersion minecraftVersion) {
+		return lvtPatchedIntermediaryServerJar.get(minecraftVersion);
+	}
+
+	@Override
+	public File getLvtPatchedIntermediaryMergedJar(MinecraftVersion minecraftVersion) {
+		return lvtPatchedIntermediaryMergedJar.get(minecraftVersion);
+	}
+
+	@Override
+	public File getMainLvtPatchedIntermediaryJar(MinecraftVersion minecraftVersion) {
+		return pickFileForPresentSides(minecraftVersion, lvtPatchedIntermediaryClientJar, lvtPatchedIntermediaryServerJar, lvtPatchedIntermediaryMergedJar);
 	}
 
 	@Override

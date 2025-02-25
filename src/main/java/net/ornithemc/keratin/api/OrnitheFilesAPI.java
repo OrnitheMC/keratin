@@ -81,6 +81,14 @@ public interface OrnitheFilesAPI {
 
 	File getMainIntermediaryJar(MinecraftVersion minecraftVersion);
 
+	File getLvtPatchedIntermediaryClientJar(MinecraftVersion minecraftVersion);
+
+	File getLvtPatchedIntermediaryServerJar(MinecraftVersion minecraftVersion);
+
+	File getLvtPatchedIntermediaryMergedJar(MinecraftVersion minecraftVersion);
+
+	File getMainLvtPatchedIntermediaryJar(MinecraftVersion minecraftVersion);
+
 	File getExceptionsPatchedIntermediaryClientJar(MinecraftVersion minecraftVersion);
 
 	File getExceptionsPatchedIntermediaryServerJar(MinecraftVersion minecraftVersion);

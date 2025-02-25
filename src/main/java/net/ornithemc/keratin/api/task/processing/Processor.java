@@ -1,7 +1,9 @@
 package net.ornithemc.keratin.api.task.processing;
 
 import java.io.File;
+import java.util.List;
 
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.workers.WorkAction;
 import org.gradle.workers.WorkParameters;
@@ -13,6 +15,10 @@ public interface Processor {
 	interface MinecraftProcessorParameters extends WorkParameters {
 
 		Property<File> getInputJar();
+
+		ListProperty<File> getLibraries();
+
+		Property<File> getLvtPatchedJar();
 
 		Property<File> getRavenFile();
 
@@ -32,7 +38,7 @@ public interface Processor {
 
 	}
 
-	abstract class ProcessMinecraft implements WorkAction<MinecraftProcessorParameters>, Exceptor, SignaturePatcher, Preen, Nester {
+	abstract class ProcessMinecraft implements WorkAction<MinecraftProcessorParameters>, Condor, Exceptor, SignaturePatcher, Preen, Nester {
 
 		@Override
 		public void execute() {
@@ -40,6 +46,16 @@ public interface Processor {
 				File data;
 				File jarIn;
 				File jarOut = getParameters().getInputJar().get();
+
+				data = null;
+
+				{
+					jarIn = jarOut;
+					jarOut = getParameters().getLvtPatchedJar().get();
+					List<File> libraries = getParameters().getLibraries().get();
+
+					lvtPatchJar(jarIn, jarOut, libraries);
+				}
 
 				data = getParameters().getRavenFile().getOrNull();
 
