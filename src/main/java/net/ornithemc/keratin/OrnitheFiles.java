@@ -218,7 +218,7 @@ public class OrnitheFiles implements OrnitheFilesAPI {
 		this.ravenBuildsCache = fileProperty(() -> this.project.file("raven-builds.json"));
 		this.sparrowBuildsCache = fileProperty(() -> this.project.file("sparrow-builds.json"));
 		this.nestsBuildsCache = fileProperty(() -> this.project.file("nests-builds.json"));
-		this.enigmaProfile = fileProperty(() -> this.project.file("enigma_profile.json"));
+		this.enigmaProfile = fileProperty(() -> this.project.file("enigma/enigma_profile.json"));
 		this.mappingsDir = fileProperty(() -> this.project.file("mappings"));
 		this.exceptionsDir = fileProperty(() -> this.project.file("exceptions"));
 		this.signaturesDir = fileProperty(() -> this.project.file("signatures"));
