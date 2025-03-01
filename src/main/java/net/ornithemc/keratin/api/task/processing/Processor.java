@@ -18,6 +18,8 @@ public interface Processor {
 
 		ListProperty<File> getLibraries();
 
+		Property<Boolean> getObfuscateVariableNames();
+
 		Property<File> getLvtPatchedJar();
 
 		Property<File> getRavenFile();
@@ -53,8 +55,9 @@ public interface Processor {
 					jarIn = jarOut;
 					jarOut = getParameters().getLvtPatchedJar().get();
 					List<File> libraries = getParameters().getLibraries().get();
+					boolean obfuscateNames = getParameters().getObfuscateVariableNames().get();
 
-					lvtPatchJar(jarIn, jarOut, libraries);
+					lvtPatchJar(jarIn, jarOut, libraries, obfuscateNames);
 				}
 
 				data = getParameters().getRavenFile().getOrNull();

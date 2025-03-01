@@ -98,7 +98,8 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 				lvtPatchJar(
 					jarIn,
 					jarOut,
-					libraries
+					libraries,
+					true
 				);
 
 				jarIn = jarOut;

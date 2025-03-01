@@ -1,5 +1,7 @@
 package net.ornithemc.keratin.api.task.processing;
 
+import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Internal;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
@@ -9,6 +11,9 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 
 public abstract class ProcessMinecraftTask extends MinecraftTask implements Processor {
 
+	@Internal
+	public abstract Property<Boolean> getObfuscateVariableNames();
+
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
@@ -17,6 +22,7 @@ public abstract class ProcessMinecraftTask extends MinecraftTask implements Proc
 		workQueue.submit(ProcessMinecraft.class, parameters -> {
 			parameters.getInputJar().set(files.getMainIntermediaryJar(minecraftVersion));
 			parameters.getLibraries().set(files.getLibraries(minecraftVersion));
+			parameters.getObfuscateVariableNames().set(getObfuscateVariableNames().get());
 			parameters.getLvtPatchedJar().set(files.getMainLvtPatchedIntermediaryJar(minecraftVersion));
 			parameters.getRavenFile().set(files.getMainIntermediaryRavenFile(minecraftVersion));
 			parameters.getExceptionsPatchedJar().set(files.getMainExceptionsPatchedIntermediaryJar(minecraftVersion));

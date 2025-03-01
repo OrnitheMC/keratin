@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -616,6 +617,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 				TaskProvider<?> processMinecraft = tasks.register("processMinecraft", ProcessMinecraftTask.class, task -> {
 					task.dependsOn(mergeIntermediaryJars, mergeIntermediaryRaven, mergeIntermediarySparrow, mergeIntermediaryNests);
+					task.getObfuscateVariableNames().set(false);
 				});
 				TaskProvider<?> loadMappings = tasks.register("loadMappings", LoadMappingsFromGraphTask.class, task -> {
 					task.dependsOn(processMinecraft);
@@ -674,8 +676,13 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.getTargetNamespace().set(Mapper.NAMED);
 				});
 
+				TaskProvider<?> processMinecraftForDecompile = tasks.register("processMinecraftForDecompile", ProcessMinecraftTask.class, task -> {
+					task.dependsOn(mergeIntermediaryJars, mergeIntermediaryRaven, mergeIntermediarySparrow, mergeIntermediaryNests);
+					task.getObfuscateVariableNames().set(true);
+				});
+
 				TaskProvider<?> buildProcessedMappings = tasks.register("buildProcessedMappings", BuildProcessedMappingsTask.class, task -> {
-					task.dependsOn(processMinecraft);
+					task.dependsOn(processMinecraftForDecompile);
 				});
 
 				TaskProvider<?> mapProcessedMinecraftToNamed = tasks.register("mapProcessedMinecraftToNamed", MapProcessedMinecraftTask.class, task -> {

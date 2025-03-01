@@ -6,16 +6,26 @@ import java.util.List;
 
 import com.google.common.io.Files;
 
+import net.ornithemc.condor.Options;
+
 public interface Condor {
 
-	default void lvtPatchJar(File input, File output, List<File> libraries) throws IOException {
-		_lvtPatchJar(input, output, libraries);
+	default void lvtPatchJar(File input, File output, List<File> libraries, boolean obfuscateNames) throws IOException {
+		_lvtPatchJar(input, output, libraries, obfuscateNames);
 	}
 
-	static void _lvtPatchJar(File input, File output, List<File> libraries) throws IOException {
+	static void _lvtPatchJar(File input, File output, List<File> libraries, boolean obfuscateNames) throws IOException {
 		if (!input.equals(output)) {
 			Files.copy(input, output);
 		}
-		net.ornithemc.condor.Condor.run(output.toPath(), libraries.stream().map(File::toPath).toList());
+
+		Options.Builder options = Options.builder().removeInvalidEntries();
+		if (obfuscateNames) {
+			options.obfuscateNames();
+		} else {
+			options.keepParameterNames();
+		}
+
+		net.ornithemc.condor.Condor.run(output.toPath(), libraries.stream().map(File::toPath).toList(), options.build());
 	}
 }
