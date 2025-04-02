@@ -21,17 +21,17 @@ public interface OrnitheFilesAPI {
 
 	File getMappingsCache();
 
-	File getRavenCache();
+	File getExceptionsCache();
 
-	File getSparrowCache();
+	File getSignaturesCache();
 
 	File getNestsCache();
 
-	File getFeatherBuildsCache();
+	File getNamedMappingsBuildsCache();
 
-	File getRavenBuildsCache();
+	File getExceptionsBuildsCache();
 
-	File getSparrowBuildsCache();
+	File getSignaturesBuildsCache();
 
 	File getNestsBuildsCache();
 
@@ -135,6 +135,12 @@ public interface OrnitheFilesAPI {
 
 	File getJavadocNamedJar(String minecraftVersion);
 
+	File getClientIntermediaryMappingsJar(MinecraftVersion minecraftVersion);
+
+	File getServerIntermediaryMappingsJar(MinecraftVersion minecraftVersion);
+
+	File getMergedIntermediaryMappingsJar(MinecraftVersion minecraftVersion);
+
 	File getClientIntermediaryMappings(MinecraftVersion minecraftVersion);
 
 	File getServerIntermediaryMappings(MinecraftVersion minecraftVersion);
@@ -167,59 +173,79 @@ public interface OrnitheFilesAPI {
 
 	File getCompressedMergedTinyV1NamedMappings(String minecraftVersion);
 
-	File getClientRavenFile(MinecraftVersion minecraftVersion);
+	File getClientExceptionsJar(MinecraftVersion minecraftVersion);
 
-	File getServerRavenFile(MinecraftVersion minecraftVersion);
+	File getServerExceptionsJar(MinecraftVersion minecraftVersion);
 
-	File getMergedRavenFile(MinecraftVersion minecraftVersion);
+	File getMergedExceptionsJar(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryClientRavenFile(MinecraftVersion minecraftVersion);
+	File getClientExceptionsFile(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryServerRavenFile(MinecraftVersion minecraftVersion);
+	File getServerExceptionsFile(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryMergedRavenFile(MinecraftVersion minecraftVersion);
+	File getMergedExceptionsFile(MinecraftVersion minecraftVersion);
 
-	File getMainIntermediaryRavenFile(MinecraftVersion minecraftVersion);
+	File getIntermediaryClientExceptionsFile(MinecraftVersion minecraftVersion);
 
-	File getNamedRavenFile(MinecraftVersion minecraftVersion);
+	File getIntermediaryServerExceptionsFile(MinecraftVersion minecraftVersion);
 
-	File getClientSparrowFile(MinecraftVersion minecraftVersion);
+	File getIntermediaryMergedExceptionsFile(MinecraftVersion minecraftVersion);
 
-	File getServerSparrowFile(MinecraftVersion minecraftVersion);
+	File getMainIntermediaryExceptionsFile(MinecraftVersion minecraftVersion);
 
-	File getMergedSparrowFile(MinecraftVersion minecraftVersion);
+	File getNamedExceptionsFile(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryClientSparrowFile(MinecraftVersion minecraftVersion);
+	File getClientSignaturesJar(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryServerSparrowFile(MinecraftVersion minecraftVersion);
+	File getServerSignaturesJar(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryMergedSparrowFile(MinecraftVersion minecraftVersion);
+	File getMergedSignaturesJar(MinecraftVersion minecraftVersion);
 
-	File getMainIntermediarySparrowFile(MinecraftVersion minecraftVersion);
+	File getClientSignaturesFile(MinecraftVersion minecraftVersion);
 
-	File getNamedSparrowFile(MinecraftVersion minecraftVersion);
+	File getServerSignaturesFile(MinecraftVersion minecraftVersion);
 
-	File getClientNests(MinecraftVersion minecraftVersion);
+	File getMergedSignaturesFile(MinecraftVersion minecraftVersion);
 
-	File getServerNests(MinecraftVersion minecraftVersion);
+	File getIntermediaryClientSignaturesFile(MinecraftVersion minecraftVersion);
 
-	File getMergedNests(MinecraftVersion minecraftVersion);
+	File getIntermediaryServerSignaturesFile(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryClientNests(MinecraftVersion minecraftVersion);
+	File getIntermediaryMergedSignaturesFile(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryServerNests(MinecraftVersion minecraftVersion);
+	File getMainIntermediarySignaturesFile(MinecraftVersion minecraftVersion);
 
-	File getIntermediaryMergedNests(MinecraftVersion minecraftVersion);
+	File getNamedSignaturesFile(MinecraftVersion minecraftVersion);
 
-	File getMainIntermediaryNests(MinecraftVersion minecraftVersion);
+	File getClientNestsJar(MinecraftVersion minecraftVersion);
 
-	File getNamedNests(MinecraftVersion minecraftVersion);
+	File getServerNestsJar(MinecraftVersion minecraftVersion);
+
+	File getMergedNestsJar(MinecraftVersion minecraftVersion);
+
+	File getClientNestsFile(MinecraftVersion minecraftVersion);
+
+	File getServerNestsFile(MinecraftVersion minecraftVersion);
+
+	File getMergedNestsFile(MinecraftVersion minecraftVersion);
+
+	File getIntermediaryClientNestsFile(MinecraftVersion minecraftVersion);
+
+	File getIntermediaryServerNestsFile(MinecraftVersion minecraftVersion);
+
+	File getIntermediaryMergedNestsFile(MinecraftVersion minecraftVersion);
+
+	File getMainIntermediaryNestsFile(MinecraftVersion minecraftVersion);
+
+	File getNamedNestsFile(MinecraftVersion minecraftVersion);
 
 	File getIntermediaryFile(String minecraftVersion);
 
 	File getIntermediaryV2File(String minecraftVersion);
 
-	File getFeatherMappings(String minecraftVersion);
+	File getNamedMappingsJar(String minecraftVersion);
+
+	File getNamedMappingsFile(String minecraftVersion);
 
 	File getClientExceptions(MinecraftVersion minecraftVersion);
 

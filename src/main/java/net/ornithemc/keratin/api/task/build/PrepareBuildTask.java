@@ -36,7 +36,7 @@ public abstract class PrepareBuildTask extends MinecraftTask implements Mappings
 		workQueue.submit(PrepareBuild.class, parameters -> {
 			parameters.getMinecraftVersion().set(minecraftVersion.id());
 			parameters.getGraphDirectory().set(files.getMappingsDirectory());
-			parameters.getNests().set(files.getMainIntermediaryNests(minecraftVersion));
+			parameters.getNests().set(files.getMainIntermediaryNestsFile(minecraftVersion));
 			parameters.getProcessedOutput().set(files.getProcessedNamedMappings(minecraftVersion));
 			parameters.getOutput().set(files.getNamedMappings(minecraftVersion));
 		});

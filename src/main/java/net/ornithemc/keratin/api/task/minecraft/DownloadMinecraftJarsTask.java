@@ -16,23 +16,31 @@ public abstract class DownloadMinecraftJarsTask extends MinecraftTask implements
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
 
+		boolean minecraftJarsChanged = false;
+
 		if (minecraftVersion.hasClient()) {
 			Download download = minecraftVersion.client().downloads().client();
 
-			download(
+			minecraftJarsChanged |= download(
 				download.url(),
 				download.sha1(),
-				files.getClientJar(minecraftVersion)
+				files.getClientJar(minecraftVersion),
+				keratin.isCacheInvalid()
 			);
 		}
 		if (minecraftVersion.hasServer()) {
 			Download download = minecraftVersion.server().downloads().server();
 
-			download(
+			minecraftJarsChanged |= download(
 				download.url(),
 				download.sha1(),
-				files.getServerJar(minecraftVersion)
+				files.getServerJar(minecraftVersion),
+				keratin.isCacheInvalid()
 			);
+		}
+
+		if (minecraftJarsChanged) {
+			keratin.invalidateCache();
 		}
 	}
 }

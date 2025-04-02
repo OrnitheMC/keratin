@@ -19,21 +19,21 @@ public abstract class MakeSetupJarsTask extends MinecraftTask implements Nester 
 			workQueue.submit(NestJar.class, parameters -> {
 				parameters.getInputJar().set(files.getMergedJar(minecraftVersion));
 				parameters.getOutputJar().set(files.getSetupMergedJar(minecraftVersion));
-				parameters.getNestsFile().set(files.getMergedNests(minecraftVersion));
+				parameters.getNestsFile().set(files.getMergedNestsFile(minecraftVersion));
 			});
 		} else {
 			if (minecraftVersion.hasClient()) {
 				workQueue.submit(NestJar.class, parameters -> {
 					parameters.getInputJar().set(files.getClientJar(minecraftVersion));
 					parameters.getOutputJar().set(files.getSetupClientJar(minecraftVersion));
-					parameters.getNestsFile().set(files.getClientNests(minecraftVersion));
+					parameters.getNestsFile().set(files.getClientNestsFile(minecraftVersion));
 				});
 			}
 			if (minecraftVersion.hasServer()) {
 				workQueue.submit(NestJar.class, parameters -> {
 					parameters.getInputJar().set(files.getServerJar(minecraftVersion));
 					parameters.getOutputJar().set(files.getSetupServerJar(minecraftVersion));
-					parameters.getNestsFile().set(files.getServerNests(minecraftVersion));
+					parameters.getNestsFile().set(files.getServerNestsFile(minecraftVersion));
 				});
 			}
 		}

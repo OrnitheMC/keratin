@@ -63,6 +63,13 @@ public interface JarSplitter {
 			File merged = getParameters().getMerged().get();
 
 			try {
+				if (client.exists()) {
+					client.delete();
+				}
+				if (server.exists()) {
+					server.delete();
+				}
+
 				splitJar(client, server, merged);
 			} catch (IOException e) {
 				throw new UncheckedIOException("error while running splitter", e);

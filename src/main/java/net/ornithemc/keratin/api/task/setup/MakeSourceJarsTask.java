@@ -35,7 +35,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 				parameters.getLibraries().set(files.getLibraries(minecraftVersion));
 				parameters.getExceptions().set(files.getSetupMergedExceptions(minecraftVersion));
 				parameters.getSignatures().set(files.getSetupMergedSignatures(minecraftVersion));
-				parameters.getNests().set(files.getMergedNests(minecraftVersion));
+				parameters.getNests().set(files.getMergedNestsFile(minecraftVersion));
 			});
 		} else {
 			if (minecraftVersion.hasClient()) {
@@ -45,7 +45,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
 					parameters.getExceptions().set(files.getSetupClientExceptions(minecraftVersion));
 					parameters.getSignatures().set(files.getSetupClientSignatures(minecraftVersion));
-					parameters.getNests().set(files.getClientNests(minecraftVersion));
+					parameters.getNests().set(files.getClientNestsFile(minecraftVersion));
 				});
 			}
 			if (minecraftVersion.hasServer()) {
@@ -55,7 +55,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
 					parameters.getExceptions().set(files.getSetupServerExceptions(minecraftVersion));
 					parameters.getSignatures().set(files.getSetupServerSignatures(minecraftVersion));
-					parameters.getNests().set(files.getServerNests(minecraftVersion));
+					parameters.getNests().set(files.getServerNestsFile(minecraftVersion));
 				});
 			}
 		}

@@ -1,11 +1,11 @@
 package net.ornithemc.keratin.api.task.generation;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 import org.gradle.api.Project;
 import org.gradle.workers.WorkQueue;
-
-import com.google.common.io.Files;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
@@ -23,23 +23,28 @@ public abstract class MakeGeneratedJarsTask extends MinecraftTask {
 		File builtJar = project.file("build/libs/" + project.getName() + ".jar");
 
 		if (minecraftVersion.canBeMerged()) {
-			Files.copy(
+			copyGeneratedJar(
 				builtJar,
 				files.getNamedGeneratedMergedJar(minecraftVersion)
 			);
 		} else {
 			if (minecraftVersion.hasClient()) {
-				Files.copy(
+				copyGeneratedJar(
 					builtJar,
 					files.getNamedGeneratedClientJar(minecraftVersion)
 				);
 			}
 			if (minecraftVersion.hasServer()) {
-				Files.copy(
+				copyGeneratedJar(
 					builtJar,
 					files.getNamedGeneratedServerJar(minecraftVersion)
 				);
 			}
 		}
+	}
+
+	private void copyGeneratedJar(File from, File to) throws IOException {
+		Files.deleteIfExists(to.toPath());
+		Files.copy(from.toPath(), to.toPath());
 	}
 }

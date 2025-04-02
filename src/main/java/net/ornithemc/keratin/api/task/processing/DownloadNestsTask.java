@@ -4,11 +4,11 @@ import java.io.File;
 
 import org.gradle.workers.WorkQueue;
 
-import net.ornithemc.keratin.Constants;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
@@ -20,24 +20,31 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
+		MultipleBuildsMavenArtifacts nests = keratin.getNestsArtifacts();
+
+		boolean nestsChanged = false;
 
 		if (minecraftVersion.hasSharedObfuscation()) {
 			int build = keratin.getNestsBuild(minecraftVersion, GameSide.MERGED);
 
 			if (build > 0) {
-				File output = minecraftVersion.hasClient() && minecraftVersion.hasServer()
-					? files.getMergedNests(minecraftVersion)
+				File outputJar = minecraftVersion.hasClient() && minecraftVersion.hasServer()
+					? files.getMergedNestsJar(minecraftVersion)
 					: minecraftVersion.hasClient()
-						? files.getClientNests(minecraftVersion)
-						: files.getServerNests(minecraftVersion);
+						? files.getClientNestsJar(minecraftVersion)
+						: files.getServerNestsJar(minecraftVersion);
+				File output = minecraftVersion.hasClient() && minecraftVersion.hasServer()
+					? files.getMergedNestsFile(minecraftVersion)
+					: minecraftVersion.hasClient()
+						? files.getClientNestsFile(minecraftVersion)
+						: files.getServerNestsFile(minecraftVersion);
 
-				downloadAndExtract(
-					Constants.nestsUrl(
-						minecraftVersion.id(),
-						GameSide.MERGED,
-						build),
+				nestsChanged |= downloadAndExtract(
+					nests.get(minecraftVersion.key(GameSide.MERGED), build),
 					PATH_IN_JAR,
-					output
+					outputJar,
+					output,
+					keratin.isCacheInvalid()
 				);
 			}
 		} else {
@@ -45,15 +52,12 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 				int build = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
 
 				if (build > 0) {
-					File output = files.getClientNests(minecraftVersion);
-
-					downloadAndExtract(
-						Constants.nestsUrl(
-							minecraftVersion.client().id(),
-							minecraftVersion.hasSharedVersioning() ? GameSide.CLIENT : GameSide.MERGED,
-							build),
+					nestsChanged |= downloadAndExtract(
+						nests.get(minecraftVersion.key(GameSide.CLIENT), build),
 						PATH_IN_JAR,
-						output
+						files.getClientNestsJar(minecraftVersion),
+						files.getClientNestsFile(minecraftVersion),
+						keratin.isCacheInvalid()
 					);
 				}
 			}
@@ -61,18 +65,19 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 				int build = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
 
 				if (build > 0) {
-					File output = files.getServerNests(minecraftVersion);
-
-					downloadAndExtract(
-						Constants.nestsUrl(
-							minecraftVersion.server().id(),
-							minecraftVersion.hasSharedVersioning() ? GameSide.SERVER : GameSide.MERGED,
-							build),
+					nestsChanged |= downloadAndExtract(
+						nests.get(minecraftVersion.key(GameSide.SERVER), build),
 						PATH_IN_JAR,
-						output
+						files.getServerNestsJar(minecraftVersion),
+						files.getServerNestsFile(minecraftVersion),
+						keratin.isCacheInvalid()
 					);
 				}
 			}
+		}
+
+		if (nestsChanged) {
+			keratin.invalidateCache();
 		}
 	}
 }

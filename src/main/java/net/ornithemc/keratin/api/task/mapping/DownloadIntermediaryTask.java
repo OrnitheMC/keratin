@@ -2,10 +2,10 @@ package net.ornithemc.keratin.api.task.mapping;
 
 import org.gradle.workers.WorkQueue;
 
-import net.ornithemc.keratin.Constants;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.api.maven.SingleBuildMavenArtifacts;
 import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
@@ -17,30 +17,41 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		OrnitheFilesAPI files = keratin.getFiles();
+		SingleBuildMavenArtifacts intermediary = keratin.getIntermediaryArtifacts();
 
-		int intermediaryGen = keratin.getIntermediaryGen().get();
+		boolean intermediaryChanged = false;
 
 		if (minecraftVersion.hasSharedVersioning()) {
-			downloadAndExtract(
-				Constants.calamusGen2Url(minecraftVersion.id(), intermediaryGen),
+			intermediaryChanged |= downloadAndExtract(
+				intermediary.get(minecraftVersion.id()),
 				PATH_IN_JAR,
-				files.getMergedIntermediaryMappings(minecraftVersion)
+				files.getMergedIntermediaryMappingsJar(minecraftVersion),
+				files.getMergedIntermediaryMappings(minecraftVersion),
+				keratin.isCacheInvalid()
 			);
 		} else {
 			if (minecraftVersion.hasClient()) {
-				downloadAndExtract(
-					Constants.calamusGen2Url(minecraftVersion.client().id(), intermediaryGen),
+				intermediaryChanged |= downloadAndExtract(
+					intermediary.get(minecraftVersion.client().id()),
 					PATH_IN_JAR,
-					files.getClientIntermediaryMappings(minecraftVersion)
+					files.getClientIntermediaryMappingsJar(minecraftVersion),
+					files.getClientIntermediaryMappings(minecraftVersion),
+					keratin.isCacheInvalid()
 				);
 			}
 			if (minecraftVersion.hasServer()) {
-				downloadAndExtract(
-					Constants.calamusGen2Url(minecraftVersion.server().id(), intermediaryGen),
+				intermediaryChanged |= downloadAndExtract(
+					intermediary.get(minecraftVersion.server().id()),
 					PATH_IN_JAR,
-					files.getServerIntermediaryMappings(minecraftVersion)
+					files.getServerIntermediaryMappingsJar(minecraftVersion),
+					files.getServerIntermediaryMappings(minecraftVersion),
+					keratin.isCacheInvalid()
 				);
 			}
+		}
+
+		if (intermediaryChanged) {
+			keratin.invalidateCache();
 		}
 	}
 }

@@ -21,7 +21,7 @@ public abstract class MakeGeneratedSignaturesTask extends MinecraftTask implemen
 		if (minecraftVersion.hasSharedObfuscation()) {
 			File jar = files.getGeneratedMergedJar(minecraftVersion);
 			File sigs = files.getGeneratedMergedSignatures(minecraftVersion);
-			File nests = files.getMergedNests(minecraftVersion);
+			File nests = files.getMergedNestsFile(minecraftVersion);
 
 			extractSignatures(
 				jar,
@@ -38,7 +38,7 @@ public abstract class MakeGeneratedSignaturesTask extends MinecraftTask implemen
 			if (minecraftVersion.hasClient()) {
 				File jar = files.getGeneratedClientJar(minecraftVersion);
 				File sigs = files.getGeneratedClientSignatures(minecraftVersion);
-				File nests = files.getClientNests(minecraftVersion);
+				File nests = files.getClientNestsFile(minecraftVersion);
 
 				extractSignatures(
 					jar,
@@ -55,7 +55,7 @@ public abstract class MakeGeneratedSignaturesTask extends MinecraftTask implemen
 			if (minecraftVersion.hasServer()) {
 				File jar = files.getGeneratedServerJar(minecraftVersion);
 				File sigs = files.getGeneratedServerSignatures(minecraftVersion);
-				File nests = files.getServerNests(minecraftVersion);
+				File nests = files.getServerNestsFile(minecraftVersion);
 
 				extractSignatures(
 					jar,

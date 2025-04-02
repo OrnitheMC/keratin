@@ -17,6 +17,7 @@ import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.fabricmc.stitch.merge.JarMerger;
 
+import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.task.TaskAware;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
 import net.ornithemc.mappingutils.MappingUtils;
@@ -24,6 +25,8 @@ import net.ornithemc.mappingutils.MappingUtils;
 public interface Merger extends TaskAware {
 
 	interface MergerParameters extends WorkParameters {
+
+		Property<Boolean> getOverwrite();
 
 		Property<File> getClient();
 
@@ -37,11 +40,16 @@ public interface Merger extends TaskAware {
 
 		@Override
 		public void execute() {
+			boolean overwrite = getParameters().getOverwrite().get();
 			File client = getParameters().getClient().get();
 			File server = getParameters().getServer().get();
 			File merged = getParameters().getMerged().get();
 
 			try {
+				if (KeratinGradleExtension.validateOutput(merged, overwrite)) {
+					return;
+				}
+
 				run(client, server, merged);
 			} catch (IOException e) {
 				throw new UncheckedIOException("error while running merger", e);
@@ -75,19 +83,19 @@ public interface Merger extends TaskAware {
 		}
 	}
 
-	abstract class MergeRaven extends MergeAction {
+	abstract class MergeExceptions extends MergeAction {
 
 		@Override
 		protected void run(File client, File server, File merged) throws IOException {
-			Merger._mergeRaven(client, server, merged);
+			Merger._mergeExceptions(client, server, merged);
 		}
 	}
 
-	abstract class MergeSparrow extends MergeAction {
+	abstract class MergeSignatures extends MergeAction {
 
 		@Override
 		protected void run(File client, File server, File merged) throws IOException {
-			Merger._mergeSparrow(client, server, merged);
+			Merger._mergeSignatures(client, server, merged);
 		}
 	}
 
@@ -109,19 +117,19 @@ public interface Merger extends TaskAware {
 		}
 	}
 
-	default void mergeRaven(File client, File server, File merged) throws IOException {
-		_mergeRaven(client, server, merged);
+	default void mergeExceptions(File client, File server, File merged) throws IOException {
+		_mergeExceptions(client, server, merged);
 	}
 
-	static void _mergeRaven(File client, File server, File merged) throws IOException {
+	static void _mergeExceptions(File client, File server, File merged) throws IOException {
 		MappingUtils.mergeExceptions(client.toPath(), server.toPath(), merged.toPath());
 	}
 
-	default void mergeSparrow(File client, File server, File merged) throws IOException {
-		_mergeSparrow(client, server, merged);
+	default void mergeSignatures(File client, File server, File merged) throws IOException {
+		_mergeSignatures(client, server, merged);
 	}
 
-	static void _mergeSparrow(File client, File server, File merged) throws IOException {
+	static void _mergeSignatures(File client, File server, File merged) throws IOException {
 		MappingUtils.mergeSignatures(client.toPath(), server.toPath(), merged.toPath());
 	}
 

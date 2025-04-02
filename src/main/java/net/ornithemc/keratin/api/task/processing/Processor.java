@@ -22,11 +22,11 @@ public interface Processor {
 
 		Property<File> getLvtPatchedJar();
 
-		Property<File> getRavenFile();
+		Property<File> getExceptionsFile();
 
 		Property<File> getExceptionsPatchedJar();
 
-		Property<File> getSparrowFile();
+		Property<File> getSignaturesFile();
 
 		Property<File> getSignaturePatchedJar();
 
@@ -60,7 +60,7 @@ public interface Processor {
 					lvtPatchJar(jarIn, jarOut, libraries, obfuscateNames);
 				}
 
-				data = getParameters().getRavenFile().getOrNull();
+				data = getParameters().getExceptionsFile().getOrNull();
 
 				if (data != null) {
 					jarIn = jarOut;
@@ -69,7 +69,7 @@ public interface Processor {
 					exceptionsPatchJar(jarIn, jarOut, data);
 				}
 
-				data = getParameters().getSparrowFile().getOrNull();
+				data = getParameters().getSignaturesFile().getOrNull();
 
 				if (data != null) {
 					jarIn = jarOut;

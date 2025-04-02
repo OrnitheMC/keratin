@@ -25,6 +25,7 @@ public abstract class FillIntermediaryTask extends MinecraftTask {
 
 		if (minecraftVersion.hasSharedObfuscation()) {
 			workQueue.submit(FillIntermediary.class, parameters -> {
+				parameters.getOverwrite().set(keratin.isCacheInvalid());
 				parameters.getInputMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
 				parameters.getOutputMappings().set(files.getFilledMergedIntermediaryMappings(minecraftVersion));
 				parameters.getJar().set(files.getMergedJar(minecraftVersion));
@@ -33,6 +34,7 @@ public abstract class FillIntermediaryTask extends MinecraftTask {
 		} else {
 			if (minecraftVersion.hasClient()) {
 				workQueue.submit(FillIntermediary.class, parameters -> {
+					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getInputMappings().set(files.getClientIntermediaryMappings(minecraftVersion));
 					parameters.getOutputMappings().set(files.getFilledClientIntermediaryMappings(minecraftVersion));
 					parameters.getJar().set(files.getClientJar(minecraftVersion));
@@ -41,6 +43,7 @@ public abstract class FillIntermediaryTask extends MinecraftTask {
 			}
 			if (minecraftVersion.hasServer()) {
 				workQueue.submit(FillIntermediary.class, parameters -> {
+					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getInputMappings().set(files.getServerIntermediaryMappings(minecraftVersion));
 					parameters.getOutputMappings().set(files.getFilledServerIntermediaryMappings(minecraftVersion));
 					parameters.getJar().set(files.getServerJar(minecraftVersion));
@@ -51,6 +54,8 @@ public abstract class FillIntermediaryTask extends MinecraftTask {
 	}
 
 	public interface FillIntermediaryParameters extends WorkParameters {
+
+		Property<Boolean> getOverwrite();
 
 		Property<File> getInputMappings();
 
@@ -66,18 +71,23 @@ public abstract class FillIntermediaryTask extends MinecraftTask {
 
 		@Override
 		public void execute() {
+			boolean overwrite = getParameters().getOverwrite().get();
 			File jar = getParameters().getJar().get();
 			Collection<File> libraries = getParameters().getLibraries().get();
 			File input = getParameters().getInputMappings().get();
 			File output = getParameters().getOutputMappings().get();
 
 			try {
+				if (KeratinGradleExtension.validateOutput(output, overwrite)) {
+					return;
+				}
+
 				fillMappings(
 					input,
 					output,
 					jar,
 					libraries,
-					"intermediary"
+					Mapper.INTERMEDIARY
 				);
 			} catch (IOException e) {
 				throw new RuntimeException("error while filling in intermediary mappings", e);

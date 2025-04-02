@@ -15,6 +15,7 @@ import net.fabricmc.tinyremapper.OutputConsumerPath;
 import net.fabricmc.tinyremapper.TinyRemapper;
 import net.fabricmc.tinyremapper.TinyUtils;
 
+import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.task.TaskAware;
 import net.ornithemc.mappingutils.MappingUtils;
 import net.ornithemc.mappingutils.io.Format;
@@ -28,6 +29,8 @@ public interface Mapper extends TaskAware {
 	static String NAMED = "named";
 
 	interface MapperParameters extends WorkParameters {
+
+		Property<Boolean> getOverwrite();
 
 		Property<Boolean> getBrokenInnerClasses();
 
@@ -49,16 +52,21 @@ public interface Mapper extends TaskAware {
 
 		@Override
 		public void execute() {
+			boolean overwrite = getParameters().getOverwrite().get();
+			File input = getParameters().getInput().get();
+			File output = getParameters().getOutput().get();
+			File mappings = getParameters().getMappings().get();
+
 			try {
+				if (KeratinGradleExtension.validateOutput(output, overwrite)) {
+					return;
+				}
+
 				if (getParameters().getBrokenInnerClasses().isPresent()) {
 					MappingUtils.parseInnerClasses = !getParameters().getBrokenInnerClasses().get();
 				}
 
-				run(
-					getParameters().getInput().get(),
-					getParameters().getOutput().get(),
-					getParameters().getMappings().get()
-				);
+				run(input, output, mappings);
 			} catch (IOException e) {
 				throw new UncheckedIOException("error while running mapper", e);
 			} finally {
@@ -82,19 +90,19 @@ public interface Mapper extends TaskAware {
 		}
 	}
 
-	abstract class MapRaven extends MapperAction {
+	abstract class MapExceptions extends MapperAction {
 
 		@Override
 		void run(File input, File output, File mappings) throws IOException {
-			Mapper._mapRaven(input, output, mappings);
+			Mapper._mapExceptions(input, output, mappings);
 		}
 	}
 
-	abstract class MapSparrow extends MapperAction {
+	abstract class MapSignatures extends MapperAction {
 
 		@Override
 		void run(File input, File output, File mappings) throws IOException {
-			Mapper._mapSparrow(input, output, mappings);
+			Mapper._mapSignatures(input, output, mappings);
 		}
 	}
 
@@ -139,19 +147,19 @@ public interface Mapper extends TaskAware {
 		}
 	}
 
-	default void mapRaven(File input, File output, File mappings) throws IOException {
-		Mapper._mapRaven(input, output, mappings);
+	default void mapExceptions(File input, File output, File mappings) throws IOException {
+		Mapper._mapExceptions(input, output, mappings);
 	}
 
-	static void _mapRaven(File input, File output, File mappings) throws IOException {
+	static void _mapExceptions(File input, File output, File mappings) throws IOException {
 		MappingUtils.mapExceptions(input.toPath(), output.toPath(), Format.TINY_V2, mappings.toPath());
 	}
 
-	default void mapSparrow(File input, File output, File mappings) throws IOException {
-		Mapper._mapSparrow(input, output, mappings);
+	default void mapSignatures(File input, File output, File mappings) throws IOException {
+		Mapper._mapSignatures(input, output, mappings);
 	}
 
-	static void _mapSparrow(File input, File output, File mappings) throws IOException {
+	static void _mapSignatures(File input, File output, File mappings) throws IOException {
 		MappingUtils.mapSignatures(input.toPath(), output.toPath(), Format.TINY_V2, mappings.toPath());
 	}
 

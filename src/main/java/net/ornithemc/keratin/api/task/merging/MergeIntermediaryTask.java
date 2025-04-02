@@ -16,6 +16,7 @@ public abstract class MergeIntermediaryTask extends MinecraftTask implements Mer
 
 		if (minecraftVersion.canBeMergedLikeAlpha()) {
 			workQueue.submit(MergeIntermediary.class, parameters -> {
+				parameters.getOverwrite().set(keratin.isCacheInvalid());
 				parameters.getClient().set(files.getClientIntermediaryMappings(minecraftVersion));
 				parameters.getServer().set(files.getServerIntermediaryMappings(minecraftVersion));
 				parameters.getMerged().set(files.getMergedIntermediaryMappings(minecraftVersion));

@@ -20,6 +20,7 @@ public abstract class MapProcessedMinecraftTask extends MappingTask implements M
 		OrnitheFilesAPI files = keratin.getFiles();
 
 		workQueue.submit(MapJar.class, parameters -> {
+			parameters.getOverwrite().set(keratin.isCacheInvalid());
 			parameters.getInput().set(files.getMainProcessedIntermediaryJar(minecraftVersion));
 			parameters.getOutput().set(files.getProcessedNamedJar(minecraftVersion.id()));
 			parameters.getMappings().set(files.getProcessedNamedMappings(minecraftVersion));

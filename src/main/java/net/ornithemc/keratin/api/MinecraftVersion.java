@@ -38,6 +38,25 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 		return new MinecraftVersion(s, clientDetails, serverDetails);
 	}
 
+	public String key(GameSide side) {
+		if (side == GameSide.CLIENT) {
+			if (client == null) {
+				throw new IllegalStateException("client-side key requested, but Minecraft version " + id + " does not have a client!");
+			}
+
+			return !hasSharedObfuscation() && hasSharedVersioning() ? client.id() + side.suffix() : client.id();
+		}
+		if (side == GameSide.SERVER) {
+			if (server == null) {
+				throw new IllegalStateException("server-side key requested, but Minecraft version " + id + " does not have a server!");
+			}
+
+			return !hasSharedObfuscation() && hasSharedVersioning() ? server.id() + side.suffix() : server.id();
+		}
+
+		return id;
+	}
+
 	public boolean hasClient() {
 		return client != null;
 	}

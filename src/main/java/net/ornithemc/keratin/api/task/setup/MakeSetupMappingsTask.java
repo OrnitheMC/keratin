@@ -14,6 +14,7 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.api.task.mapping.Mapper;
 import net.ornithemc.keratin.api.task.processing.Nester;
 
 public abstract class MakeSetupMappingsTask extends MinecraftTask {
@@ -29,16 +30,16 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 				parameters.getOutputMappings().set(files.getSetupMergedIntermediaryMappings(minecraftVersion));
 				parameters.getJar().set(files.getMergedJar(minecraftVersion));
 				parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-				parameters.getTargetNamespace().set("intermediary");
-				parameters.getNestsFile().set(files.getMergedNests(minecraftVersion));
+				parameters.getTargetNamespace().set(Mapper.INTERMEDIARY);
+				parameters.getNestsFile().set(files.getMergedNestsFile(minecraftVersion));
 			});
 			workQueue.submit(MakeSetupMappings.class, parameters -> {
-				parameters.getInputMappings().set(files.getFeatherMappings(minecraftVersion.id()));
+				parameters.getInputMappings().set(files.getNamedMappingsFile(minecraftVersion.id()));
 				parameters.getOutputMappings().set(files.getSetupMergedNamedMappings(minecraftVersion));
 				parameters.getJar().set(files.getIntermediaryMergedJar(minecraftVersion));
 				parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-				parameters.getTargetNamespace().set("named");
-				parameters.getNestsFile().set(files.getIntermediaryMergedNests(minecraftVersion));
+				parameters.getTargetNamespace().set(Mapper.NAMED);
+				parameters.getNestsFile().set(files.getIntermediaryMergedNestsFile(minecraftVersion));
 			});
 		} else {
 			if (minecraftVersion.hasClient()) {
@@ -47,16 +48,16 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 					parameters.getOutputMappings().set(files.getSetupClientIntermediaryMappings(minecraftVersion));
 					parameters.getJar().set(files.getClientJar(minecraftVersion));
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-					parameters.getTargetNamespace().set("intermediary");
-					parameters.getNestsFile().set(files.getClientNests(minecraftVersion));
+					parameters.getTargetNamespace().set(Mapper.INTERMEDIARY);
+					parameters.getNestsFile().set(files.getClientNestsFile(minecraftVersion));
 				});
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
-					parameters.getInputMappings().set(files.getFeatherMappings(minecraftVersion.client().id()));
+					parameters.getInputMappings().set(files.getNamedMappingsFile(minecraftVersion.client().id()));
 					parameters.getOutputMappings().set(files.getSetupClientNamedMappings(minecraftVersion));
 					parameters.getJar().set(files.getIntermediaryClientJar(minecraftVersion));
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-					parameters.getTargetNamespace().set("named");
-					parameters.getNestsFile().set(files.getIntermediaryClientNests(minecraftVersion));
+					parameters.getTargetNamespace().set(Mapper.NAMED);
+					parameters.getNestsFile().set(files.getIntermediaryClientNestsFile(minecraftVersion));
 				});
 			}
 			if (minecraftVersion.hasServer()) {
@@ -65,16 +66,16 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 					parameters.getOutputMappings().set(files.getSetupServerIntermediaryMappings(minecraftVersion));
 					parameters.getJar().set(files.getServerJar(minecraftVersion));
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-					parameters.getTargetNamespace().set("intermediary");
-					parameters.getNestsFile().set(files.getServerNests(minecraftVersion));
+					parameters.getTargetNamespace().set(Mapper.INTERMEDIARY);
+					parameters.getNestsFile().set(files.getServerNestsFile(minecraftVersion));
 				});
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
-					parameters.getInputMappings().set(files.getFeatherMappings(minecraftVersion.server().id()));
+					parameters.getInputMappings().set(files.getNamedMappingsFile(minecraftVersion.server().id()));
 					parameters.getOutputMappings().set(files.getSetupServerNamedMappings(minecraftVersion));
 					parameters.getJar().set(files.getIntermediaryServerJar(minecraftVersion));
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-					parameters.getTargetNamespace().set("named");
-					parameters.getNestsFile().set(files.getIntermediaryServerNests(minecraftVersion));
+					parameters.getTargetNamespace().set(Mapper.NAMED);
+					parameters.getNestsFile().set(files.getIntermediaryServerNestsFile(minecraftVersion));
 				});
 			}
 		}

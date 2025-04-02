@@ -16,6 +16,7 @@ public abstract class SplitIntermediaryTask extends MinecraftTask implements Map
 
 		if (!minecraftVersion.hasSharedObfuscation() && minecraftVersion.hasSharedVersioning()) {
 			workQueue.submit(SplitMappingsAction.class, parameters -> {
+				parameters.getOverwrite().set(keratin.isCacheInvalid());
 				parameters.getMerged().set(files.getMergedIntermediaryMappings(minecraftVersion));
 				if (minecraftVersion.hasClient()) {
 					parameters.getClient().set(files.getClientIntermediaryMappings(minecraftVersion));

@@ -30,7 +30,7 @@ public abstract class GenerateNewIntermediaryTask extends GenerateIntermediaryTa
 		if (minecraftVersion.hasSharedObfuscation()) {
 			IntermediaryUtil.MergedArgsBuilder args = mergedArgs(minecraftVersion)
 				.newJarFile(files.getMergedJar(minecraftVersion))
-				.newNests(files.getMergedNests(minecraftVersion))
+				.newNests(files.getMergedNestsFile(minecraftVersion))
 				.newLibraries(files.getLibraries(minecraftVersion))
 				.newIntermediaryFile(new File(dir, "%s.tiny".formatted(minecraftVersion.id())));
 
@@ -40,10 +40,10 @@ public abstract class GenerateNewIntermediaryTask extends GenerateIntermediaryTa
 
 			IntermediaryUtil.SplitArgsBuilder args = splitArgs(minecraftVersion)
 				.newClientJarFile(files.getClientJar(minecraftVersion))
-				.newClientNests(files.getClientNests(minecraftVersion))
+				.newClientNests(files.getClientNestsFile(minecraftVersion))
 				.newClientLibraries(files.getLibraries(minecraftVersion.client().id()))
 				.newServerJarFile(files.getServerJar(minecraftVersion))
-				.newServerNests(files.getServerNests(minecraftVersion))
+				.newServerNests(files.getServerNestsFile(minecraftVersion))
 				.newServerLibraries(files.getLibraries(minecraftVersion.server().id()))
 				.clientServerMatchesFile(matches.file(), matches.inverted());
 

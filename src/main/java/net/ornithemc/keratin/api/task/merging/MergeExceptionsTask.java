@@ -8,7 +8,7 @@ import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
 
-public abstract class MergeRavenTask extends MergeTask {
+public abstract class MergeExceptionsTask extends MergeTask {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
@@ -20,14 +20,15 @@ public abstract class MergeRavenTask extends MergeTask {
 		OrnitheFilesAPI files = keratin.getFiles();
 
 		if (!minecraftVersion.canBeMergedAsObfuscated()) {
-			int clientBuild = keratin.getRavenBuild(minecraftVersion, GameSide.CLIENT);
-			int serverBuild = keratin.getRavenBuild(minecraftVersion, GameSide.SERVER);
+			int clientBuild = keratin.getExceptionsBuild(minecraftVersion, GameSide.CLIENT);
+			int serverBuild = keratin.getExceptionsBuild(minecraftVersion, GameSide.SERVER);
 
 			if (clientBuild > 0 && serverBuild > 0) {
-				workQueue.submit(MergeRaven.class, parameters -> {
-					parameters.getClient().set(files.getIntermediaryClientRavenFile(minecraftVersion));
-					parameters.getServer().set(files.getIntermediaryServerRavenFile(minecraftVersion));
-					parameters.getMerged().set(files.getIntermediaryMergedRavenFile(minecraftVersion));
+				workQueue.submit(MergeExceptions.class, parameters -> {
+					parameters.getOverwrite().set(keratin.isCacheInvalid());
+					parameters.getClient().set(files.getIntermediaryClientExceptionsFile(minecraftVersion));
+					parameters.getServer().set(files.getIntermediaryServerExceptionsFile(minecraftVersion));
+					parameters.getMerged().set(files.getIntermediaryMergedExceptionsFile(minecraftVersion));
 				});
 			}
 		}
@@ -35,7 +36,7 @@ public abstract class MergeRavenTask extends MergeTask {
 
 	private static void validateNamespace(String namespace) {
 		if (!Mapper.INTERMEDIARY.equals(namespace)) {
-			throw new IllegalStateException("cannot merge Raven in the " + namespace + " namespace");
+			throw new IllegalStateException("cannot merge exceptions in the " + namespace + " namespace");
 		}
 	}
 }

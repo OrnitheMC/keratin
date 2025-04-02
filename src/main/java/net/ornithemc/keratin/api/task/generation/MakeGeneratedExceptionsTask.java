@@ -21,7 +21,7 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 		if (minecraftVersion.hasSharedObfuscation()) {
 			File jar = files.getGeneratedMergedJar(minecraftVersion);
 			File excs = files.getGeneratedMergedExceptions(minecraftVersion);
-			File nests = files.getMergedNests(minecraftVersion);
+			File nests = files.getMergedNestsFile(minecraftVersion);
 
 			extractExceptions(
 				jar,
@@ -38,7 +38,7 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 			if (minecraftVersion.hasClient()) {
 				File jar = files.getGeneratedClientJar(minecraftVersion);
 				File excs = files.getGeneratedClientExceptions(minecraftVersion);
-				File nests = files.getClientNests(minecraftVersion);
+				File nests = files.getClientNestsFile(minecraftVersion);
 
 				extractExceptions(
 					jar,
@@ -55,7 +55,7 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 			if (minecraftVersion.hasServer()) {
 				File jar = files.getGeneratedServerJar(minecraftVersion);
 				File excs = files.getGeneratedServerExceptions(minecraftVersion);
-				File nests = files.getServerNests(minecraftVersion);
+				File nests = files.getServerNestsFile(minecraftVersion);
 
 				extractExceptions(
 					jar,

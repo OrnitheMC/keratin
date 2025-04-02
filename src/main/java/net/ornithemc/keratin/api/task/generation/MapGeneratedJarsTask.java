@@ -17,32 +17,35 @@ public abstract class MapGeneratedJarsTask extends MinecraftTask implements Mapp
 
 		if (minecraftVersion.hasSharedObfuscation()) {
 			workQueue.submit(MapJar.class, parameters -> {
+				parameters.getOverwrite().set(true);
 				parameters.getInput().set(files.getNamedGeneratedMergedJar(minecraftVersion));
 				parameters.getOutput().set(files.getGeneratedMergedJar(minecraftVersion));
 				parameters.getMappings().set(files.getSourceMergedMappings(minecraftVersion));
 				parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-				parameters.getSourceNamespace().set("named");
-				parameters.getTargetNamespace().set("official");
+				parameters.getSourceNamespace().set(Mapper.NAMED);
+				parameters.getTargetNamespace().set(Mapper.OFFICIAL);
 			});
 		} else {
 			if (minecraftVersion.hasClient()) {
 				workQueue.submit(MapJar.class, parameters -> {
+					parameters.getOverwrite().set(true);
 					parameters.getInput().set(files.getNamedGeneratedClientJar(minecraftVersion));
 					parameters.getOutput().set(files.getGeneratedClientJar(minecraftVersion));
 					parameters.getMappings().set(files.getSourceClientMappings(minecraftVersion));
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-					parameters.getSourceNamespace().set("named");
-					parameters.getTargetNamespace().set("official");
+					parameters.getSourceNamespace().set(Mapper.NAMED);
+					parameters.getTargetNamespace().set(Mapper.OFFICIAL);
 				});
 			}
 			if (minecraftVersion.hasServer()) {
 				workQueue.submit(MapJar.class, parameters -> {
+					parameters.getOverwrite().set(true);
 					parameters.getInput().set(files.getNamedGeneratedServerJar(minecraftVersion));
 					parameters.getOutput().set(files.getGeneratedServerJar(minecraftVersion));
 					parameters.getMappings().set(files.getSourceServerMappings(minecraftVersion));
 					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
-					parameters.getSourceNamespace().set("named");
-					parameters.getTargetNamespace().set("official");
+					parameters.getSourceNamespace().set(Mapper.NAMED);
+					parameters.getTargetNamespace().set(Mapper.OFFICIAL);
 				});
 			}
 		}

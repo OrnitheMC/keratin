@@ -23,6 +23,7 @@ public abstract class MergeMinecraftJarsTask extends MergeTask {
 
 			if (official == minecraftVersion.hasSharedObfuscation()) {
 				workQueue.submit(MergeJars.class, parameters -> {
+					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getClient().set(official ? files.getClientJar(minecraftVersion) : files.getIntermediaryClientJar(minecraftVersion));
 					parameters.getServer().set(official ? files.getServerJar(minecraftVersion) : files.getIntermediaryServerJar(minecraftVersion));
 					parameters.getMerged().set(official ? files.getMergedJar(minecraftVersion) : files.getIntermediaryMergedJar(minecraftVersion));

@@ -24,12 +24,12 @@ public abstract class ProcessMinecraftTask extends MinecraftTask implements Proc
 			parameters.getLibraries().set(files.getLibraries(minecraftVersion));
 			parameters.getObfuscateVariableNames().set(getObfuscateVariableNames().get());
 			parameters.getLvtPatchedJar().set(files.getMainLvtPatchedIntermediaryJar(minecraftVersion));
-			parameters.getRavenFile().set(files.getMainIntermediaryRavenFile(minecraftVersion));
+			parameters.getExceptionsFile().set(files.getMainIntermediaryExceptionsFile(minecraftVersion));
 			parameters.getExceptionsPatchedJar().set(files.getMainExceptionsPatchedIntermediaryJar(minecraftVersion));
-			parameters.getSparrowFile().set(files.getMainIntermediarySparrowFile(minecraftVersion));
+			parameters.getSignaturesFile().set(files.getMainIntermediarySignaturesFile(minecraftVersion));
 			parameters.getSignaturePatchedJar().set(files.getMainSignaturePatchedIntermediaryJar(minecraftVersion));
 			parameters.getPreenedJar().set(files.getMainPreenedIntermediaryJar(minecraftVersion));
-			parameters.getNestsFile().set(files.getMainIntermediaryNests(minecraftVersion));
+			parameters.getNestsFile().set(files.getMainIntermediaryNestsFile(minecraftVersion));
 			parameters.getNestedJar().set(files.getMainNestedIntermediaryJar(minecraftVersion));
 			parameters.getOutputJar().set(files.getMainProcessedIntermediaryJar(minecraftVersion));
 		});

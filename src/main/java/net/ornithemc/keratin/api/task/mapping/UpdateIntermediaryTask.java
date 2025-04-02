@@ -109,7 +109,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 		if (minecraftVersion.hasSharedObfuscation()) {
 			IntermediaryUtil.MergedArgsBuilder args = mergedArgs(minecraftVersion)
 				.newJarFile(files.getMergedJar(minecraftVersion))
-				.newNests(files.getMergedNests(minecraftVersion))
+				.newNests(files.getMergedNestsFile(minecraftVersion))
 				.newLibraries(files.getLibraries(minecraftVersion))
 				.newCheckSerializable(minecraftVersion.usesSerializableForLevelSaving())
 				.newIntermediaryFile(files.getIntermediaryFile(minecraftVersion.id()));
@@ -132,14 +132,14 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 			if (minecraftVersion.hasClient()) {
 				args
 					.newClientJarFile(files.getClientJar(minecraftVersion))
-					.newClientNests(files.getClientNests(minecraftVersion))
+					.newClientNests(files.getClientNestsFile(minecraftVersion))
 					.newClientLibraries(files.getLibraries(minecraftVersion.client().id()))
 					.newClientCheckSerializable(minecraftVersion.usesSerializableForLevelSaving());
 			}
 			if (minecraftVersion.hasServer()) {
 				args
 					.newServerJarFile(files.getServerJar(minecraftVersion))
-					.newServerNests(files.getServerNests(minecraftVersion))
+					.newServerNests(files.getServerNestsFile(minecraftVersion))
 					.newServerLibraries(files.getLibraries(minecraftVersion.server().id()))
 					.newServerCheckSerializable(minecraftVersion.usesSerializableForLevelSaving());
 			}

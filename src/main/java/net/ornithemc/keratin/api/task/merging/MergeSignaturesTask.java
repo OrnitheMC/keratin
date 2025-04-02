@@ -8,7 +8,7 @@ import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
 
-public abstract class MergeSparrowTask extends MergeTask {
+public abstract class MergeSignaturesTask extends MergeTask {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
@@ -20,14 +20,15 @@ public abstract class MergeSparrowTask extends MergeTask {
 		OrnitheFilesAPI files = keratin.getFiles();
 
 		if (!minecraftVersion.canBeMergedAsObfuscated()) {
-			int clientBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.CLIENT);
-			int serverBuild = keratin.getSparrowBuild(minecraftVersion, GameSide.SERVER);
+			int clientBuild = keratin.getSignaturesBuild(minecraftVersion, GameSide.CLIENT);
+			int serverBuild = keratin.getSignaturesBuild(minecraftVersion, GameSide.SERVER);
 
 			if (clientBuild > 0 && serverBuild > 0) {
-				workQueue.submit(MergeSparrow.class, parameters -> {
-					parameters.getClient().set(files.getIntermediaryClientSparrowFile(minecraftVersion));
-					parameters.getServer().set(files.getIntermediaryServerSparrowFile(minecraftVersion));
-					parameters.getMerged().set(files.getIntermediaryMergedSparrowFile(minecraftVersion));
+				workQueue.submit(MergeSignatures.class, parameters -> {
+					parameters.getOverwrite().set(keratin.isCacheInvalid());
+					parameters.getClient().set(files.getIntermediaryClientSignaturesFile(minecraftVersion));
+					parameters.getServer().set(files.getIntermediaryServerSignaturesFile(minecraftVersion));
+					parameters.getMerged().set(files.getIntermediaryMergedSignaturesFile(minecraftVersion));
 				});
 			}
 		}
@@ -35,7 +36,7 @@ public abstract class MergeSparrowTask extends MergeTask {
 
 	private static void validateNamespace(String namespace) {
 		if (!Mapper.INTERMEDIARY.equals(namespace)) {
-			throw new IllegalStateException("cannot merge Sparrow in the " + namespace + " namespace");
+			throw new IllegalStateException("cannot merge signatures in the " + namespace + " namespace");
 		}
 	}
 }

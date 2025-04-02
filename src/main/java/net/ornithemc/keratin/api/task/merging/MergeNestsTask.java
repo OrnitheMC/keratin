@@ -25,9 +25,10 @@ public abstract class MergeNestsTask extends MergeTask {
 
 			if (clientBuild > 0 && serverBuild > 0) {
 				workQueue.submit(MergeNests.class, parameters -> {
-					parameters.getClient().set(files.getIntermediaryClientNests(minecraftVersion));
-					parameters.getServer().set(files.getIntermediaryServerNests(minecraftVersion));
-					parameters.getMerged().set(files.getIntermediaryMergedNests(minecraftVersion));
+					parameters.getOverwrite().set(keratin.isCacheInvalid());
+					parameters.getClient().set(files.getIntermediaryClientNestsFile(minecraftVersion));
+					parameters.getServer().set(files.getIntermediaryServerNestsFile(minecraftVersion));
+					parameters.getMerged().set(files.getIntermediaryMergedNestsFile(minecraftVersion));
 				});
 			}
 		}
@@ -35,7 +36,7 @@ public abstract class MergeNestsTask extends MergeTask {
 
 	private static void validateNamespace(String namespace) {
 		if (!Mapper.INTERMEDIARY.equals(namespace)) {
-			throw new IllegalStateException("cannot merge Nests in the " + namespace + " namespace");
+			throw new IllegalStateException("cannot merge nests in the " + namespace + " namespace");
 		}
 	}
 }

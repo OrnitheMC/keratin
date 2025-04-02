@@ -28,26 +28,29 @@ public abstract class MapNestsTask extends MappingTask {
 		if (minecraftVersion.canBeMerged() && (!fromOfficial || minecraftVersion.hasSharedObfuscation())) {
 			if (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (clientBuild > 0 || serverBuild > 0)) {
 				workQueue.submit(MapNests.class, parameters -> {
+					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(fromOfficial ? files.getMergedNests(minecraftVersion) : files.getIntermediaryMergedNests(minecraftVersion));
-					parameters.getOutput().set(fromOfficial ? files.getIntermediaryMergedNests(minecraftVersion) : files.getNamedNests(minecraftVersion));
+					parameters.getInput().set(fromOfficial ? files.getMergedNestsFile(minecraftVersion) : files.getIntermediaryMergedNestsFile(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? files.getIntermediaryMergedNestsFile(minecraftVersion) : files.getNamedNestsFile(minecraftVersion));
 					parameters.getMappings().set(fromOfficial ? files.getMergedIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
 				});
 			}
 		} else {
 			if (minecraftVersion.hasClient() && (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (clientBuild > 0))) {
 				workQueue.submit(MapNests.class, parameters -> {
+					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(fromOfficial ? files.getClientNests(minecraftVersion) : files.getIntermediaryClientNests(minecraftVersion));
-					parameters.getOutput().set(fromOfficial ? files.getIntermediaryClientNests(minecraftVersion) : files.getNamedNests(minecraftVersion));
+					parameters.getInput().set(fromOfficial ? files.getClientNestsFile(minecraftVersion) : files.getIntermediaryClientNestsFile(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? files.getIntermediaryClientNestsFile(minecraftVersion) : files.getNamedNestsFile(minecraftVersion));
 					parameters.getMappings().set(fromOfficial ? files.getClientIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
 				});
 			}
 			if (minecraftVersion.hasServer() && (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (serverBuild > 0))) {
 				workQueue.submit(MapNests.class, parameters -> {
+					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(fromOfficial ? files.getServerNests(minecraftVersion) : files.getIntermediaryServerNests(minecraftVersion));
-					parameters.getOutput().set(fromOfficial ? files.getIntermediaryServerNests(minecraftVersion) : files.getNamedNests(minecraftVersion));
+					parameters.getInput().set(fromOfficial ? files.getServerNestsFile(minecraftVersion) : files.getIntermediaryServerNestsFile(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? files.getIntermediaryServerNestsFile(minecraftVersion) : files.getNamedNestsFile(minecraftVersion));
 					parameters.getMappings().set(fromOfficial ? files.getServerIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
 				});
 			}
@@ -61,7 +64,7 @@ public abstract class MapNestsTask extends MappingTask {
 			default -> false;
 		};
 		if (!valid) {
-			throw new IllegalStateException("cannot map Nests from " + srcNs + " to " + dstNs);
+			throw new IllegalStateException("cannot map nests from " + srcNs + " to " + dstNs);
 		}
 	}
 }
