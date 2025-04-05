@@ -158,6 +158,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private final Versioned<MinecraftVersion, Map<GameSide, Integer>> signaturesBuilds;
 	private final Versioned<MinecraftVersion, Map<GameSide, Integer>> nestsBuilds;
 
+	private boolean configured;
 	private boolean cacheInvalid;
 
 	public KeratinGradleExtension(Project project) {
@@ -399,6 +400,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	@SuppressWarnings("unused")
 	private Set<String> configure(TaskSelection selection) throws Exception {
+		configured = true;
+
 		if (intermediaryGen.get() < 2) {
 			throw new RuntimeException("gen1 is no longer supported!");
 		}
@@ -859,13 +862,21 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		});
 	}
 
+	public void checkAccess(String obj) {
+		if (!configured) {
+			throw new IllegalStateException("cannot access " + obj + " before the project has been configured!");
+		}
+	}
+
 	@Override
 	public OrnitheFiles getFiles() {
+		checkAccess("file management");
 		return files;
 	}
 
 	@Override
 	public PublicationsAPI getPublications() {
+		checkAccess("publications");
 		return publications;
 	}
 
@@ -876,6 +887,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	@Override
 	public MetaSourcedSingleBuildMavenArtifacts getIntermediaryArtifacts() {
+		checkAccess("intermediary artifacts");
 		return intermediaryArtifacts;
 	}
 
@@ -886,6 +898,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	@Override
 	public MetaSourcedMultipleBuildsMavenArtifacts getNamedMappingsArtifacts() {
+		checkAccess("named mappings artifacts");
 		return namedMappingsArtifacts;
 	}
 
@@ -896,6 +909,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	@Override
 	public MetaSourcedMultipleBuildsMavenArtifacts getExceptionsArtifacts() {
+		checkAccess("exceptions artifacts");
 		return exceptionsArtifacts;
 	}
 
@@ -906,6 +920,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	@Override
 	public MetaSourcedMultipleBuildsMavenArtifacts getSignaturesArtifacts() {
+		checkAccess("signatures artifacts");
 		return signaturesArtifacts;
 	}
 
@@ -916,6 +931,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	@Override
 	public MetaSourcedMultipleBuildsMavenArtifacts getNestsArtifacts() {
+		checkAccess("nests artifacts");
 		return nestsArtifacts;
 	}
 
@@ -955,6 +971,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	@Override
 	public VersionsManifest getVersionsManifest() {
+		checkAccess("versions manifest");
 		return versionsManifest.get();
 	}
 
@@ -968,21 +985,25 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	@Override
 	public int getNamedMappingsBuild(String minecraftVersion) {
+		checkAccess("named mappings builds");
 		return namedMappingsBuilds.get(minecraftVersion);
 	}
 
 	@Override
 	public int getExceptionsBuild(MinecraftVersion minecraftVersion, GameSide side) {
+		checkAccess("exceptions builds");
 		return exceptionsBuilds.get(minecraftVersion).getOrDefault(side, -1);
 	}
 
 	@Override
 	public int getSignaturesBuild(MinecraftVersion minecraftVersion, GameSide side) {
+		checkAccess("signatures builds");
 		return signaturesBuilds.get(minecraftVersion).getOrDefault(side, -1);
 	}
 
 	@Override
 	public int getNestsBuild(MinecraftVersion minecraftVersion, GameSide side) {
+		checkAccess("nests builds");
 		return nestsBuilds.get(minecraftVersion).getOrDefault(side, -1);
 	}
 
