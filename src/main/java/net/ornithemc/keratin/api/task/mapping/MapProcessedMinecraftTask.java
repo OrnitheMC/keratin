@@ -4,8 +4,11 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.merging.Merger;
+import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
+import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
+import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MapProcessedMinecraftTask extends MappingTask implements Merger {
 
@@ -17,14 +20,18 @@ public abstract class MapProcessedMinecraftTask extends MappingTask implements M
 		validateNamespaces(srcNs, dstNs);
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		ProcessedJarsCache processedJars = files.getGlobalCache().getProcessedJarsCache();
+		LibrariesCache libraries = files.getGlobalCache().getLibrariesCache();
+		BuildFiles buildFiles = files.getMappingsDevelopmentFiles().getBuildFiles();
 
 		workQueue.submit(MapJar.class, parameters -> {
 			parameters.getOverwrite().set(keratin.isCacheInvalid());
-			parameters.getInput().set(files.getMainProcessedIntermediaryJar(minecraftVersion));
-			parameters.getOutput().set(files.getProcessedNamedJar(minecraftVersion.id()));
-			parameters.getMappings().set(files.getProcessedNamedMappings(minecraftVersion));
-			parameters.getLibraries().set(files.getLibraries(minecraftVersion));
+			parameters.getInput().set(processedJars.getMainProcessedIntermediaryJar(minecraftVersion));
+			parameters.getOutput().set(buildFiles.getProcessedNamedJar(minecraftVersion.id()));
+			parameters.getMappings().set(buildFiles.getProcessedMappingsFile(minecraftVersion));
+			parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 			parameters.getSourceNamespace().set(srcNs);
 			parameters.getTargetNamespace().set(dstNs);
 		});

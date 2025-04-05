@@ -10,9 +10,11 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.Configurations;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.JavaExecution;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
+import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class GenerateFakeSourceTask extends MinecraftTask implements JavaExecution {
 
@@ -20,38 +22,40 @@ public abstract class GenerateFakeSourceTask extends MinecraftTask implements Ja
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		Project project = keratin.getProject();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
 
-		File libraries = files.getLibrariesCache();
+		LibrariesCache libraries = files.getGlobalCache().getLibrariesCache();
+		BuildFiles buildFiles = files.getMappingsDevelopmentFiles().getBuildFiles();
+
 		Set<File> classpath = project.getConfigurations().getByName(Configurations.MAPPING_POET).getFiles();
 
 		if (minecraftVersion.hasSharedVersioning() && minecraftVersion.canBeMerged()) {
 			submit(
 				workQueue,
-				files.getMergedTinyV2NamedMappings(minecraftVersion.id()),
-				files.getJavadocNamedJar(minecraftVersion.id()),
-				files.getFakeSourceDirectory(minecraftVersion.id()),
-				libraries,
+				buildFiles.getMergedTinyV2MappingsFile(minecraftVersion.id()),
+				buildFiles.getJavadocNamedJar(minecraftVersion.id()),
+				buildFiles.getFakeSourceDirectory(minecraftVersion.id()),
+				libraries.getDirectory(),
 				classpath
 			);
 		} else {
 			if (minecraftVersion.hasClient()) {
 				submit(
 					workQueue,
-					files.getMergedTinyV2NamedMappings(minecraftVersion.client().id()),
-					files.getJavadocNamedJar(minecraftVersion.client().id()),
-					files.getFakeSourceDirectory(minecraftVersion.client().id()),
-					libraries,
+					buildFiles.getMergedTinyV2MappingsFile(minecraftVersion.client().id()),
+					buildFiles.getJavadocNamedJar(minecraftVersion.client().id()),
+					buildFiles.getFakeSourceDirectory(minecraftVersion.client().id()),
+					libraries.getDirectory(),
 					classpath
 				);
 			}
 			if (minecraftVersion.hasServer()) {
 				submit(
 					workQueue,
-					files.getMergedTinyV2NamedMappings(minecraftVersion.server().id()),
-					files.getJavadocNamedJar(minecraftVersion.server().id()),
-					files.getFakeSourceDirectory(minecraftVersion.server().id()),
-					libraries,
+					buildFiles.getMergedTinyV2MappingsFile(minecraftVersion.server().id()),
+					buildFiles.getJavadocNamedJar(minecraftVersion.server().id()),
+					buildFiles.getFakeSourceDirectory(minecraftVersion.server().id()),
+					libraries.getDirectory(),
 					classpath
 				);
 			}

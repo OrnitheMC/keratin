@@ -11,8 +11,10 @@ import cuchaz.enigma.command.CheckMappingsCommand;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
+import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class CheckMappingsTask extends MinecraftTask {
 
@@ -22,11 +24,14 @@ public abstract class CheckMappingsTask extends MinecraftTask {
 		getProject().getLogger().lifecycle(":checking mappings for Minecraft " + minecraftVersion.id());
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		MappedJarsCache mappedJars = files.getGlobalCache().getMappedJarsCache();
+		BuildFiles buildFiles = files.getMappingsDevelopmentFiles().getBuildFiles();
 
 		workQueue.submit(CheckMappings.class, parameters -> {
-			parameters.getJar().set(files.getMainIntermediaryJar(minecraftVersion));
-			parameters.getMappings().set(files.getNamedMappings(minecraftVersion));
+			parameters.getJar().set(mappedJars.getMainIntermediaryJar(minecraftVersion));
+			parameters.getMappings().set(buildFiles.getMappingsFile(minecraftVersion));
 		});
 	}
 

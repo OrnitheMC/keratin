@@ -9,8 +9,9 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.BuildFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MakeGeneratedJarsTask extends MinecraftTask {
 
@@ -18,26 +19,28 @@ public abstract class MakeGeneratedJarsTask extends MinecraftTask {
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		Project project = getProject();
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		BuildFiles buildFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getBuildFiles();
 
 		File builtJar = project.file("build/libs/" + project.getName() + ".jar");
 
 		if (minecraftVersion.canBeMerged()) {
 			copyGeneratedJar(
 				builtJar,
-				files.getNamedGeneratedMergedJar(minecraftVersion)
+				buildFiles.getNamedGeneratedMergedJar(minecraftVersion)
 			);
 		} else {
 			if (minecraftVersion.hasClient()) {
 				copyGeneratedJar(
 					builtJar,
-					files.getNamedGeneratedClientJar(minecraftVersion)
+					buildFiles.getNamedGeneratedClientJar(minecraftVersion)
 				);
 			}
 			if (minecraftVersion.hasServer()) {
 				copyGeneratedJar(
 					builtJar,
-					files.getNamedGeneratedServerJar(minecraftVersion)
+					buildFiles.getNamedGeneratedServerJar(minecraftVersion)
 				);
 			}
 		}

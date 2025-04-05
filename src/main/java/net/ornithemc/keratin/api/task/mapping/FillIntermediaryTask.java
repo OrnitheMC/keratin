@@ -12,42 +12,51 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.setup.MappingsFiller;
+import net.ornithemc.keratin.files.GlobalCache;
+import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
+import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
+import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class FillIntermediaryTask extends MinecraftTask {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		GlobalCache globalCache = files.getGlobalCache();
+		GameJarsCache gameJars = globalCache.getGameJarsCache();
+		MappingsCache mappings = globalCache.getMappingsCache();
+		LibrariesCache libraries = globalCache.getLibrariesCache();
 
 		if (minecraftVersion.hasSharedObfuscation()) {
 			workQueue.submit(FillIntermediary.class, parameters -> {
 				parameters.getOverwrite().set(keratin.isCacheInvalid());
-				parameters.getInputMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
-				parameters.getOutputMappings().set(files.getFilledMergedIntermediaryMappings(minecraftVersion));
-				parameters.getJar().set(files.getMergedJar(minecraftVersion));
-				parameters.getLibraries().set(files.getLibraries(minecraftVersion));
+				parameters.getInputMappings().set(mappings.getMergedIntermediaryMappingsFile(minecraftVersion));
+				parameters.getOutputMappings().set(mappings.getFilledMergedIntermediaryMappingsFile(minecraftVersion));
+				parameters.getJar().set(gameJars.getMergedJar(minecraftVersion));
+				parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 			});
 		} else {
 			if (minecraftVersion.hasClient()) {
 				workQueue.submit(FillIntermediary.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
-					parameters.getInputMappings().set(files.getClientIntermediaryMappings(minecraftVersion));
-					parameters.getOutputMappings().set(files.getFilledClientIntermediaryMappings(minecraftVersion));
-					parameters.getJar().set(files.getClientJar(minecraftVersion));
-					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
+					parameters.getInputMappings().set(mappings.getClientIntermediaryMappingsFile(minecraftVersion));
+					parameters.getOutputMappings().set(mappings.getFilledClientIntermediaryMappingsFile(minecraftVersion));
+					parameters.getJar().set(gameJars.getClientJar(minecraftVersion));
+					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 				});
 			}
 			if (minecraftVersion.hasServer()) {
 				workQueue.submit(FillIntermediary.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
-					parameters.getInputMappings().set(files.getServerIntermediaryMappings(minecraftVersion));
-					parameters.getOutputMappings().set(files.getFilledServerIntermediaryMappings(minecraftVersion));
-					parameters.getJar().set(files.getServerJar(minecraftVersion));
-					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
+					parameters.getInputMappings().set(mappings.getServerIntermediaryMappingsFile(minecraftVersion));
+					parameters.getOutputMappings().set(mappings.getFilledServerIntermediaryMappingsFile(minecraftVersion));
+					parameters.getJar().set(gameJars.getServerJar(minecraftVersion));
+					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 				});
 			}
 		}

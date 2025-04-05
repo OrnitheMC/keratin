@@ -4,21 +4,24 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.BuildFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class SplitGeneratedJarTask extends MinecraftTask implements JarSplitter {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		BuildFiles buildFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getBuildFiles();
 
 		if (!minecraftVersion.hasSharedObfuscation() && minecraftVersion.canBeMerged()) {
 			workQueue.submit(SplitJar.class, parameters -> {
-				parameters.getClient().set(files.getNamedGeneratedClientJar(minecraftVersion));
-				parameters.getServer().set(files.getNamedGeneratedServerJar(minecraftVersion));
-				parameters.getMerged().set(files.getNamedGeneratedMergedJar(minecraftVersion));
+				parameters.getClient().set(buildFiles.getNamedGeneratedClientJar(minecraftVersion));
+				parameters.getServer().set(buildFiles.getNamedGeneratedServerJar(minecraftVersion));
+				parameters.getMerged().set(buildFiles.getNamedGeneratedMergedJar(minecraftVersion));
 			});
 		}
 	}

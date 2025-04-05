@@ -7,10 +7,11 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.GlobalCache.ExceptionsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class DownloadExceptionsTask extends MinecraftTask implements DownloaderAndExtracter {
 
@@ -19,8 +20,10 @@ public abstract class DownloadExceptionsTask extends MinecraftTask implements Do
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
-		MultipleBuildsMavenArtifacts exceptions = keratin.getExceptionsArtifacts();
+		OrnitheFiles files = keratin.getFiles();
+		MultipleBuildsMavenArtifacts exceptionsArtifacts = keratin.getExceptionsArtifacts();
+
+		ExceptionsCache exceptions = files.getGlobalCache().getExceptionsCache();
 
 		boolean exceptionsChanged = false;
 
@@ -29,18 +32,18 @@ public abstract class DownloadExceptionsTask extends MinecraftTask implements Do
 
 			if (build > 0) {
 				File outputJar = minecraftVersion.hasClient() && minecraftVersion.hasServer()
-					? files.getMergedExceptionsJar(minecraftVersion)
+					? exceptions.getMergedExceptionsJar(minecraftVersion)
 					: minecraftVersion.hasClient()
-						? files.getClientExceptionsJar(minecraftVersion)
-						: files.getServerExceptionsJar(minecraftVersion);
+						? exceptions.getClientExceptionsJar(minecraftVersion)
+						: exceptions.getServerExceptionsJar(minecraftVersion);
 				File output = minecraftVersion.hasClient() && minecraftVersion.hasServer()
-					? files.getMergedExceptionsFile(minecraftVersion)
+					? exceptions.getMergedExceptionsFile(minecraftVersion)
 					: minecraftVersion.hasClient()
-						? files.getClientExceptionsFile(minecraftVersion)
-						: files.getServerExceptionsFile(minecraftVersion);
+						? exceptions.getClientExceptionsFile(minecraftVersion)
+						: exceptions.getServerExceptionsFile(minecraftVersion);
 
 				exceptionsChanged |= downloadAndExtract(
-					exceptions.get(minecraftVersion.key(GameSide.MERGED), build),
+					exceptionsArtifacts.get(minecraftVersion.key(GameSide.MERGED), build),
 					PATH_IN_JAR,
 					outputJar,
 					output,
@@ -53,10 +56,10 @@ public abstract class DownloadExceptionsTask extends MinecraftTask implements Do
 
 				if (build > 0) {
 					exceptionsChanged |= downloadAndExtract(
-						exceptions.get(minecraftVersion.key(GameSide.CLIENT), build),
+						exceptionsArtifacts.get(minecraftVersion.key(GameSide.CLIENT), build),
 						PATH_IN_JAR,
-						files.getClientExceptionsJar(minecraftVersion),
-						files.getClientExceptionsFile(minecraftVersion),
+						exceptions.getClientExceptionsJar(minecraftVersion),
+						exceptions.getClientExceptionsFile(minecraftVersion),
 						keratin.isCacheInvalid()
 					);
 				}
@@ -66,10 +69,10 @@ public abstract class DownloadExceptionsTask extends MinecraftTask implements Do
 
 				if (build > 0) {
 					exceptionsChanged |= downloadAndExtract(
-						exceptions.get(minecraftVersion.key(GameSide.SERVER), build),
+						exceptionsArtifacts.get(minecraftVersion.key(GameSide.SERVER), build),
 						PATH_IN_JAR,
-						files.getServerExceptionsJar(minecraftVersion),
-						files.getServerExceptionsFile(minecraftVersion),
+						exceptions.getServerExceptionsJar(minecraftVersion),
+						exceptions.getServerExceptionsFile(minecraftVersion),
 						keratin.isCacheInvalid()
 					);
 				}

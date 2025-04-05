@@ -7,10 +7,11 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.GlobalCache.SignaturesCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class DownloadSignaturesTask extends MinecraftTask implements DownloaderAndExtracter {
 
@@ -19,8 +20,10 @@ public abstract class DownloadSignaturesTask extends MinecraftTask implements Do
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
-		MultipleBuildsMavenArtifacts signatures = keratin.getSignaturesArtifacts();
+		OrnitheFiles files = keratin.getFiles();
+		MultipleBuildsMavenArtifacts signaturesArtifacts = keratin.getSignaturesArtifacts();
+
+		SignaturesCache signatures = files.getGlobalCache().getSignaturesCache();
 
 		boolean signaturesChanged = false;
 
@@ -29,18 +32,18 @@ public abstract class DownloadSignaturesTask extends MinecraftTask implements Do
 
 			if (build > 0) {
 				File outputJar = minecraftVersion.hasClient() && minecraftVersion.hasServer()
-					? files.getMergedSignaturesJar(minecraftVersion)
+					? signatures.getMergedSignaturesJar(minecraftVersion)
 					: minecraftVersion.hasClient()
-						? files.getClientSignaturesJar(minecraftVersion)
-						: files.getServerSignaturesJar(minecraftVersion);
+						? signatures.getClientSignaturesJar(minecraftVersion)
+						: signatures.getServerSignaturesJar(minecraftVersion);
 				File output = minecraftVersion.hasClient() && minecraftVersion.hasServer()
-					? files.getMergedSignaturesFile(minecraftVersion)
+					? signatures.getMergedSignaturesFile(minecraftVersion)
 					: minecraftVersion.hasClient()
-						? files.getClientSignaturesFile(minecraftVersion)
-						: files.getServerSignaturesFile(minecraftVersion);
+						? signatures.getClientSignaturesFile(minecraftVersion)
+						: signatures.getServerSignaturesFile(minecraftVersion);
 
 				signaturesChanged |= downloadAndExtract(
-					signatures.get(minecraftVersion.key(GameSide.MERGED), build),
+					signaturesArtifacts.get(minecraftVersion.key(GameSide.MERGED), build),
 					PATH_IN_JAR,
 					outputJar,
 					output,
@@ -53,10 +56,10 @@ public abstract class DownloadSignaturesTask extends MinecraftTask implements Do
 
 				if (build > 0) {
 					signaturesChanged |= downloadAndExtract(
-						signatures.get(minecraftVersion.key(GameSide.CLIENT), build),
+						signaturesArtifacts.get(minecraftVersion.key(GameSide.CLIENT), build),
 						PATH_IN_JAR,
-						files.getClientSignaturesJar(minecraftVersion),
-						files.getClientSignaturesFile(minecraftVersion),
+						signatures.getClientSignaturesJar(minecraftVersion),
+						signatures.getClientSignaturesFile(minecraftVersion),
 						keratin.isCacheInvalid()
 					);
 				}
@@ -66,10 +69,10 @@ public abstract class DownloadSignaturesTask extends MinecraftTask implements Do
 
 				if (build > 0) {
 					signaturesChanged |= downloadAndExtract(
-						signatures.get(minecraftVersion.key(GameSide.SERVER), build),
+						signaturesArtifacts.get(minecraftVersion.key(GameSide.SERVER), build),
 						PATH_IN_JAR,
-						files.getServerSignaturesJar(minecraftVersion),
-						files.getServerSignaturesFile(minecraftVersion),
+						signatures.getServerSignaturesJar(minecraftVersion),
+						signatures.getServerSignaturesFile(minecraftVersion),
 						keratin.isCacheInvalid()
 					);
 				}

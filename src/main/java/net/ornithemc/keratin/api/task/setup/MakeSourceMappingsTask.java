@@ -4,38 +4,47 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SetupFiles;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SetupJars;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SourceMappings;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MakeSourceMappingsTask extends MinecraftTask implements MappingsPatcher {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		ExceptionsAndSignaturesDevelopmentFiles excsAndSigs = files.getExceptionsAndSignaturesDevelopmentFiles();
+		SetupJars setupJars = excsAndSigs.getSetupJars();
+		SetupFiles setupFiles = excsAndSigs.getSetupFiles();
+		SourceMappings sourceMappings = excsAndSigs.getSourceMappings();
 
 		if (minecraftVersion.hasSharedObfuscation()) {
 			workQueue.submit(PatchMappings.class, parameters -> {
-				parameters.getIntermediaryMappings().set(files.getSetupMergedIntermediaryMappings(minecraftVersion));
-				parameters.getNamedMappings().set(files.getSetupMergedNamedMappings(minecraftVersion));
-				parameters.getMappings().set(files.getSourceMergedMappings(minecraftVersion));
-				parameters.getJar().set(files.getSetupMergedJar(minecraftVersion));
+				parameters.getIntermediaryMappings().set(setupFiles.getMergedIntermediaryMappingsFile(minecraftVersion));
+				parameters.getNamedMappings().set(setupFiles.getMergedNamedMappingsFile(minecraftVersion));
+				parameters.getMappings().set(sourceMappings.getMergedMappingsFile(minecraftVersion));
+				parameters.getJar().set(setupJars.getMergedJar(minecraftVersion));
 			});
 		} else {
 			if (minecraftVersion.hasClient()) {
 				workQueue.submit(PatchMappings.class, parameters -> {
-					parameters.getIntermediaryMappings().set(files.getSetupClientIntermediaryMappings(minecraftVersion));
-					parameters.getNamedMappings().set(files.getSetupClientNamedMappings(minecraftVersion));
-					parameters.getMappings().set(files.getSourceClientMappings(minecraftVersion));
-					parameters.getJar().set(files.getSetupClientJar(minecraftVersion));
+					parameters.getIntermediaryMappings().set(setupFiles.getClientIntermediaryMappingsFile(minecraftVersion));
+					parameters.getNamedMappings().set(setupFiles.getClientNamedMappingsFile(minecraftVersion));
+					parameters.getMappings().set(sourceMappings.getClientMappingsFile(minecraftVersion));
+					parameters.getJar().set(setupJars.getClientJar(minecraftVersion));
 				});
 			}
 			if (minecraftVersion.hasServer()) {
 				workQueue.submit(PatchMappings.class, parameters -> {
-					parameters.getIntermediaryMappings().set(files.getSetupServerIntermediaryMappings(minecraftVersion));
-					parameters.getNamedMappings().set(files.getSetupServerNamedMappings(minecraftVersion));
-					parameters.getMappings().set(files.getSourceServerMappings(minecraftVersion));
-					parameters.getJar().set(files.getSetupServerJar(minecraftVersion));
+					parameters.getIntermediaryMappings().set(setupFiles.getServerIntermediaryMappingsFile(minecraftVersion));
+					parameters.getNamedMappings().set(setupFiles.getServerNamedMappingsFile(minecraftVersion));
+					parameters.getMappings().set(sourceMappings.getServerMappingsFile(minecraftVersion));
+					parameters.getJar().set(setupJars.getServerJar(minecraftVersion));
 				});
 			}
 		}

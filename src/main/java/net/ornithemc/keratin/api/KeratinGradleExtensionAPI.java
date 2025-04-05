@@ -3,6 +3,7 @@ package net.ornithemc.keratin.api;
 import org.gradle.api.Action;
 import org.gradle.api.provider.Property;
 
+import net.ornithemc.keratin.api.files.OrnitheFilesAccess;
 import net.ornithemc.keratin.api.manifest.VersionsManifest;
 import net.ornithemc.keratin.api.maven.SingleBuildMavenArtifacts;
 import net.ornithemc.keratin.api.maven.MetaSourcedMavenArtifactsAPI;
@@ -24,7 +25,7 @@ public interface KeratinGradleExtensionAPI {
 
 	void tasks(TaskSelection selection) throws Exception;
 
-	OrnitheFilesAPI getFiles();
+	OrnitheFilesAccess getFiles();
 
 	PublicationsAPI getPublications();
 

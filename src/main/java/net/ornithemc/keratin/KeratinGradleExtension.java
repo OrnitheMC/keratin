@@ -41,6 +41,7 @@ import net.ornithemc.keratin.api.KeratinGradleExtensionAPI;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.PublicationsAPI;
 import net.ornithemc.keratin.api.TaskSelection;
+import net.ornithemc.keratin.api.files.IntermediaryDevelopmentFilesAccess;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.manifest.VersionInfo;
 import net.ornithemc.keratin.api.manifest.VersionInfo.Library;
@@ -111,6 +112,8 @@ import net.ornithemc.keratin.api.task.setup.MapSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.MergeSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.ProcessSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.SetUpSourceTask;
+import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 import net.ornithemc.keratin.matching.Matches;
 import net.ornithemc.keratin.util.Versioned;
 
@@ -221,7 +224,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 		this.versionsManifest = this.project.getObjects().property(VersionsManifest.class);
 		this.versionsManifest.convention(this.project.provider(() -> {
-			File file = KeratinGradleExtension.this.files.getVersionsManifest();
+			File file = KeratinGradleExtension.this.files.getGlobalCache().getVersionsManifest();
 
 			if (cacheInvalid || project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
 				FileUtils.copyURLToFile(new URL(this.versionsManifestUrl.get()), file);
@@ -234,7 +237,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		}));
 		this.versionsManifest.finalizeValueOnRead();
 		this.versionInfos = new Versioned<>(minecraftVersion -> {
-			File file = this.files.getVersionInfo(minecraftVersion);
+			File file = this.files.getGlobalCache().getMetadataCache().getVersionInfoJson(minecraftVersion);
 
 			if (cacheInvalid || project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
 				VersionsManifest manifest = getVersionsManifest();
@@ -249,7 +252,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			return info;
 		});
 		this.versionDetails = new Versioned<>(minecraftVersion -> {
-			File file = this.files.getVersionDetails(minecraftVersion);
+			File file = this.files.getGlobalCache().getMetadataCache().getVersionDetailJsons(minecraftVersion);
 
 			if (cacheInvalid || project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
 				VersionsManifest manifest = getVersionsManifest();
@@ -264,7 +267,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			return details;
 		});
 		this.namedMappingsBuilds = new Versioned<>(minecraftVersion -> {
-			File cacheFile = this.files.getNamedMappingsBuildsCache();
+			File cacheFile = this.files.getSharedFiles().getNamedMappingsBuildsJson();
 
 			if (cacheFile.exists()) {
 				String s = FileUtils.readFileToString(cacheFile, Charset.defaultCharset());			
@@ -278,9 +281,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 			return 0;
 		});
-		this.exceptionsBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getExceptionsBuildsCache()));
-		this.signaturesBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getSignaturesBuildsCache()));
-		this.nestsBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getNestsBuildsCache()));
+		this.exceptionsBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getSharedFiles().getExceptionsBuildsJson()));
+		this.signaturesBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getSharedFiles().getSignaturesBuildsJson()));
+		this.nestsBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getSharedFiles().getNestsBuildsJson()));
 	}
 
 	private static Map<GameSide, Integer> parseBuildsFromCache(MinecraftVersion minecraftVersion, File cacheFile) throws IOException {
@@ -363,8 +366,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	}
 
 	private void findMinecraftVersions(TaskSelection selection, Set<MinecraftVersion> minecraftVersions) throws IOException {
-		if (selection == TaskSelection.CALAMUS) {
-			File dir = files.getMappingsDirectory();
+		if (selection == TaskSelection.INTERMEDIARY) {
+			File dir = files.getIntermediaryDevelopmentFiles().getMappingsDirectory();
 
 			for (File file : dir.listFiles()) {
 				if (!file.isFile() || !file.canRead()) {
@@ -386,8 +389,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				minecraftVersions.add(MinecraftVersion.parse(this, version));
 			}
 		}
-		if (selection == TaskSelection.FEATHER) {
-			File dir = files.getMappingsDirectory();
+		if (selection == TaskSelection.MAPPINGS) {
+			File dir = files.getMappingsDevelopmentFiles().getMappingsDirectory();
 			VersionGraph graph = VersionGraph.of(Format.TINY_V2, dir.toPath());
 
 			graph.walk(version -> minecraftVersions.add(MinecraftVersion.parse(this, version.toString())), path -> { });
@@ -400,26 +403,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			throw new RuntimeException("gen1 is no longer supported!");
 		}
 
-		for (File cacheDir : files.getCacheDirectories()) {
-			if (!cacheDir.exists()) {
-				cacheDir.mkdirs();
-			}
-		}
-		if (selection == TaskSelection.CALAMUS || selection == TaskSelection.FEATHER) {
-			File mappingsDir = files.getMappingsDirectory();
-
-			if (!mappingsDir.exists()) {
-				mappingsDir.mkdirs();
-			}
-
-			if (selection == TaskSelection.FEATHER) {
-				File runDir = files.getRunDirectory();
-				
-				if (!runDir.exists()) {
-					runDir.mkdirs();
-				}
-			}
-		}
+		files.mkdirs(selection);
 
 		List<MinecraftVersion> selectedMinecraftVersions = minecraftVersions.get();
 
@@ -458,14 +442,14 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				if (artifact != null) {
 					dependencies.add(minecraftLibraries.getName(), library.name());
 
-					if (selection == TaskSelection.SPARROW_AND_RAVEN) {
+					if (selection == TaskSelection.EXCEPTIONS_AND_SIGNATURES) {
 						dependencies.add(Configurations.IMPLEMENTATION, library.name());
 					}
 				}
 			}
 		}
 
-		if (selection == TaskSelection.FEATHER) {
+		if (selection == TaskSelection.MAPPINGS) {
 			Configuration decompileClasspath = configurations.register(Configurations.DECOMPILE_CLASSPATH).get();
 			Configuration enigmaRuntime = configurations.register(Configurations.ENIGMA_RUNTIME).get();
 			Configuration mappingPoetJar = configurations.register(Configurations.MAPPING_POET_JAR, configuration -> {
@@ -483,7 +467,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			dependencies.add(mappingPoetJar.getName(), "net.fabricmc:mappingpoet:0.3.0");
 			
 		}
-		if (selection == TaskSelection.SPARROW_AND_RAVEN) {
+		if (selection == TaskSelection.EXCEPTIONS_AND_SIGNATURES) {
 			Configuration decompileClasspath = configurations.register(Configurations.DECOMPILE_CLASSPATH).get();
 
 			dependencies.add(Configurations.IMPLEMENTATION, "net.fabricmc:fabric-loader:0.15.11");
@@ -492,10 +476,10 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 		publications.getGroupId().convention(project.provider(() -> "net.ornithemc"));
 
-		if (selection == TaskSelection.CALAMUS) {
+		if (selection == TaskSelection.INTERMEDIARY) {
 			publications.getArtifactId().convention(project.provider(() -> "calamus-intermediary-gen%d".formatted(intermediaryGen.get())));
 		}
-		if (selection == TaskSelection.FEATHER) {
+		if (selection == TaskSelection.MAPPINGS) {
 			publications.getArtifactId().convention(project.provider(() -> "feather-gen%d".formatted(intermediaryGen.get())));
 		}
 
@@ -522,7 +506,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			for (String minecraftVersion : minecraftVersionIds) {
 				task.from(configurations.getByName(Configurations.minecraftLibraries(minecraftVersion)));
 			}
-			task.into(files.getLibrariesCache());
+			task.into(files.getGlobalCache().getLibrariesCache().getDirectory());
 		});
 		TaskProvider<?> downloadJars = tasks.register("downloadMinecraftJars", DownloadMinecraftJarsTask.class);
 		TaskProvider<?> mergeJars = tasks.register("mergeMinecraftJars", MergeMinecraftJarsTask.class, task -> {
@@ -534,7 +518,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		TaskProvider<?> downloadSignatures = tasks.register("downloadSignatures", DownloadSignaturesTask.class);
 		TaskProvider<?> downloadNests = tasks.register("downloadNests", DownloadNestsTask.class);
 
-		if (selection == TaskSelection.CALAMUS) {
+		if (selection == TaskSelection.INTERMEDIARY) {
 			Action<GenerateIntermediaryTask> configureIntermediaryTask = task -> {
 				task.dependsOn(mergeJars, downloadNests);
 				task.getTargetNamespace().set(Mapper.INTERMEDIARY);
@@ -555,18 +539,20 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			TaskProvider<?> generateIntermediary = tasks.register("generateIntermediary", GenerateNewIntermediaryTask.class, configureIntermediaryTask);
 			TaskProvider<?> updateIntermediary = tasks.register("updateIntermediary", UpdateIntermediaryTask.class, configureIntermediaryTask);
 
+			IntermediaryDevelopmentFilesAccess files = this.files.getIntermediaryDevelopmentFiles();
+
 			for (String minecraftVersion : minecraftVersionIds) {
 				TaskProvider<?> convertMappings = tasks.register("%s_convertMappingsFromTinyV1ToTinyV2".formatted(minecraftVersion), ConvertMappingsFromTinyV1ToTinyV2Task.class, task -> {
-					task.getInput().set(files.getIntermediaryFile(minecraftVersion));
-					task.getOutput().set(files.getIntermediaryV2File(minecraftVersion));
+					task.getInput().set(files.getTinyV1MappingsFile(minecraftVersion));
+					task.getOutput().set(files.getTinyV2MappingsFile(minecraftVersion));
 				});
 
 				TaskProvider<BuildMappingsJarTask> tinyV1Jar = tasks.register("%s_tinyV1Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
-					task.configure(minecraftVersion, files.getIntermediaryFile(minecraftVersion), "%s-tiny-v1.jar");
+					task.configure(minecraftVersion, files.getTinyV1MappingsFile(minecraftVersion), "%s-tiny-v1.jar");
 				});
 				TaskProvider<BuildMappingsJarTask> tinyV2Jar = tasks.register("%s_tinyV2Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
 					task.dependsOn(convertMappings);
-					task.configure(minecraftVersion, files.getIntermediaryV2File(minecraftVersion), "%s-tiny-v2.jar");
+					task.configure(minecraftVersion, files.getTinyV2MappingsFile(minecraftVersion), "%s-tiny-v2.jar");
 				});
 
 				tasks.getByName("build").dependsOn(tinyV1Jar, tinyV2Jar);
@@ -583,7 +569,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				});
 			}
 		}
-		if (selection == TaskSelection.FEATHER || selection == TaskSelection.SPARROW_AND_RAVEN) {
+		if (selection == TaskSelection.MAPPINGS || selection == TaskSelection.EXCEPTIONS_AND_SIGNATURES) {
 			TaskProvider<?> downloadIntermediary = tasks.register("downloadIntermediary", DownloadIntermediaryTask.class, task -> {
 				task.dependsOn(mergeJars);
 			});
@@ -617,7 +603,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				task.getNamespace().set(Mapper.INTERMEDIARY);
 			});
 
-			if (selection == TaskSelection.FEATHER) {
+			if (selection == TaskSelection.MAPPINGS) {
 				TaskProvider<?> mapExceptionsToIntermediary = tasks.register("mapExceptionsToIntermediary", MapExceptionsTask.class, task -> {
 					task.dependsOn(downloadExceptions, fillIntermediary);
 					task.getSourceNamespace().set(Mapper.OFFICIAL);
@@ -729,6 +715,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.dependsOn(buildMappings, mapMinecraftForJavadoc);
 				});
 
+				BuildFiles files = this.files.getMappingsDevelopmentFiles().getBuildFiles();
+
 				for (String minecraftVersion : minecraftVersionIds) {
 					TaskProvider<Javadoc> javadoc = tasks.register("%s_javadoc".formatted(minecraftVersion), Javadoc.class, task -> {
 						task.dependsOn(genFakeSource);
@@ -741,20 +729,20 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 					TaskProvider<?> mergedTinyV1Jar = tasks.register("%s_mergedTinyV1Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
 						task.dependsOn(buildMappings);
-						task.configure(minecraftVersion, files.getMergedTinyV1NamedMappings(minecraftVersion), "%s-merged-tiny-v1.jar");
+						task.configure(minecraftVersion, files.getMergedTinyV1MappingsFile(minecraftVersion), "%s-merged-tiny-v1.jar");
 					});
 					TaskProvider<?> tinyV2Jar = tasks.register("%s_tinyV2Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
 						task.dependsOn(buildMappings);
-						task.configure(minecraftVersion, files.getTinyV2NamedMappings(minecraftVersion), "%s-tiny-v2.jar");
+						task.configure(minecraftVersion, files.getTinyV2MappingsFile(minecraftVersion), "%s-tiny-v2.jar");
 					});
 					TaskProvider<?> mergedTinyV2Jar = tasks.register("%s_mergedTinyV2Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
 						task.dependsOn(buildMappings);
-						task.configure(minecraftVersion, files.getMergedTinyV2NamedMappings(minecraftVersion), "%s-merged-tiny-v2.jar");
+						task.configure(minecraftVersion, files.getMergedTinyV2MappingsFile(minecraftVersion), "%s-merged-tiny-v2.jar");
 					});
 					TaskProvider<?> compressTinyV1 = tasks.register("%s_compressTinyV1".formatted(minecraftVersion), CompressMappingsTask.class, task -> {
 						task.dependsOn(buildMappings);
-						task.getMappings().set(files.getMergedTinyV1NamedMappings(minecraftVersion));
-						task.getCompressedMappings().set(files.getCompressedMergedTinyV1NamedMappings(minecraftVersion));
+						task.getMappings().set(files.getMergedTinyV1MappingsFile(minecraftVersion));
+						task.getCompressedMappings().set(files.getCompressedMergedTinyV1MappingsFile(minecraftVersion));
 					});
 					TaskProvider<?> javadocJar = tasks.register("%s_javadocJar".formatted(minecraftVersion), Jar.class, task -> {
 						task.dependsOn(javadoc);
@@ -786,7 +774,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					});
 				}
 			}
-			if (selection == TaskSelection.SPARROW_AND_RAVEN) {
+			if (selection == TaskSelection.EXCEPTIONS_AND_SIGNATURES) {
 				TaskProvider<?> downloadNamedMappings = tasks.register("downloadNamedMappings", DownloadNamedMappingsTask.class);
 
 				TaskProvider<?> makeSetupExceptions = tasks.register("makeSetupExceptions", MakeSetupExceptionsTask.class);
@@ -866,7 +854,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		});
 		tasks.getByName("clean", task -> {
 			task.doFirst(t -> {
-				project.delete(files.getLocalBuildCache());
+				project.delete(files.getLocalCache().getDirectory());
 			});
 		});
 	}
@@ -999,7 +987,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	}
 
 	public Matches findMatches(String sideA, String versionA, String sideB, String versionB) {
-		File dir = files.getMatchesDirectory();
+		File dir = files.getSharedFiles().getMatchesDirectory();
 
 		File file;
 		boolean inverted;

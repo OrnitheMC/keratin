@@ -14,7 +14,12 @@ import net.fabricmc.stitch.util.IntermediaryUtil;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.files.GlobalCache;
+import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
+import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
+import net.ornithemc.keratin.files.GlobalCache.NestsCache;
+import net.ornithemc.keratin.files.IntermediaryDevelopmentFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 import net.ornithemc.keratin.matching.Matches;
 
 public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
@@ -39,7 +44,13 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 		}
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		GlobalCache globalCache = files.getGlobalCache();
+		GameJarsCache gameJars = globalCache.getGameJarsCache();
+		NestsCache nests = globalCache.getNestsCache();
+		LibrariesCache libraries = globalCache.getLibrariesCache();
+		IntermediaryDevelopmentFiles intermediary = files.getIntermediaryDevelopmentFiles();
 
 		List<MinecraftVersion> fromMinecraftVersions = new ArrayList<>();
 
@@ -108,20 +119,20 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 
 		if (minecraftVersion.hasSharedObfuscation()) {
 			IntermediaryUtil.MergedArgsBuilder args = mergedArgs(minecraftVersion)
-				.newJarFile(files.getMergedJar(minecraftVersion))
-				.newNests(files.getMergedNestsFile(minecraftVersion))
-				.newLibraries(files.getLibraries(minecraftVersion))
+				.newJarFile(gameJars.getMergedJar(minecraftVersion))
+				.newNests(nests.getMergedNestsFile(minecraftVersion))
+				.newLibraries(libraries.getLibraries(minecraftVersion))
 				.newCheckSerializable(minecraftVersion.usesSerializableForLevelSaving())
-				.newIntermediaryFile(files.getIntermediaryFile(minecraftVersion.id()));
+				.newIntermediaryFile(intermediary.getTinyV1MappingsFile(minecraftVersion.id()));
 
 			for (MinecraftVersion fromMinecraftVersion : fromMinecraftVersions) {
 				Matches m = keratin.findMatches("merged", fromMinecraftVersion.id(), "merged", minecraftVersion.id());
 
 				args
-					.addOldJarFile(files.getMergedJar(fromMinecraftVersion))
+					.addOldJarFile(gameJars.getMergedJar(fromMinecraftVersion))
 					.addOldLibraries(Collections.emptyList())
 					.addOldCheckSerializable(fromMinecraftVersion.usesSerializableForLevelSaving())
-					.addOldIntermediaryFile(files.getIntermediaryFile(fromMinecraftVersion.id()))
+					.addOldIntermediaryFile(intermediary.getTinyV1MappingsFile(fromMinecraftVersion.id()))
 					.addMatchesFile(m.file(), m.inverted());
 			}
 
@@ -131,26 +142,26 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 
 			if (minecraftVersion.hasClient()) {
 				args
-					.newClientJarFile(files.getClientJar(minecraftVersion))
-					.newClientNests(files.getClientNestsFile(minecraftVersion))
-					.newClientLibraries(files.getLibraries(minecraftVersion.client().id()))
+					.newClientJarFile(gameJars.getClientJar(minecraftVersion))
+					.newClientNests(nests.getClientNestsFile(minecraftVersion))
+					.newClientLibraries(libraries.getLibraries(minecraftVersion.client().id()))
 					.newClientCheckSerializable(minecraftVersion.usesSerializableForLevelSaving());
 			}
 			if (minecraftVersion.hasServer()) {
 				args
-					.newServerJarFile(files.getServerJar(minecraftVersion))
-					.newServerNests(files.getServerNestsFile(minecraftVersion))
-					.newServerLibraries(files.getLibraries(minecraftVersion.server().id()))
+					.newServerJarFile(gameJars.getServerJar(minecraftVersion))
+					.newServerNests(nests.getServerNestsFile(minecraftVersion))
+					.newServerLibraries(libraries.getLibraries(minecraftVersion.server().id()))
 					.newServerCheckSerializable(minecraftVersion.usesSerializableForLevelSaving());
 			}
 			if (minecraftVersion.hasSharedVersioning()) {
-				args.newIntermediaryFile(files.getIntermediaryFile(minecraftVersion.id()));
+				args.newIntermediaryFile(intermediary.getTinyV1MappingsFile(minecraftVersion.id()));
 			} else {
 				if (minecraftVersion.hasClient()) {
-					args.newClientIntermediaryFile(files.getIntermediaryFile(minecraftVersion.client().id()));
+					args.newClientIntermediaryFile(intermediary.getTinyV1MappingsFile(minecraftVersion.client().id()));
 				}
 				if (minecraftVersion.hasServer()) {
-					args.newServerIntermediaryFile(files.getIntermediaryFile(minecraftVersion.server().id()));
+					args.newServerIntermediaryFile(intermediary.getTinyV1MappingsFile(minecraftVersion.server().id()));
 				}
 			}
 			if (minecraftVersion.hasClient() && minecraftVersion.hasServer()) {
@@ -162,9 +173,9 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 				MinecraftVersion fromMinecraftVersion = fromMinecraftVersions.get(0);
 
 				args
-					.oldJarFile(files.getMergedJar(fromMinecraftVersion))
+					.oldJarFile(gameJars.getMergedJar(fromMinecraftVersion))
 					.oldCheckSerializable(fromMinecraftVersion.usesSerializableForLevelSaving())
-					.oldIntermediaryFile(files.getIntermediaryFile(fromMinecraftVersion.id()));
+					.oldIntermediaryFile(intermediary.getTinyV1MappingsFile(fromMinecraftVersion.id()));
 
 				if (minecraftVersion.hasClient()) {
 					Matches m = keratin.findMatches("merged", fromMinecraftVersion.id(), "client", minecraftVersion.client().id());
@@ -214,18 +225,18 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 					Matches m = keratin.findMatches("client", fromClientVersion.client().id(), "client", minecraftVersion.client().id());
 
 					args
-						.oldClientJarFile(files.getClientJar(fromClientVersion))
+						.oldClientJarFile(gameJars.getClientJar(fromClientVersion))
 						.oldClientCheckSerializable(fromClientVersion.usesSerializableForLevelSaving())
-						.oldClientIntermediaryFile(files.getIntermediaryFile(fromClientVersion.client().id()))
+						.oldClientIntermediaryFile(intermediary.getTinyV1MappingsFile(fromClientVersion.client().id()))
 						.clientMatchesFile(m.file(), m.inverted());
 				}
 				if (fromServerVersion != null) {
 					Matches m = keratin.findMatches("server", fromServerVersion.server().id(), "server", minecraftVersion.server().id());
 
 					args
-						.oldServerJarFile(files.getServerJar(fromServerVersion))
+						.oldServerJarFile(gameJars.getServerJar(fromServerVersion))
 						.oldServerCheckSerializable(fromServerVersion.usesSerializableForLevelSaving())
-						.oldServerIntermediaryFile(files.getIntermediaryFile(fromServerVersion.server().id()))
+						.oldServerIntermediaryFile(intermediary.getTinyV1MappingsFile(fromServerVersion.server().id()))
 						.serverMatchesFile(m.file(), m.inverted());
 				}
 			}

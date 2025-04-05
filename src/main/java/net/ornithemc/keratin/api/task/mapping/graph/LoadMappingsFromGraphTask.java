@@ -4,13 +4,16 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.enigma.EnigmaSession;
+import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
+
 import net.ornithemc.mappingutils.io.Format;
 
 public abstract class LoadMappingsFromGraphTask extends MinecraftTask implements MappingsGraph {
@@ -18,11 +21,11 @@ public abstract class LoadMappingsFromGraphTask extends MinecraftTask implements
 	@Override
 	public void run() throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
 
-		File runDir = files.getRunDirectory();
+		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();
 
-		for (File f : runDir.listFiles()) {
+		for (File f : mappings.getRunDirectory().listFiles()) {
 			File enigmaSessionLock = new File(f, EnigmaSession.LOCK_FILE);
 
 			if (!enigmaSessionLock.exists()) {
@@ -38,10 +41,12 @@ public abstract class LoadMappingsFromGraphTask extends MinecraftTask implements
 		getProject().getLogger().lifecycle(":loading mappings from the graph for Minecraft " + minecraftVersion.id());
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
 
-		File graphDir = files.getMappingsDirectory();
-		File output = files.getWorkingDirectory(minecraftVersion);
+		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();
+
+		File graphDir = mappings.getMappingsDirectory();
+		File output = mappings.getWorkingDirectory(minecraftVersion);
 
 		loadMappings(minecraftVersion.id(), graphDir, output, Format.ENIGMA_DIR, Validators.removeDummyMappings(false));
 	}

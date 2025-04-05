@@ -4,22 +4,25 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.merging.Merger;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SourceJars;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MergeSourceJarsTask extends MinecraftTask implements Merger {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		SourceJars sourceJars = files.getExceptionsAndSignaturesDevelopmentFiles().getSourceJars();
 
 		if (!minecraftVersion.hasSharedObfuscation() && minecraftVersion.canBeMerged()) {
 			workQueue.submit(MergeJars.class, parameters -> {
-				parameters.getClient().set(files.getNamedSourceClientJar(minecraftVersion));
-				parameters.getServer().set(files.getNamedSourceServerJar(minecraftVersion));
-				parameters.getMerged().set(files.getNamedSourceMergedJar(minecraftVersion));
+				parameters.getClient().set(sourceJars.getNamedClientJar(minecraftVersion));
+				parameters.getServer().set(sourceJars.getNamedServerJar(minecraftVersion));
+				parameters.getMerged().set(sourceJars.getNamedMergedJar(minecraftVersion));
 			});
 		}
 	}

@@ -5,8 +5,9 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
+import net.ornithemc.keratin.files.GlobalCache.ExceptionsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MergeExceptionsTask extends MergeTask {
 
@@ -17,7 +18,9 @@ public abstract class MergeExceptionsTask extends MergeTask {
 		validateNamespace(namespace);
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		ExceptionsCache exceptions = files.getGlobalCache().getExceptionsCache();
 
 		if (!minecraftVersion.canBeMergedAsObfuscated()) {
 			int clientBuild = keratin.getExceptionsBuild(minecraftVersion, GameSide.CLIENT);
@@ -26,9 +29,9 @@ public abstract class MergeExceptionsTask extends MergeTask {
 			if (clientBuild > 0 && serverBuild > 0) {
 				workQueue.submit(MergeExceptions.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
-					parameters.getClient().set(files.getIntermediaryClientExceptionsFile(minecraftVersion));
-					parameters.getServer().set(files.getIntermediaryServerExceptionsFile(minecraftVersion));
-					parameters.getMerged().set(files.getIntermediaryMergedExceptionsFile(minecraftVersion));
+					parameters.getClient().set(exceptions.getIntermediaryClientExceptionsFile(minecraftVersion));
+					parameters.getServer().set(exceptions.getIntermediaryServerExceptionsFile(minecraftVersion));
+					parameters.getMerged().set(exceptions.getIntermediaryMergedExceptionsFile(minecraftVersion));
 				});
 			}
 		}

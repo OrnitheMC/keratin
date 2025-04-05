@@ -5,7 +5,9 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
+import net.ornithemc.keratin.files.GlobalCache.NestsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MapNestsTask extends MappingTask {
 
@@ -17,7 +19,10 @@ public abstract class MapNestsTask extends MappingTask {
 		validateNamespaces(srcNs, dstNs);
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		MappingsCache mappings = files.getGlobalCache().getMappingsCache();
+		NestsCache nests = files.getGlobalCache().getNestsCache();
 
 		boolean fromOfficial = OFFICIAL.equals(srcNs);
 
@@ -30,9 +35,9 @@ public abstract class MapNestsTask extends MappingTask {
 				workQueue.submit(MapNests.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(fromOfficial ? files.getMergedNestsFile(minecraftVersion) : files.getIntermediaryMergedNestsFile(minecraftVersion));
-					parameters.getOutput().set(fromOfficial ? files.getIntermediaryMergedNestsFile(minecraftVersion) : files.getNamedNestsFile(minecraftVersion));
-					parameters.getMappings().set(fromOfficial ? files.getMergedIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+					parameters.getInput().set(nests.getMergedNestsFile(minecraftVersion));
+					parameters.getOutput().set(nests.getIntermediaryMergedNestsFile(minecraftVersion));
+					parameters.getMappings().set(mappings.getFilledMergedIntermediaryMappingsFile(minecraftVersion));
 				});
 			}
 		} else {
@@ -40,18 +45,18 @@ public abstract class MapNestsTask extends MappingTask {
 				workQueue.submit(MapNests.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(fromOfficial ? files.getClientNestsFile(minecraftVersion) : files.getIntermediaryClientNestsFile(minecraftVersion));
-					parameters.getOutput().set(fromOfficial ? files.getIntermediaryClientNestsFile(minecraftVersion) : files.getNamedNestsFile(minecraftVersion));
-					parameters.getMappings().set(fromOfficial ? files.getClientIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+					parameters.getInput().set(nests.getClientNestsFile(minecraftVersion));
+					parameters.getOutput().set(nests.getIntermediaryClientNestsFile(minecraftVersion));
+					parameters.getMappings().set(mappings.getFilledClientIntermediaryMappingsFile(minecraftVersion));
 				});
 			}
 			if (minecraftVersion.hasServer() && (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (serverBuild > 0))) {
 				workQueue.submit(MapNests.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(fromOfficial ? files.getServerNestsFile(minecraftVersion) : files.getIntermediaryServerNestsFile(minecraftVersion));
-					parameters.getOutput().set(fromOfficial ? files.getIntermediaryServerNestsFile(minecraftVersion) : files.getNamedNestsFile(minecraftVersion));
-					parameters.getMappings().set(fromOfficial ? files.getServerIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+					parameters.getInput().set(nests.getServerNestsFile(minecraftVersion));
+					parameters.getOutput().set(nests.getIntermediaryServerNestsFile(minecraftVersion));
+					parameters.getMappings().set(mappings.getFilledServerIntermediaryMappingsFile(minecraftVersion));
 				});
 			}
 		}
@@ -60,7 +65,6 @@ public abstract class MapNestsTask extends MappingTask {
 	private static void validateNamespaces(String srcNs, String dstNs) {
 		boolean valid = switch (dstNs) {
 			case INTERMEDIARY -> OFFICIAL.equals(srcNs);
-			case NAMED -> INTERMEDIARY.equals(srcNs);
 			default -> false;
 		};
 		if (!valid) {

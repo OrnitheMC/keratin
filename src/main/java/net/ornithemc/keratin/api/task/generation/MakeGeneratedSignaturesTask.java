@@ -6,9 +6,11 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.SignaturePatcher;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.BuildFiles;
+import net.ornithemc.keratin.files.GlobalCache.NestsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 import net.ornithemc.mappingutils.MappingUtils;
 
 public abstract class MakeGeneratedSignaturesTask extends MinecraftTask implements SignaturePatcher {
@@ -16,12 +18,15 @@ public abstract class MakeGeneratedSignaturesTask extends MinecraftTask implemen
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		NestsCache nestsCache = files.getGlobalCache().getNestsCache();
+		BuildFiles buildFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getBuildFiles();
 
 		if (minecraftVersion.hasSharedObfuscation()) {
-			File jar = files.getGeneratedMergedJar(minecraftVersion);
-			File sigs = files.getGeneratedMergedSignatures(minecraftVersion);
-			File nests = files.getMergedNestsFile(minecraftVersion);
+			File jar = buildFiles.getGeneratedMergedJar(minecraftVersion);
+			File sigs = buildFiles.getGeneratedMergedSignaturesFile(minecraftVersion);
+			File nests = nestsCache.getMergedNestsFile(minecraftVersion);
 
 			extractSignatures(
 				jar,
@@ -36,9 +41,9 @@ public abstract class MakeGeneratedSignaturesTask extends MinecraftTask implemen
 			}
 		} else {
 			if (minecraftVersion.hasClient()) {
-				File jar = files.getGeneratedClientJar(minecraftVersion);
-				File sigs = files.getGeneratedClientSignatures(minecraftVersion);
-				File nests = files.getClientNestsFile(minecraftVersion);
+				File jar = buildFiles.getGeneratedClientJar(minecraftVersion);
+				File sigs = buildFiles.getGeneratedClientSignaturesFile(minecraftVersion);
+				File nests = nestsCache.getClientNestsFile(minecraftVersion);
 
 				extractSignatures(
 					jar,
@@ -53,9 +58,9 @@ public abstract class MakeGeneratedSignaturesTask extends MinecraftTask implemen
 				}
 			}
 			if (minecraftVersion.hasServer()) {
-				File jar = files.getGeneratedServerJar(minecraftVersion);
-				File sigs = files.getGeneratedServerSignatures(minecraftVersion);
-				File nests = files.getServerNestsFile(minecraftVersion);
+				File jar = buildFiles.getGeneratedServerJar(minecraftVersion);
+				File sigs = buildFiles.getGeneratedServerSignaturesFile(minecraftVersion);
+				File nests = nestsCache.getServerNestsFile(minecraftVersion);
 
 				extractSignatures(
 					jar,

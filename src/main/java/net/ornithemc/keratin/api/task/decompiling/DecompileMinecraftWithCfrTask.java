@@ -6,7 +6,9 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.Configurations;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.SharedFiles;
 
 public abstract class DecompileMinecraftWithCfrTask extends DecompileTask {
 
@@ -14,16 +16,19 @@ public abstract class DecompileMinecraftWithCfrTask extends DecompileTask {
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
 		Project project = keratin.getProject();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		SharedFiles sharedFiles = files.getSharedFiles();
+		BuildFiles buildFiles = files.getMappingsDevelopmentFiles().getBuildFiles();
 
 		submitJavaExecDecompileTask(
 			workQueue,
 			"org.benf.cfr.reader.Main",
 			project.getConfigurations().getByName(Configurations.DECOMPILE_CLASSPATH),
 			new String[] {
-				files.getProcessedNamedJar(minecraftVersion.id()).getAbsolutePath(),
+				buildFiles.getProcessedNamedJar(minecraftVersion.id()).getAbsolutePath(),
 				"--outputdir",
-				files.getDecompiledSourceDirectory(minecraftVersion).getAbsolutePath()
+				sharedFiles.getDecompiledSourceDirectory(minecraftVersion).getAbsolutePath()
 			}
 		);
 	}

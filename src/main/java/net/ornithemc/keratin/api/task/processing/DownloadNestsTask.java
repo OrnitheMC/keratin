@@ -7,10 +7,11 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.GlobalCache.NestsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class DownloadNestsTask extends MinecraftTask implements DownloaderAndExtracter {
 
@@ -19,8 +20,10 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
-		MultipleBuildsMavenArtifacts nests = keratin.getNestsArtifacts();
+		OrnitheFiles files = keratin.getFiles();
+		MultipleBuildsMavenArtifacts nestsArtifacts = keratin.getNestsArtifacts();
+
+		NestsCache nests = files.getGlobalCache().getNestsCache();
 
 		boolean nestsChanged = false;
 
@@ -29,18 +32,18 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 
 			if (build > 0) {
 				File outputJar = minecraftVersion.hasClient() && minecraftVersion.hasServer()
-					? files.getMergedNestsJar(minecraftVersion)
+					? nests.getMergedNestsJar(minecraftVersion)
 					: minecraftVersion.hasClient()
-						? files.getClientNestsJar(minecraftVersion)
-						: files.getServerNestsJar(minecraftVersion);
+						? nests.getClientNestsJar(minecraftVersion)
+						: nests.getServerNestsJar(minecraftVersion);
 				File output = minecraftVersion.hasClient() && minecraftVersion.hasServer()
-					? files.getMergedNestsFile(minecraftVersion)
+					? nests.getMergedNestsFile(minecraftVersion)
 					: minecraftVersion.hasClient()
-						? files.getClientNestsFile(minecraftVersion)
-						: files.getServerNestsFile(minecraftVersion);
+						? nests.getClientNestsFile(minecraftVersion)
+						: nests.getServerNestsFile(minecraftVersion);
 
 				nestsChanged |= downloadAndExtract(
-					nests.get(minecraftVersion.key(GameSide.MERGED), build),
+					nestsArtifacts.get(minecraftVersion.key(GameSide.MERGED), build),
 					PATH_IN_JAR,
 					outputJar,
 					output,
@@ -53,10 +56,10 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 
 				if (build > 0) {
 					nestsChanged |= downloadAndExtract(
-						nests.get(minecraftVersion.key(GameSide.CLIENT), build),
+						nestsArtifacts.get(minecraftVersion.key(GameSide.CLIENT), build),
 						PATH_IN_JAR,
-						files.getClientNestsJar(minecraftVersion),
-						files.getClientNestsFile(minecraftVersion),
+						nests.getClientNestsJar(minecraftVersion),
+						nests.getClientNestsFile(minecraftVersion),
 						keratin.isCacheInvalid()
 					);
 				}
@@ -66,10 +69,10 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 
 				if (build > 0) {
 					nestsChanged |= downloadAndExtract(
-						nests.get(minecraftVersion.key(GameSide.SERVER), build),
+						nestsArtifacts.get(minecraftVersion.key(GameSide.SERVER), build),
 						PATH_IN_JAR,
-						files.getServerNestsJar(minecraftVersion),
-						files.getServerNestsFile(minecraftVersion),
+						nests.getServerNestsJar(minecraftVersion),
+						nests.getServerNestsFile(minecraftVersion),
 						keratin.isCacheInvalid()
 					);
 				}

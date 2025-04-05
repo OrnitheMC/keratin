@@ -13,8 +13,10 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
+import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class ExtendGraphTask extends MinecraftTask implements MappingsGraph {
 
@@ -37,7 +39,10 @@ public abstract class ExtendGraphTask extends MinecraftTask implements MappingsG
 		}
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		ProcessedJarsCache processedJars = files.getGlobalCache().getProcessedJarsCache();
+		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();
 
 		List<MinecraftVersion> fromMinecraftVersions = new ArrayList<>();
 
@@ -47,13 +52,13 @@ public abstract class ExtendGraphTask extends MinecraftTask implements MappingsG
 
 		getProject().getLogger().lifecycle("extending the graph from Minecraft " + String.join("/", fromMinecraftVersionStrings) + " to " + minecraftVersion.id());
 
-		File graphDir = files.getMappingsDirectory();
+		File graphDir = mappings.getMappingsDirectory();
 		String classNamePattern = getClassNamePattern().getOrElse("");
 
-		File jar = files.getMainProcessedIntermediaryJar(minecraftVersion);
+		File jar = processedJars.getMainProcessedIntermediaryJar(minecraftVersion);
 		List<File> fromJars = new ArrayList<>();
 		for (MinecraftVersion fromMinecraftVersion : fromMinecraftVersions) {
-			fromJars.add(files.getMainProcessedIntermediaryJar(fromMinecraftVersion));
+			fromJars.add(processedJars.getMainProcessedIntermediaryJar(fromMinecraftVersion));
 		}
 
 		extendGraph(graphDir, minecraftVersion, fromMinecraftVersions, jar, fromJars, classNamePattern);

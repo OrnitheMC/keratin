@@ -10,23 +10,26 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.Preen;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SourceJars;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class ProcessSourceJarsTask extends MinecraftTask {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		SourceJars sourceJars = files.getExceptionsAndSignaturesDevelopmentFiles().getSourceJars();
 
 		File sourceJar = minecraftVersion.canBeMerged()
-			? files.getNamedSourceMergedJar(minecraftVersion)
+			? sourceJars.getNamedMergedJar(minecraftVersion)
 			: minecraftVersion.hasClient()
-				? files.getNamedSourceClientJar(minecraftVersion)
-				: files.getNamedSourceServerJar(minecraftVersion);
-		File processedSourceJar = files.getProcessedNamedSourceJar(minecraftVersion);
+				? sourceJars.getNamedClientJar(minecraftVersion)
+				: sourceJars.getNamedServerJar(minecraftVersion);
+		File processedSourceJar = sourceJars.getProcessedNamedJar(minecraftVersion);
 
 		workQueue.submit(ProcessSourceJar.class, parameters -> {
 			parameters.getInput().set(sourceJar);

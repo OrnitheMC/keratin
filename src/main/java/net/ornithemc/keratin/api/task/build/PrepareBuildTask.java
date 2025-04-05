@@ -13,10 +13,13 @@ import com.google.common.io.Files;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.graph.MappingsGraph;
 import net.ornithemc.keratin.api.task.mapping.graph.Validators;
+import net.ornithemc.keratin.files.GlobalCache.NestsCache;
+import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
+import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 import net.ornithemc.mappingutils.MappingUtils;
 import net.ornithemc.mappingutils.io.Format;
 
@@ -25,20 +28,18 @@ public abstract class PrepareBuildTask extends MinecraftTask implements Mappings
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
 
-		File buildCache = files.getLocalBuildCache();
-
-		if (!buildCache.exists()) {
-			buildCache.mkdirs();
-		}
+		NestsCache nests = files.getGlobalCache().getNestsCache();
+		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();
+		BuildFiles buildFiles = mappings.getBuildFiles();
 
 		workQueue.submit(PrepareBuild.class, parameters -> {
 			parameters.getMinecraftVersion().set(minecraftVersion.id());
-			parameters.getGraphDirectory().set(files.getMappingsDirectory());
-			parameters.getNests().set(files.getMainIntermediaryNestsFile(minecraftVersion));
-			parameters.getProcessedOutput().set(files.getProcessedNamedMappings(minecraftVersion));
-			parameters.getOutput().set(files.getNamedMappings(minecraftVersion));
+			parameters.getGraphDirectory().set(mappings.getMappingsDirectory());
+			parameters.getNests().set(nests.getMainIntermediaryNestsFile(minecraftVersion));
+			parameters.getProcessedOutput().set(buildFiles.getProcessedMappingsFile(minecraftVersion));
+			parameters.getOutput().set(buildFiles.getMappingsFile(minecraftVersion));
 		});
 	}
 

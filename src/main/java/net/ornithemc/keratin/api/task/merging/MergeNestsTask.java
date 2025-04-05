@@ -5,8 +5,9 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
+import net.ornithemc.keratin.files.GlobalCache.NestsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MergeNestsTask extends MergeTask {
 
@@ -17,7 +18,9 @@ public abstract class MergeNestsTask extends MergeTask {
 		validateNamespace(namespace);
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		NestsCache nests = files.getGlobalCache().getNestsCache();
 
 		if (!minecraftVersion.canBeMergedAsObfuscated()) {
 			int clientBuild = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
@@ -26,9 +29,9 @@ public abstract class MergeNestsTask extends MergeTask {
 			if (clientBuild > 0 && serverBuild > 0) {
 				workQueue.submit(MergeNests.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
-					parameters.getClient().set(files.getIntermediaryClientNestsFile(minecraftVersion));
-					parameters.getServer().set(files.getIntermediaryServerNestsFile(minecraftVersion));
-					parameters.getMerged().set(files.getIntermediaryMergedNestsFile(minecraftVersion));
+					parameters.getClient().set(nests.getIntermediaryClientNestsFile(minecraftVersion));
+					parameters.getServer().set(nests.getIntermediaryServerNestsFile(minecraftVersion));
+					parameters.getMerged().set(nests.getIntermediaryMergedNestsFile(minecraftVersion));
 				});
 			}
 		}

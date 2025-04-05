@@ -12,70 +12,85 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
 import net.ornithemc.keratin.api.task.processing.Nester;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SetupFiles;
+import net.ornithemc.keratin.files.GlobalCache;
+import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
+import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
+import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
+import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
+import net.ornithemc.keratin.files.GlobalCache.NestsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MakeSetupMappingsTask extends MinecraftTask {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		GlobalCache globalCache = files.getGlobalCache();
+		GameJarsCache gameJars = globalCache.getGameJarsCache();
+		MappedJarsCache mappedJars = globalCache.getMappedJarsCache();
+		MappingsCache mappings = globalCache.getMappingsCache();
+		NestsCache nests = globalCache.getNestsCache();
+		LibrariesCache libraries = globalCache.getLibrariesCache();
+		SetupFiles setupFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getSetupFiles();
 
 		if (minecraftVersion.hasSharedObfuscation()) {
 			workQueue.submit(MakeSetupMappings.class, parameters -> {
-				parameters.getInputMappings().set(files.getMergedIntermediaryMappings(minecraftVersion));
-				parameters.getOutputMappings().set(files.getSetupMergedIntermediaryMappings(minecraftVersion));
-				parameters.getJar().set(files.getMergedJar(minecraftVersion));
-				parameters.getLibraries().set(files.getLibraries(minecraftVersion));
+				parameters.getInputMappings().set(mappings.getMergedIntermediaryMappingsFile(minecraftVersion));
+				parameters.getOutputMappings().set(setupFiles.getMergedIntermediaryMappingsFile(minecraftVersion));
+				parameters.getJar().set(gameJars.getMergedJar(minecraftVersion));
+				parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 				parameters.getTargetNamespace().set(Mapper.INTERMEDIARY);
-				parameters.getNestsFile().set(files.getMergedNestsFile(minecraftVersion));
+				parameters.getNestsFile().set(nests.getMergedNestsFile(minecraftVersion));
 			});
 			workQueue.submit(MakeSetupMappings.class, parameters -> {
-				parameters.getInputMappings().set(files.getNamedMappingsFile(minecraftVersion.id()));
-				parameters.getOutputMappings().set(files.getSetupMergedNamedMappings(minecraftVersion));
-				parameters.getJar().set(files.getIntermediaryMergedJar(minecraftVersion));
-				parameters.getLibraries().set(files.getLibraries(minecraftVersion));
+				parameters.getInputMappings().set(mappings.getNamedMappingsFile(minecraftVersion.id()));
+				parameters.getOutputMappings().set(setupFiles.getMergedNamedMappingsFile(minecraftVersion));
+				parameters.getJar().set(mappedJars.getIntermediaryMergedJar(minecraftVersion));
+				parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 				parameters.getTargetNamespace().set(Mapper.NAMED);
-				parameters.getNestsFile().set(files.getIntermediaryMergedNestsFile(minecraftVersion));
+				parameters.getNestsFile().set(nests.getIntermediaryMergedNestsFile(minecraftVersion));
 			});
 		} else {
 			if (minecraftVersion.hasClient()) {
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
-					parameters.getInputMappings().set(files.getClientIntermediaryMappings(minecraftVersion));
-					parameters.getOutputMappings().set(files.getSetupClientIntermediaryMappings(minecraftVersion));
-					parameters.getJar().set(files.getClientJar(minecraftVersion));
-					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
+					parameters.getInputMappings().set(mappings.getClientIntermediaryMappingsFile(minecraftVersion));
+					parameters.getOutputMappings().set(setupFiles.getClientIntermediaryMappingsFile(minecraftVersion));
+					parameters.getJar().set(gameJars.getClientJar(minecraftVersion));
+					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 					parameters.getTargetNamespace().set(Mapper.INTERMEDIARY);
-					parameters.getNestsFile().set(files.getClientNestsFile(minecraftVersion));
+					parameters.getNestsFile().set(nests.getClientNestsFile(minecraftVersion));
 				});
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
-					parameters.getInputMappings().set(files.getNamedMappingsFile(minecraftVersion.client().id()));
-					parameters.getOutputMappings().set(files.getSetupClientNamedMappings(minecraftVersion));
-					parameters.getJar().set(files.getIntermediaryClientJar(minecraftVersion));
-					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
+					parameters.getInputMappings().set(mappings.getNamedMappingsFile(minecraftVersion.client().id()));
+					parameters.getOutputMappings().set(setupFiles.getClientNamedMappingsFile(minecraftVersion));
+					parameters.getJar().set(mappedJars.getIntermediaryClientJar(minecraftVersion));
+					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 					parameters.getTargetNamespace().set(Mapper.NAMED);
-					parameters.getNestsFile().set(files.getIntermediaryClientNestsFile(minecraftVersion));
+					parameters.getNestsFile().set(nests.getIntermediaryClientNestsFile(minecraftVersion));
 				});
 			}
 			if (minecraftVersion.hasServer()) {
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
-					parameters.getInputMappings().set(files.getServerIntermediaryMappings(minecraftVersion));
-					parameters.getOutputMappings().set(files.getSetupServerIntermediaryMappings(minecraftVersion));
-					parameters.getJar().set(files.getServerJar(minecraftVersion));
-					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
+					parameters.getInputMappings().set(mappings.getServerIntermediaryMappingsFile(minecraftVersion));
+					parameters.getOutputMappings().set(setupFiles.getServerIntermediaryMappingsFile(minecraftVersion));
+					parameters.getJar().set(gameJars.getServerJar(minecraftVersion));
+					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 					parameters.getTargetNamespace().set(Mapper.INTERMEDIARY);
-					parameters.getNestsFile().set(files.getServerNestsFile(minecraftVersion));
+					parameters.getNestsFile().set(nests.getServerNestsFile(minecraftVersion));
 				});
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
-					parameters.getInputMappings().set(files.getNamedMappingsFile(minecraftVersion.server().id()));
-					parameters.getOutputMappings().set(files.getSetupServerNamedMappings(minecraftVersion));
-					parameters.getJar().set(files.getIntermediaryServerJar(minecraftVersion));
-					parameters.getLibraries().set(files.getLibraries(minecraftVersion));
+					parameters.getInputMappings().set(mappings.getNamedMappingsFile(minecraftVersion.server().id()));
+					parameters.getOutputMappings().set(setupFiles.getServerNamedMappingsFile(minecraftVersion));
+					parameters.getJar().set(mappedJars.getIntermediaryServerJar(minecraftVersion));
+					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 					parameters.getTargetNamespace().set(Mapper.NAMED);
-					parameters.getNestsFile().set(files.getIntermediaryServerNestsFile(minecraftVersion));
+					parameters.getNestsFile().set(nests.getIntermediaryServerNestsFile(minecraftVersion));
 				});
 			}
 		}

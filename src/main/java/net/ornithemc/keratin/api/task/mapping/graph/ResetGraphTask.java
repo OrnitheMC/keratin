@@ -9,8 +9,10 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
+import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class ResetGraphTask extends MinecraftTask implements MappingsGraph {
 
@@ -22,10 +24,13 @@ public abstract class ResetGraphTask extends MinecraftTask implements MappingsGr
 		getProject().getLogger().lifecycle(":resetting the graph with Minecraft " + minecraftVersion.id() + " as the root");
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
 
-		File graphDir = files.getMappingsDirectory();
-		File rootMinecraftJar = files.getMainProcessedIntermediaryJar(minecraftVersion);
+		ProcessedJarsCache processedJars = files.getGlobalCache().getProcessedJarsCache();
+		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();
+
+		File graphDir = mappings.getMappingsDirectory();
+		File rootMinecraftJar = processedJars.getMainProcessedIntermediaryJar(minecraftVersion);
 		String classNamePattern = getClassNamePattern().getOrElse("");
 
 		resetGraph(graphDir, minecraftVersion, rootMinecraftJar, classNamePattern);

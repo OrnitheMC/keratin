@@ -16,10 +16,12 @@ import net.ornithemc.exceptor.io.ClassEntry;
 import net.ornithemc.exceptor.io.ExceptionsFile;
 import net.ornithemc.exceptor.io.ExceptorIo;
 import net.ornithemc.exceptor.io.MethodEntry;
+
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 import net.ornithemc.keratin.matching.Matches;
 import net.ornithemc.keratin.matching.MatchesUtil;
 
@@ -31,15 +33,17 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		ExceptionsAndSignaturesDevelopmentFiles excsAndSigs = files.getExceptionsAndSignaturesDevelopmentFiles();
 
 		MinecraftVersion fromMinecraftVersion = getFromMinecraftVersion().isPresent()
 			? MinecraftVersion.parse(keratin, getFromMinecraftVersion().get())
 			: null;
 
 		if (minecraftVersion.hasSharedObfuscation()) {
-			File excs = files.getMergedExceptions(minecraftVersion);
-			File setup = files.getSetupMergedExceptions(minecraftVersion);
+			File excs = excsAndSigs.getMergedExceptionsFile(minecraftVersion);
+			File setup = excsAndSigs.getMergedExceptionsFile(minecraftVersion);
 
 			if (excs.exists()) {
 				Files.copy(excs, setup);
@@ -47,7 +51,7 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 				if (fromMinecraftVersion == null) {
 					setup.createNewFile();
 				} else if (fromMinecraftVersion.hasSharedObfuscation()) {
-					File fromExcs = files.getMergedExceptions(fromMinecraftVersion);
+					File fromExcs = excsAndSigs.getMergedExceptionsFile(fromMinecraftVersion);
 
 					updateExceptions(
 						fromMinecraftVersion.id(),
@@ -63,8 +67,8 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 			}
 		} else {
 			if (minecraftVersion.hasClient()) {
-				File excs = files.getClientExceptions(minecraftVersion);
-				File setup = files.getSetupClientExceptions(minecraftVersion);
+				File excs = excsAndSigs.getClientExceptionsFile(minecraftVersion);
+				File setup = excsAndSigs.getClientExceptionsFile(minecraftVersion);
 
 				if (excs.exists()) {
 					Files.copy(excs, setup);
@@ -74,7 +78,7 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 					} else if (fromMinecraftVersion.hasSharedObfuscation()) {
 						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
 					} else if (fromMinecraftVersion.hasClient()) {
-						File fromExcs = files.getClientExceptions(fromMinecraftVersion);
+						File fromExcs = excsAndSigs.getClientExceptionsFile(fromMinecraftVersion);
 
 						updateExceptions(
 							fromMinecraftVersion.client().id(),
@@ -90,8 +94,8 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 				}
 			}
 			if (minecraftVersion.hasServer()) {
-				File excs = files.getServerExceptions(minecraftVersion);
-				File setup = files.getSetupServerExceptions(minecraftVersion);
+				File excs = excsAndSigs.getServerExceptionsFile(minecraftVersion);
+				File setup = excsAndSigs.getServerExceptionsFile(minecraftVersion);
 
 				if (excs.exists()) {
 					Files.copy(excs, setup);
@@ -101,7 +105,7 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 					} else if (fromMinecraftVersion.hasSharedObfuscation()) {
 						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
 					} else if (fromMinecraftVersion.hasServer()) {
-						File fromExcs = files.getServerExceptions(fromMinecraftVersion);
+						File fromExcs = excsAndSigs.getServerExceptionsFile(fromMinecraftVersion);
 
 						updateExceptions(
 							fromMinecraftVersion.server().id(),

@@ -4,10 +4,11 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.maven.SingleBuildMavenArtifacts;
 import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class DownloadIntermediaryTask extends MinecraftTask implements DownloaderAndExtracter {
 
@@ -16,8 +17,10 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
 		SingleBuildMavenArtifacts intermediary = keratin.getIntermediaryArtifacts();
+
+		MappingsCache mappings = files.getGlobalCache().getMappingsCache();
 
 		boolean intermediaryChanged = false;
 
@@ -25,8 +28,8 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 			intermediaryChanged |= downloadAndExtract(
 				intermediary.get(minecraftVersion.id()),
 				PATH_IN_JAR,
-				files.getMergedIntermediaryMappingsJar(minecraftVersion),
-				files.getMergedIntermediaryMappings(minecraftVersion),
+				mappings.getMergedIntermediaryMappingsJar(minecraftVersion),
+				mappings.getMergedIntermediaryMappingsFile(minecraftVersion),
 				keratin.isCacheInvalid()
 			);
 		} else {
@@ -34,8 +37,8 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 				intermediaryChanged |= downloadAndExtract(
 					intermediary.get(minecraftVersion.client().id()),
 					PATH_IN_JAR,
-					files.getClientIntermediaryMappingsJar(minecraftVersion),
-					files.getClientIntermediaryMappings(minecraftVersion),
+					mappings.getClientIntermediaryMappingsJar(minecraftVersion),
+					mappings.getClientIntermediaryMappingsFile(minecraftVersion),
 					keratin.isCacheInvalid()
 				);
 			}
@@ -43,8 +46,8 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 				intermediaryChanged |= downloadAndExtract(
 					intermediary.get(minecraftVersion.server().id()),
 					PATH_IN_JAR,
-					files.getServerIntermediaryMappingsJar(minecraftVersion),
-					files.getServerIntermediaryMappings(minecraftVersion),
+					mappings.getServerIntermediaryMappingsJar(minecraftVersion),
+					mappings.getServerIntermediaryMappingsFile(minecraftVersion),
 					keratin.isCacheInvalid()
 				);
 			}

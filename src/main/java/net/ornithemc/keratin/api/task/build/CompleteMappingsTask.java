@@ -13,8 +13,11 @@ import net.fabricmc.nameproposal.MappingNameCompleter;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
+import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
+import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class CompleteMappingsTask extends MinecraftTask {
 
@@ -23,13 +26,17 @@ public abstract class CompleteMappingsTask extends MinecraftTask {
 		getProject().getLogger().lifecycle(":completing mappings for Minecraft " + minecraftVersion.id());
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		MappedJarsCache mappedJars = files.getGlobalCache().getMappedJarsCache();
+		MappingsCache mappings = files.getGlobalCache().getMappingsCache();
+		BuildFiles buildFiles = files.getMappingsDevelopmentFiles().getBuildFiles();
 
 		workQueue.submit(CompleteMappings.class, parameters -> {
-			parameters.getJar().set(files.getMainIntermediaryJar(minecraftVersion));
-			parameters.getMappings().set(files.getNamedMappings(minecraftVersion));
-			parameters.getIntermediary().set(files.getMainIntermediaryMappings(minecraftVersion));
-			parameters.getCompletedMappings().set(files.getCompletedNamedMappings(minecraftVersion));
+			parameters.getJar().set(mappedJars.getMainIntermediaryJar(minecraftVersion));
+			parameters.getMappings().set(buildFiles.getMappingsFile(minecraftVersion));
+			parameters.getIntermediary().set(mappings.getMainIntermediaryMappingsFile(minecraftVersion));
+			parameters.getCompletedMappings().set(buildFiles.getCompletedMappingsFile(minecraftVersion));
 		});
 	}
 

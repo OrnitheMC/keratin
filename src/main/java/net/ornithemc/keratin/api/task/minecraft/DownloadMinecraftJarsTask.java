@@ -4,17 +4,20 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.manifest.VersionDetails.Downloads.Download;
 import net.ornithemc.keratin.api.task.Downloader;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class DownloadMinecraftJarsTask extends MinecraftTask implements Downloader {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		GameJarsCache gameJars = files.getGlobalCache().getGameJarsCache();
 
 		boolean minecraftJarsChanged = false;
 
@@ -24,7 +27,7 @@ public abstract class DownloadMinecraftJarsTask extends MinecraftTask implements
 			minecraftJarsChanged |= download(
 				download.url(),
 				download.sha1(),
-				files.getClientJar(minecraftVersion),
+				gameJars.getClientJar(minecraftVersion),
 				keratin.isCacheInvalid()
 			);
 		}
@@ -34,7 +37,7 @@ public abstract class DownloadMinecraftJarsTask extends MinecraftTask implements
 			minecraftJarsChanged |= download(
 				download.url(),
 				download.sha1(),
-				files.getServerJar(minecraftVersion),
+				gameJars.getServerJar(minecraftVersion),
 				keratin.isCacheInvalid()
 			);
 		}

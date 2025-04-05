@@ -6,9 +6,12 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.Exceptor;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.BuildFiles;
+import net.ornithemc.keratin.files.GlobalCache.NestsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
+
 import net.ornithemc.mappingutils.MappingUtils;
 
 public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implements Exceptor {
@@ -16,12 +19,15 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		NestsCache nestsCache = files.getGlobalCache().getNestsCache();
+		BuildFiles buildFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getBuildFiles();
 
 		if (minecraftVersion.hasSharedObfuscation()) {
-			File jar = files.getGeneratedMergedJar(minecraftVersion);
-			File excs = files.getGeneratedMergedExceptions(minecraftVersion);
-			File nests = files.getMergedNestsFile(minecraftVersion);
+			File jar = buildFiles.getGeneratedMergedJar(minecraftVersion);
+			File excs = buildFiles.getGeneratedMergedExceptionsFile(minecraftVersion);
+			File nests = nestsCache.getMergedNestsFile(minecraftVersion);
 
 			extractExceptions(
 				jar,
@@ -36,9 +42,9 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 			}
 		} else {
 			if (minecraftVersion.hasClient()) {
-				File jar = files.getGeneratedClientJar(minecraftVersion);
-				File excs = files.getGeneratedClientExceptions(minecraftVersion);
-				File nests = files.getClientNestsFile(minecraftVersion);
+				File jar = buildFiles.getGeneratedClientJar(minecraftVersion);
+				File excs = buildFiles.getGeneratedClientExceptionsFile(minecraftVersion);
+				File nests = nestsCache.getClientNestsFile(minecraftVersion);
 
 				extractExceptions(
 					jar,
@@ -53,9 +59,9 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 				}
 			}
 			if (minecraftVersion.hasServer()) {
-				File jar = files.getGeneratedServerJar(minecraftVersion);
-				File excs = files.getGeneratedServerExceptions(minecraftVersion);
-				File nests = files.getServerNestsFile(minecraftVersion);
+				File jar = buildFiles.getGeneratedServerJar(minecraftVersion);
+				File excs = buildFiles.getGeneratedServerExceptionsFile(minecraftVersion);
+				File nests = nestsCache.getServerNestsFile(minecraftVersion);
 
 				extractExceptions(
 					jar,

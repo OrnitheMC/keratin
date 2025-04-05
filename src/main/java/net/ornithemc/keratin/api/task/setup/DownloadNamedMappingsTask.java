@@ -4,10 +4,11 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class DownloadNamedMappingsTask extends MinecraftTask implements DownloaderAndExtracter {
 
@@ -35,8 +36,10 @@ public abstract class DownloadNamedMappingsTask extends MinecraftTask implements
 
 	private boolean downloadNamedMappings(String minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
 		MultipleBuildsMavenArtifacts namedMappings = keratin.getNamedMappingsArtifacts();
+
+		MappingsCache mappings = files.getGlobalCache().getMappingsCache();
 
 		int build = keratin.getNamedMappingsBuild(minecraftVersion);
 
@@ -44,8 +47,8 @@ public abstract class DownloadNamedMappingsTask extends MinecraftTask implements
 			return downloadAndExtract(
 				namedMappings.get(minecraftVersion, build),
 				PATH_IN_JAR,
-				files.getNamedMappingsJar(minecraftVersion),
-				files.getNamedMappingsFile(minecraftVersion),
+				mappings.getNamedMappingsJar(minecraftVersion),
+				mappings.getNamedMappingsFile(minecraftVersion),
 				keratin.isCacheInvalid()
 			);
 		}

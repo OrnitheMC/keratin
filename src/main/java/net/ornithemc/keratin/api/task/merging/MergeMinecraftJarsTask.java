@@ -4,8 +4,10 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
+import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
+import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MergeMinecraftJarsTask extends MergeTask {
 
@@ -16,7 +18,10 @@ public abstract class MergeMinecraftJarsTask extends MergeTask {
 		validateNamespace(namespace);
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		GameJarsCache gameJars = files.getGlobalCache().getGameJarsCache();
+		MappedJarsCache mappedJars = files.getGlobalCache().getMappedJarsCache();
 
 		if (minecraftVersion.canBeMerged()) {
 			boolean official = Mapper.OFFICIAL.equals(namespace);
@@ -24,9 +29,9 @@ public abstract class MergeMinecraftJarsTask extends MergeTask {
 			if (official == minecraftVersion.hasSharedObfuscation()) {
 				workQueue.submit(MergeJars.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
-					parameters.getClient().set(official ? files.getClientJar(minecraftVersion) : files.getIntermediaryClientJar(minecraftVersion));
-					parameters.getServer().set(official ? files.getServerJar(minecraftVersion) : files.getIntermediaryServerJar(minecraftVersion));
-					parameters.getMerged().set(official ? files.getMergedJar(minecraftVersion) : files.getIntermediaryMergedJar(minecraftVersion));
+					parameters.getClient().set(official ? gameJars.getClientJar(minecraftVersion) : mappedJars.getIntermediaryClientJar(minecraftVersion));
+					parameters.getServer().set(official ? gameJars.getServerJar(minecraftVersion) : mappedJars.getIntermediaryServerJar(minecraftVersion));
+					parameters.getMerged().set(official ? gameJars.getMergedJar(minecraftVersion) : mappedJars.getIntermediaryMergedJar(minecraftVersion));
 				});
 			}
 		}

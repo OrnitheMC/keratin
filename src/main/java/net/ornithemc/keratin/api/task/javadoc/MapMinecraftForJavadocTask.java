@@ -4,43 +4,50 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
+import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
+import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
+import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MapMinecraftForJavadocTask extends MinecraftTask implements Mapper {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		MappedJarsCache mappedJars = files.getGlobalCache().getMappedJarsCache();
+		LibrariesCache libraries = files.getGlobalCache().getLibrariesCache();
+		BuildFiles buildFiles = files.getMappingsDevelopmentFiles().getBuildFiles();
 
 		if (minecraftVersion.hasSharedVersioning() && minecraftVersion.canBeMerged()) {
 			workQueue.submit(MapJar.class, parameters -> {
-				parameters.getInput().set(files.getIntermediaryMergedJar(minecraftVersion));
-				parameters.getOutput().set(files.getJavadocNamedJar(minecraftVersion.id()));
-				parameters.getMappings().set(files.getNamedMappings(minecraftVersion));
-				parameters.getLibraries().addAll(files.getLibraries(minecraftVersion));
+				parameters.getInput().set(mappedJars.getIntermediaryMergedJar(minecraftVersion));
+				parameters.getOutput().set(buildFiles.getJavadocNamedJar(minecraftVersion.id()));
+				parameters.getMappings().set(buildFiles.getMappingsFile(minecraftVersion));
+				parameters.getLibraries().addAll(libraries.getLibraries(minecraftVersion));
 				parameters.getSourceNamespace().set(INTERMEDIARY);
 				parameters.getTargetNamespace().set(NAMED);
 			});
 		} else {
 			if (minecraftVersion.hasClient()) {
 				workQueue.submit(MapJar.class, parameters -> {
-					parameters.getInput().set(files.getIntermediaryClientJar(minecraftVersion));
-					parameters.getOutput().set(files.getJavadocNamedJar(minecraftVersion.client().id()));
-					parameters.getMappings().set(files.getNamedMappings(minecraftVersion));
-					parameters.getLibraries().set(files.getLibraries(minecraftVersion.client().id()));
+					parameters.getInput().set(mappedJars.getIntermediaryClientJar(minecraftVersion));
+					parameters.getOutput().set(buildFiles.getJavadocNamedJar(minecraftVersion.client().id()));
+					parameters.getMappings().set(buildFiles.getMappingsFile(minecraftVersion));
+					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion.client().id()));
 					parameters.getSourceNamespace().set(INTERMEDIARY);
 					parameters.getTargetNamespace().set(NAMED);
 				});
 			}
 			if (minecraftVersion.hasServer()) {
 				workQueue.submit(MapJar.class, parameters -> {
-					parameters.getInput().set(files.getIntermediaryServerJar(minecraftVersion));
-					parameters.getOutput().set(files.getJavadocNamedJar(minecraftVersion.server().id()));
-					parameters.getMappings().set(files.getNamedMappings(minecraftVersion));
-					parameters.getLibraries().set(files.getLibraries(minecraftVersion.server().id()));
+					parameters.getInput().set(mappedJars.getIntermediaryServerJar(minecraftVersion));
+					parameters.getOutput().set(buildFiles.getJavadocNamedJar(minecraftVersion.server().id()));
+					parameters.getMappings().set(buildFiles.getMappingsFile(minecraftVersion));
+					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion.server().id()));
 					parameters.getSourceNamespace().set(INTERMEDIARY);
 					parameters.getTargetNamespace().set(NAMED);
 				});

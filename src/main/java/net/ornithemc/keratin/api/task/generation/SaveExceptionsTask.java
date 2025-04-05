@@ -13,38 +13,44 @@ import net.ornithemc.exceptor.io.ClassEntry;
 import net.ornithemc.exceptor.io.ExceptionsFile;
 import net.ornithemc.exceptor.io.ExceptorIo;
 import net.ornithemc.exceptor.io.MethodEntry;
+
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.Exceptor;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.BuildFiles;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class SaveExceptionsTask extends MinecraftTask implements Exceptor {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		ExceptionsAndSignaturesDevelopmentFiles excsAndSigs = files.getExceptionsAndSignaturesDevelopmentFiles();
+		BuildFiles buildFiles = excsAndSigs.getBuildFiles();
 
 		if (minecraftVersion.hasSharedObfuscation()) {
 			saveExceptions(
-				files.getBaseMergedExceptions(minecraftVersion),
-				files.getGeneratedMergedExceptions(minecraftVersion),
-				files.getMergedExceptions(minecraftVersion)
+				buildFiles.getBaseMergedExceptionsFile(minecraftVersion),
+				buildFiles.getGeneratedMergedExceptionsFile(minecraftVersion),
+				excsAndSigs.getMergedExceptionsFile(minecraftVersion)
 			);
 		} else {
 			if (minecraftVersion.hasClient()) {
 				saveExceptions(
-					files.getBaseClientExceptions(minecraftVersion),
-					files.getGeneratedClientExceptions(minecraftVersion),
-					files.getClientExceptions(minecraftVersion)
+					buildFiles.getBaseClientExceptionsFile(minecraftVersion),
+					buildFiles.getGeneratedClientExceptionsFile(minecraftVersion),
+					excsAndSigs.getClientExceptionsFile(minecraftVersion)
 				);
 			}
 			if (minecraftVersion.hasServer()) {
 				saveExceptions(
-					files.getBaseServerExceptions(minecraftVersion),
-					files.getGeneratedServerExceptions(minecraftVersion),
-					files.getServerExceptions(minecraftVersion)
+					buildFiles.getBaseServerExceptionsFile(minecraftVersion),
+					buildFiles.getGeneratedServerExceptionsFile(minecraftVersion),
+					excsAndSigs.getServerExceptionsFile(minecraftVersion)
 				);
 			}
 		}

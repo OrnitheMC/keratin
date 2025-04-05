@@ -5,7 +5,9 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.api.OrnitheFilesAPI;
+import net.ornithemc.keratin.files.GlobalCache.ExceptionsCache;
+import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
+import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MapExceptionsTask extends MappingTask {
 
@@ -17,7 +19,10 @@ public abstract class MapExceptionsTask extends MappingTask {
 		validateNamespaces(srcNs, dstNs);
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFilesAPI files = keratin.getFiles();
+		OrnitheFiles files = keratin.getFiles();
+
+		MappingsCache mappings = files.getGlobalCache().getMappingsCache();
+		ExceptionsCache exceptions = files.getGlobalCache().getExceptionsCache();
 
 		boolean fromOfficial = OFFICIAL.equals(srcNs);
 
@@ -30,9 +35,9 @@ public abstract class MapExceptionsTask extends MappingTask {
 				workQueue.submit(MapExceptions.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(fromOfficial ? files.getMergedExceptionsFile(minecraftVersion) : files.getIntermediaryMergedExceptionsFile(minecraftVersion));
-					parameters.getOutput().set(fromOfficial ? files.getIntermediaryMergedExceptionsFile(minecraftVersion) : files.getNamedExceptionsFile(minecraftVersion));
-					parameters.getMappings().set(fromOfficial ? files.getFilledMergedIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+					parameters.getInput().set(exceptions.getMergedExceptionsFile(minecraftVersion));
+					parameters.getOutput().set(exceptions.getIntermediaryMergedExceptionsFile(minecraftVersion));
+					parameters.getMappings().set(mappings.getFilledMergedIntermediaryMappingsFile(minecraftVersion));
 				});
 			}
 		} else {
@@ -40,18 +45,18 @@ public abstract class MapExceptionsTask extends MappingTask {
 				workQueue.submit(MapExceptions.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(fromOfficial ? files.getClientExceptionsFile(minecraftVersion) : files.getIntermediaryClientExceptionsFile(minecraftVersion));
-					parameters.getOutput().set(fromOfficial ? files.getIntermediaryClientExceptionsFile(minecraftVersion) : files.getNamedExceptionsFile(minecraftVersion));
-					parameters.getMappings().set(fromOfficial ? files.getFilledClientIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+					parameters.getInput().set(exceptions.getClientExceptionsFile(minecraftVersion));
+					parameters.getOutput().set(exceptions.getIntermediaryClientExceptionsFile(minecraftVersion));
+					parameters.getMappings().set(mappings.getFilledClientIntermediaryMappingsFile(minecraftVersion));
 				});
 			}
 			if (minecraftVersion.hasServer() && (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (serverBuild > 0))) {
 				workQueue.submit(MapExceptions.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(fromOfficial ? files.getServerExceptionsFile(minecraftVersion) : files.getIntermediaryServerExceptionsFile(minecraftVersion));
-					parameters.getOutput().set(fromOfficial ? files.getIntermediaryServerExceptionsFile(minecraftVersion) : files.getNamedExceptionsFile(minecraftVersion));
-					parameters.getMappings().set(fromOfficial ? files.getFilledServerIntermediaryMappings(minecraftVersion) : files.getNamedMappings(minecraftVersion));
+					parameters.getInput().set(exceptions.getServerExceptionsFile(minecraftVersion));
+					parameters.getOutput().set(exceptions.getIntermediaryServerExceptionsFile(minecraftVersion));
+					parameters.getMappings().set(mappings.getFilledServerIntermediaryMappingsFile(minecraftVersion));
 				});
 			}
 		}
@@ -60,7 +65,6 @@ public abstract class MapExceptionsTask extends MappingTask {
 	private static void validateNamespaces(String srcNs, String dstNs) {
 		boolean valid = switch (dstNs) {
 			case INTERMEDIARY -> OFFICIAL.equals(srcNs);
-			case NAMED -> INTERMEDIARY.equals(srcNs);
 			default -> false;
 		};
 		if (!valid) {
