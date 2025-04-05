@@ -9,7 +9,7 @@ public interface GlobalCacheAccess {
 
 	File getDirectory();
 
-	File getVersionsManifest();
+	File getVersionsManifestJson();
 
 	MetadataCacheAccess getMetadataCache();
 

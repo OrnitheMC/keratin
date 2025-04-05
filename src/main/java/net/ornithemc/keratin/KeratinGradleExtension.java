@@ -225,7 +225,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 		this.versionsManifest = this.project.getObjects().property(VersionsManifest.class);
 		this.versionsManifest.convention(this.project.provider(() -> {
-			File file = KeratinGradleExtension.this.files.getGlobalCache().getVersionsManifest();
+			File file = KeratinGradleExtension.this.files.getGlobalCache().getVersionsManifestJson();
 
 			if (cacheInvalid || project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
 				FileUtils.copyURLToFile(new URL(this.versionsManifestUrl.get()), file);

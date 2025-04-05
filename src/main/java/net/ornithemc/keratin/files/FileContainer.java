@@ -4,22 +4,24 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.util.Versioned;
 
 public class FileContainer {
 
 	protected final Project project;
 	protected final KeratinGradleExtension keratin;
+	protected final OrnitheFiles files;
 
-	protected FileContainer(KeratinGradleExtension keratin) {
+	protected FileContainer(KeratinGradleExtension keratin, OrnitheFiles files) {
 		this.project = keratin.getProject();
 		this.keratin = keratin;
+		this.files = files;
 	}
 
 	protected void mkdirs() throws IOException {
@@ -29,9 +31,9 @@ public class FileContainer {
 		Files.createDirectories(dir.toPath());
 	}
 
-	protected Property<File> fileProperty(Callable<File> provider) {
-		Property<File> property = this.project.getObjects().property(File.class);
-		property.convention(this.project.provider(provider));
+	protected <T> Property<T> property(Class<T> type, Callable<T> provider) {
+		Property<T> property = project.getObjects().property(type);
+		property.convention(project.provider(provider));
 		property.finalizeValueOnRead();
 		return property;
 	}
@@ -40,15 +42,15 @@ public class FileContainer {
 		return keratin.getIntermediaryGen().get();
 	}
 
-	protected File pickFileForPresentSides(MinecraftVersion minecraftVersion, Versioned<MinecraftVersion, File> client, Versioned<MinecraftVersion, File> server, Versioned<MinecraftVersion, File> merged) {
+	protected File pickFileForPresentSides(MinecraftVersion minecraftVersion, Function<MinecraftVersion, File> client, Function<MinecraftVersion, File> server, Function<MinecraftVersion, File> merged) {
 		if (minecraftVersion.hasClient() && minecraftVersion.hasServer()) {
-			return merged.get(minecraftVersion);
+			return merged.apply(minecraftVersion);
 		} else {
 			if (minecraftVersion.hasClient()) {
-				return client.get(minecraftVersion);
+				return client.apply(minecraftVersion);
 			}
 			if (minecraftVersion.hasServer()) {
-				return server.get(minecraftVersion);
+				return server.apply(minecraftVersion);
 			}
 		}
 

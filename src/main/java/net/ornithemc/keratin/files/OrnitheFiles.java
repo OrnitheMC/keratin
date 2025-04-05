@@ -2,73 +2,75 @@ package net.ornithemc.keratin.files;
 
 import java.io.IOException;
 
+import org.gradle.api.provider.Property;
+
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.TaskSelection;
 import net.ornithemc.keratin.api.files.OrnitheFilesAccess;
 
 public class OrnitheFiles extends FileContainer implements OrnitheFilesAccess {
 
-	private final GlobalCache globalCache;
-	private final LocalCache localCache;
-	private final SharedFiles sharedFiles;
-	private final IntermediaryDevelopmentFiles intermediaryDevelopmentFiles;
-	private final MappingsDevelopmentFiles mappingsDevelopmentFiles;
-	private final ExceptionsAndSignaturesDevelopmentFiles exceptionsAndSignaturesDevelopmentFiles;
+	private final Property<GlobalCache> globalCache;
+	private final Property<LocalCache> localCache;
+	private final Property<SharedFiles> sharedFiles;
+	private final Property<IntermediaryDevelopmentFiles> intermediaryDevelopmentFiles;
+	private final Property<MappingsDevelopmentFiles> mappingsDevelopmentFiles;
+	private final Property<ExceptionsAndSignaturesDevelopmentFiles> exceptionsAndSignaturesDevelopmentFiles;
 
 	public OrnitheFiles(KeratinGradleExtension keratin) {
-		super(keratin);
+		super(keratin, null);
 
-		this.globalCache = new GlobalCache(keratin);
-		this.localCache = new LocalCache(keratin);
-		this.sharedFiles = new SharedFiles(keratin);
-		this.intermediaryDevelopmentFiles = new IntermediaryDevelopmentFiles(keratin, this.localCache);
-		this.mappingsDevelopmentFiles = new MappingsDevelopmentFiles(keratin, this.localCache);
-		this.exceptionsAndSignaturesDevelopmentFiles = new ExceptionsAndSignaturesDevelopmentFiles(keratin, this.localCache);
+		this.globalCache = property(GlobalCache.class, () -> new GlobalCache(keratin, this));
+		this.localCache = property(LocalCache.class, () -> new LocalCache(keratin, this));
+		this.sharedFiles = property(SharedFiles.class, () -> new SharedFiles(keratin, this));
+		this.intermediaryDevelopmentFiles = property(IntermediaryDevelopmentFiles.class, () -> new IntermediaryDevelopmentFiles(keratin, this));
+		this.mappingsDevelopmentFiles = property(MappingsDevelopmentFiles.class, () -> new MappingsDevelopmentFiles(keratin, this));
+		this.exceptionsAndSignaturesDevelopmentFiles = property(ExceptionsAndSignaturesDevelopmentFiles.class, () -> new ExceptionsAndSignaturesDevelopmentFiles(keratin, this));
 	}
 
 	public void mkdirs(TaskSelection selection) throws IOException {
-		globalCache.mkdirs();
-		localCache.mkdirs();
-		sharedFiles.mkdirs();
+		getGlobalCache().mkdirs();
+		getLocalCache().mkdirs();
+		getSharedFiles().mkdirs();
 
 		if (selection == TaskSelection.INTERMEDIARY) {
-			intermediaryDevelopmentFiles.mkdirs();
+			getIntermediaryDevelopmentFiles().mkdirs();
 		}
 		if (selection == TaskSelection.MAPPINGS) {
-			mappingsDevelopmentFiles.mkdirs();
+			getMappingsDevelopmentFiles().mkdirs();
 		}
 		if (selection == TaskSelection.EXCEPTIONS_AND_SIGNATURES) {
-			exceptionsAndSignaturesDevelopmentFiles.mkdirs();
+			getExceptionsAndSignaturesDevelopmentFiles().mkdirs();
 		}
 	}
 
 	@Override
 	public GlobalCache getGlobalCache() {
-		return globalCache;
+		return globalCache.get();
 	}
 
 	@Override
 	public LocalCache getLocalCache() {
-		return localCache;
+		return localCache.get();
 	}
 
 	@Override
 	public SharedFiles getSharedFiles() {
-		return sharedFiles;
+		return sharedFiles.get();
 	}
 
 	@Override
 	public IntermediaryDevelopmentFiles getIntermediaryDevelopmentFiles() {
-		return intermediaryDevelopmentFiles;
+		return intermediaryDevelopmentFiles.get();
 	}
 
 	@Override
 	public MappingsDevelopmentFiles getMappingsDevelopmentFiles() {
-		return mappingsDevelopmentFiles;
+		return mappingsDevelopmentFiles.get();
 	}
 
 	@Override
 	public ExceptionsAndSignaturesDevelopmentFiles getExceptionsAndSignaturesDevelopmentFiles() {
-		return exceptionsAndSignaturesDevelopmentFiles;
+		return exceptionsAndSignaturesDevelopmentFiles.get();
 	}
 }
