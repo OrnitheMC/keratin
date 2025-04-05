@@ -41,7 +41,6 @@ import net.ornithemc.keratin.api.KeratinGradleExtensionAPI;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.PublicationsAPI;
 import net.ornithemc.keratin.api.TaskSelection;
-import net.ornithemc.keratin.api.files.IntermediaryDevelopmentFilesAccess;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.manifest.VersionInfo;
 import net.ornithemc.keratin.api.manifest.VersionInfo.Library;
@@ -112,6 +111,7 @@ import net.ornithemc.keratin.api.task.setup.MapSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.MergeSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.ProcessSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.SetUpSourceTask;
+import net.ornithemc.keratin.files.IntermediaryDevelopmentFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
 import net.ornithemc.keratin.files.OrnitheFiles;
 import net.ornithemc.keratin.matching.Matches;
@@ -526,7 +526,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			TaskProvider<?> generateIntermediary = tasks.register("generateIntermediary", GenerateNewIntermediaryTask.class, configureIntermediaryTask);
 			TaskProvider<?> updateIntermediary = tasks.register("updateIntermediary", UpdateIntermediaryTask.class, configureIntermediaryTask);
 
-			IntermediaryDevelopmentFilesAccess files = this.files.getIntermediaryDevelopmentFiles();
+			IntermediaryDevelopmentFiles files = this.files.getIntermediaryDevelopmentFiles();
 
 			for (String minecraftVersion : minecraftVersionIds) {
 				TaskProvider<?> convertMappings = tasks.register("%s_convertMappingsFromTinyV1ToTinyV2".formatted(minecraftVersion), ConvertMappingsFromTinyV1ToTinyV2Task.class, task -> {
