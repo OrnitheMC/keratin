@@ -35,7 +35,7 @@ public interface GlobalCacheAccess {
 
 		File getVersionInfoJson(String minecraftVersion);
 
-		File getVersionDetailJsons(String minecraftVersion);
+		File getVersionDetailJson(String minecraftVersion);
 
 	}
 

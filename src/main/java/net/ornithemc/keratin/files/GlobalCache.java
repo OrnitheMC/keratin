@@ -137,7 +137,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		}
 
 		@Override
-		public File getVersionDetailJsons(String minecraftVersion) {
+		public File getVersionDetailJson(String minecraftVersion) {
 			return file("%s-details.json".formatted(minecraftVersion));
 		}
 	}

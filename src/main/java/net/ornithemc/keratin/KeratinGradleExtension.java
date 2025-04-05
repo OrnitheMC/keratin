@@ -237,7 +237,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			return info;
 		});
 		this.versionDetails = new Versioned<>(minecraftVersion -> {
-			File file = this.files.getGlobalCache().getMetadataCache().getVersionDetailJsons(minecraftVersion);
+			File file = this.files.getGlobalCache().getMetadataCache().getVersionDetailJson(minecraftVersion);
 
 			if (cacheInvalid || project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
 				VersionsManifest manifest = getVersionsManifest();
