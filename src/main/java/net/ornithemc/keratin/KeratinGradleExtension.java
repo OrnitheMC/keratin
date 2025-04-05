@@ -142,10 +142,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	private final Property<String> globalCacheDir;
 	private final Property<String> localCacheDir;
-	private final Property<String> namedMappingsId;
-	private final Property<String> exceptionsId;
-	private final Property<String> signaturesId;
-	private final Property<String> nestsId;
 	private final Property<String> versionsManifestUrl;
 	private final ListProperty<MinecraftVersion> minecraftVersions;
 	private final Property<Integer> intermediaryGen;
@@ -200,18 +196,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.localCacheDir = this.project.getObjects().property(String.class);
 		this.localCacheDir.convention(Constants.ORNITHE_LOCAL_CACHE_DIR);
 		this.localCacheDir.finalizeValueOnRead();
-		this.namedMappingsId = this.project.getObjects().property(String.class);
-		this.namedMappingsId.convention(Constants.FEATHER_ID);
-		this.namedMappingsId.finalizeValueOnRead();
-		this.exceptionsId = this.project.getObjects().property(String.class);
-		this.exceptionsId.convention(Constants.RAVEN_ID);
-		this.exceptionsId.finalizeValueOnRead();
-		this.signaturesId = this.project.getObjects().property(String.class);
-		this.signaturesId.convention(Constants.SPARROW_ID);
-		this.signaturesId.finalizeValueOnRead();
-		this.nestsId = this.project.getObjects().property(String.class);
-		this.nestsId.convention(Constants.NESTS_ID);
-		this.nestsId.finalizeValueOnRead();
 		this.versionsManifestUrl = this.project.getObjects().property(String.class);
 		this.versionsManifestUrl.convention(Constants.VERSIONS_MANIFEST_URL);
 		this.versionsManifestUrl.finalizeValueOnRead();
