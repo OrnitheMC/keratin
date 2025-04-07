@@ -580,7 +580,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			});
 
 			TaskProvider<?> mapNestsToIntermediary = tasks.register("mapNestsToIntermediary", MapNestsTask.class, task -> {
-				task.dependsOn(downloadNests, splitIntermediary);
+				task.dependsOn(downloadNests, fillIntermediary);
 				task.getSourceNamespace().set(Mapper.OFFICIAL);
 				task.getTargetNamespace().set(Mapper.INTERMEDIARY);
 				
