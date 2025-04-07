@@ -225,7 +225,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			File file = this.files.getGlobalCache().getMetadataCache().getVersionInfoJson(minecraftVersion);
 
 			if (cacheInvalid || project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
-				VersionsManifest manifest = getVersionsManifest();
+				VersionsManifest manifest = versionsManifest.get();
 				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
 				FileUtils.copyURLToFile(new URL(entry.url()), file);
@@ -240,7 +240,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			File file = this.files.getGlobalCache().getMetadataCache().getVersionDetailJson(minecraftVersion);
 
 			if (cacheInvalid || project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
-				VersionsManifest manifest = getVersionsManifest();
+				VersionsManifest manifest = versionsManifest.get();
 				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
 				FileUtils.copyURLToFile(new URL(entry.details()), file);
