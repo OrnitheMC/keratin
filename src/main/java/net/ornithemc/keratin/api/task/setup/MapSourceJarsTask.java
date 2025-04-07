@@ -24,6 +24,7 @@ public abstract class MapSourceJarsTask extends MinecraftTask implements Mapper 
 
 		if (minecraftVersion.hasSharedObfuscation()) {
 			workQueue.submit(MapJar.class, parameters -> {
+				parameters.getOverwrite().set(true);
 				parameters.getInput().set(sourceJars.getMergedJar(minecraftVersion));
 				parameters.getOutput().set(sourceJars.getNamedMergedJar(minecraftVersion));
 				parameters.getMappings().set(mappings.getMergedMappingsFile(minecraftVersion));
@@ -34,6 +35,7 @@ public abstract class MapSourceJarsTask extends MinecraftTask implements Mapper 
 		} else {
 			if (minecraftVersion.hasClient()) {
 				workQueue.submit(MapJar.class, parameters -> {
+					parameters.getOverwrite().set(true);
 					parameters.getInput().set(sourceJars.getClientJar(minecraftVersion));
 					parameters.getOutput().set(sourceJars.getNamedClientJar(minecraftVersion));
 					parameters.getMappings().set(mappings.getClientMappingsFile(minecraftVersion));
@@ -44,6 +46,7 @@ public abstract class MapSourceJarsTask extends MinecraftTask implements Mapper 
 			}
 			if (minecraftVersion.hasServer()) {
 				workQueue.submit(MapJar.class, parameters -> {
+					parameters.getOverwrite().set(true);
 					parameters.getInput().set(sourceJars.getServerJar(minecraftVersion));
 					parameters.getOutput().set(sourceJars.getNamedServerJar(minecraftVersion));
 					parameters.getMappings().set(mappings.getServerMappingsFile(minecraftVersion));

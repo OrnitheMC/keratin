@@ -24,6 +24,7 @@ public abstract class MapMinecraftForJavadocTask extends MinecraftTask implement
 
 		if (minecraftVersion.hasSharedVersioning() && minecraftVersion.canBeMerged()) {
 			workQueue.submit(MapJar.class, parameters -> {
+				parameters.getOverwrite().set(true);
 				parameters.getInput().set(mappedJars.getIntermediaryMergedJar(minecraftVersion));
 				parameters.getOutput().set(buildFiles.getJavadocNamedJar(minecraftVersion.id()));
 				parameters.getMappings().set(buildFiles.getMappingsFile(minecraftVersion));
@@ -34,6 +35,7 @@ public abstract class MapMinecraftForJavadocTask extends MinecraftTask implement
 		} else {
 			if (minecraftVersion.hasClient()) {
 				workQueue.submit(MapJar.class, parameters -> {
+					parameters.getOverwrite().set(true);
 					parameters.getInput().set(mappedJars.getIntermediaryClientJar(minecraftVersion));
 					parameters.getOutput().set(buildFiles.getJavadocNamedJar(minecraftVersion.client().id()));
 					parameters.getMappings().set(buildFiles.getMappingsFile(minecraftVersion));
@@ -44,6 +46,7 @@ public abstract class MapMinecraftForJavadocTask extends MinecraftTask implement
 			}
 			if (minecraftVersion.hasServer()) {
 				workQueue.submit(MapJar.class, parameters -> {
+					parameters.getOverwrite().set(true);
 					parameters.getInput().set(mappedJars.getIntermediaryServerJar(minecraftVersion));
 					parameters.getOutput().set(buildFiles.getJavadocNamedJar(minecraftVersion.server().id()));
 					parameters.getMappings().set(buildFiles.getMappingsFile(minecraftVersion));
