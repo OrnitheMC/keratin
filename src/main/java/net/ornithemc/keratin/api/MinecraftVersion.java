@@ -106,4 +106,12 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 				// c0.0.13a-launcher is the odd one out, dunno what's up with that
 				|| client.id().equals("c0.0.13a-launcher"));
 	}
+
+	public boolean isBefore(MinecraftVersion other) {
+		return (client != null ? client : server).releaseTime().compareTo((other.client != null ? other.client : other.server).releaseTime()) < 0;
+	}
+
+	public boolean isAfter(MinecraftVersion other) {
+		return (client != null ? client : server).releaseTime().compareTo((other.client != null ? other.client : other.server).releaseTime()) > 0;
+	}
 }

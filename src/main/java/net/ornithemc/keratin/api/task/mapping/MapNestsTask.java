@@ -7,6 +7,7 @@ import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
 import net.ornithemc.keratin.files.GlobalCache.NestsCache;
+import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
 import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MapNestsTask extends MappingTask {
@@ -23,6 +24,7 @@ public abstract class MapNestsTask extends MappingTask {
 
 		MappingsCache mappings = files.getGlobalCache().getMappingsCache();
 		NestsCache nests = files.getGlobalCache().getNestsCache();
+		BuildFiles buildFiles = files.getMappingsDevelopmentFiles().getBuildFiles();
 
 		boolean fromOfficial = OFFICIAL.equals(srcNs);
 
@@ -35,9 +37,9 @@ public abstract class MapNestsTask extends MappingTask {
 				workQueue.submit(MapNests.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(nests.getMergedNestsFile(minecraftVersion));
-					parameters.getOutput().set(nests.getIntermediaryMergedNestsFile(minecraftVersion));
-					parameters.getMappings().set(mappings.getFilledMergedIntermediaryMappingsFile(minecraftVersion));
+					parameters.getInput().set(fromOfficial ? nests.getMergedNestsFile(minecraftVersion) : nests.getIntermediaryMergedNestsFile(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? nests.getIntermediaryMergedNestsFile(minecraftVersion) : buildFiles.getNamedNestsFile(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? mappings.getFilledMergedIntermediaryMappingsFile(minecraftVersion) : buildFiles.getMappingsFile(minecraftVersion));
 				});
 			}
 		} else {
@@ -45,18 +47,18 @@ public abstract class MapNestsTask extends MappingTask {
 				workQueue.submit(MapNests.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(nests.getClientNestsFile(minecraftVersion));
-					parameters.getOutput().set(nests.getIntermediaryClientNestsFile(minecraftVersion));
-					parameters.getMappings().set(mappings.getFilledClientIntermediaryMappingsFile(minecraftVersion));
+					parameters.getInput().set(fromOfficial ? nests.getClientNestsFile(minecraftVersion) : nests.getIntermediaryClientNestsFile(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? nests.getIntermediaryClientNestsFile(minecraftVersion) : buildFiles.getNamedNestsFile(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? mappings.getFilledClientIntermediaryMappingsFile(minecraftVersion) : buildFiles.getMappingsFile(minecraftVersion));
 				});
 			}
 			if (minecraftVersion.hasServer() && (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (serverBuild > 0))) {
 				workQueue.submit(MapNests.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(nests.getServerNestsFile(minecraftVersion));
-					parameters.getOutput().set(nests.getIntermediaryServerNestsFile(minecraftVersion));
-					parameters.getMappings().set(mappings.getFilledServerIntermediaryMappingsFile(minecraftVersion));
+					parameters.getInput().set(fromOfficial ? nests.getServerNestsFile(minecraftVersion) : nests.getIntermediaryServerNestsFile(minecraftVersion));
+					parameters.getOutput().set(fromOfficial ? nests.getIntermediaryServerNestsFile(minecraftVersion) : buildFiles.getNamedNestsFile(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? mappings.getFilledServerIntermediaryMappingsFile(minecraftVersion) : buildFiles.getMappingsFile(minecraftVersion));
 				});
 			}
 		}
@@ -65,6 +67,7 @@ public abstract class MapNestsTask extends MappingTask {
 	private static void validateNamespaces(String srcNs, String dstNs) {
 		boolean valid = switch (dstNs) {
 			case INTERMEDIARY -> OFFICIAL.equals(srcNs);
+			case NAMED -> INTERMEDIARY.equals(srcNs);
 			default -> false;
 		};
 		if (!valid) {

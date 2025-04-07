@@ -9,6 +9,7 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.files.MappingsDevelopmentFilesAccess;
 import net.ornithemc.keratin.api.task.enigma.EnigmaSession;
+import net.ornithemc.keratin.api.task.unpick.UnpickDefinitions;
 
 public class MappingsDevelopmentFiles extends FileContainer implements MappingsDevelopmentFilesAccess {
 
@@ -23,6 +24,7 @@ public class MappingsDevelopmentFiles extends FileContainer implements MappingsD
 	@Override
 	public void mkdirs() throws IOException {
 		mkdirs(getMappingsDirectory());
+		mkdirs(getUnpickDirectory());
 		mkdirs(getRunDirectory());
 
 		getBuildFiles().mkdirs();
@@ -31,6 +33,16 @@ public class MappingsDevelopmentFiles extends FileContainer implements MappingsD
 	@Override
 	public File getMappingsDirectory() {
 		return project.file("mappings");
+	}
+
+	@Override
+	public File getUnpickDirectory() {
+		return project.file("unpick-definitions");
+	}
+
+	@Override
+	public File getUnpickJson() {
+		return new File(getUnpickDirectory(), "unpick.json");
 	}
 
 	@Override
@@ -84,6 +96,26 @@ public class MappingsDevelopmentFiles extends FileContainer implements MappingsD
 		}
 
 		@Override
+		public File getNamedNestsFile(MinecraftVersion minecraftVersion) {
+			return file("%s-named.nest".formatted(minecraftVersion.id()));
+		}
+
+		@Override
+		public File getProcessedUnpickDefinitionsFile(MinecraftVersion minecraftVersion) {
+			return file("%s-processed%s".formatted(minecraftVersion.id(), UnpickDefinitions.FILE_EXTENSION));
+		}
+
+		@Override
+		public File getProcessedIntermediaryUnpickDefinitionsFile(MinecraftVersion minecraftVersion) {
+			return file("%s-processed-intermediary-gen%d%s".formatted(minecraftVersion.id(), getIntermediaryGen(), UnpickDefinitions.FILE_EXTENSION));
+		}
+
+		@Override
+		public File getUnpickedProcessedIntermediaryJar(MinecraftVersion minecraftVersion) {
+			return file("%s-unpicked-processed-intermediary-gen%d.jar".formatted(minecraftVersion.id(), getIntermediaryGen()));
+		}
+
+		@Override
 		public File getTinyV1MappingsFile(String minecraftVersion) {
 			return file("%s-tiny-v1.tiny".formatted(minecraftVersion));
 		}
@@ -106,6 +138,11 @@ public class MappingsDevelopmentFiles extends FileContainer implements MappingsD
 		@Override
 		public File getCompressedMergedTinyV1MappingsFile(String minecraftVersion) {
 			return file("%s-merged-tiny-v1.gz".formatted(minecraftVersion));
+		}
+
+		@Override
+		public File getUnpickDefinitionsFile(String minecraftVersion) {
+			return file("%s%s".formatted(minecraftVersion, UnpickDefinitions.FILE_EXTENSION));
 		}
 
 		@Override

@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,11 +21,13 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
+import org.gradle.api.internal.tasks.DefaultSourceSetContainer;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.publish.PublicationContainer;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
+import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
@@ -52,6 +55,7 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.build.BuildMappingsJarTask;
 import net.ornithemc.keratin.api.task.build.BuildMappingsTask;
 import net.ornithemc.keratin.api.task.build.BuildProcessedMappingsTask;
+import net.ornithemc.keratin.api.task.build.BuildUnpickDefinitionsTask;
 import net.ornithemc.keratin.api.task.build.CheckMappingsTask;
 import net.ornithemc.keratin.api.task.build.CompleteMappingsTask;
 import net.ornithemc.keratin.api.task.build.CompressMappingsTask;
@@ -111,6 +115,9 @@ import net.ornithemc.keratin.api.task.setup.MapSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.MergeSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.ProcessSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.SetUpSourceTask;
+import net.ornithemc.keratin.api.task.unpick.LoadUnpickDefinitionsTask;
+import net.ornithemc.keratin.api.task.unpick.MapUnpickDefinitionsToIntermediaryTask;
+import net.ornithemc.keratin.api.task.unpick.UnpickMinecraftTask;
 import net.ornithemc.keratin.files.IntermediaryDevelopmentFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
 import net.ornithemc.keratin.files.OrnitheFiles;
@@ -144,6 +151,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private final Property<String> localCacheDir;
 	private final Property<String> versionsManifestUrl;
 	private final ListProperty<MinecraftVersion> minecraftVersions;
+	private final Map<String, MinecraftVersion> minecraftVersionsById;
 	private final Property<Integer> intermediaryGen;
 
 	private final Property<VersionsManifest> versionsManifest;
@@ -203,6 +211,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.minecraftVersions = this.project.getObjects().listProperty(MinecraftVersion.class);
 		this.minecraftVersions.convention(Collections.emptyList());
 		this.minecraftVersions.finalizeValueOnRead();
+		this.minecraftVersionsById = new HashMap<>();
 		this.intermediaryGen = this.project.getObjects().property(Integer.class);
 		this.intermediaryGen.convention(1);
 		this.intermediaryGen.finalizeValueOnRead();
@@ -390,8 +399,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			throw new RuntimeException("gen1 is no longer supported!");
 		}
 
-		files.mkdirs(selection);
-
 		List<MinecraftVersion> selectedMinecraftVersions = minecraftVersions.get();
 
 		Set<MinecraftVersion> minecraftVersions = new LinkedHashSet<>();
@@ -403,15 +410,22 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			minecraftVersions.addAll(selectedMinecraftVersions);
 		}
 
+		minecraftVersionsById.clear();
+
 		for (MinecraftVersion minecraftVersion : minecraftVersions) {
 			if (minecraftVersion.hasClient())
 				minecraftVersionIds.add(minecraftVersion.client().id());
 			if (minecraftVersion.hasServer())
 				minecraftVersionIds.add(minecraftVersion.server().id());
+
+			minecraftVersionsById.put(minecraftVersion.id(), minecraftVersion);
 		}
+
+		files.mkdirs(selection);
 
 		ConfigurationContainer configurations = project.getConfigurations();
 		DependencyHandler dependencies = project.getDependencies();
+		DefaultSourceSetContainer sourceSets = (DefaultSourceSetContainer) project.getExtensions().getByName("sourceSets");
 
 		for (String minecraftVersion : minecraftVersionIds) {
 			Configuration minecraftLibraries = configurations.register(Configurations.minecraftLibraries(minecraftVersion)).get();
@@ -452,7 +466,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			dependencies.add(enigmaRuntime.getName(), "net.ornithemc:enigma-swing:2.5.1");
 			dependencies.add(enigmaRuntime.getName(), "org.quiltmc:quilt-enigma-plugin:2.3.1");
 			dependencies.add(mappingPoetJar.getName(), "net.fabricmc:mappingpoet:0.3.0");
-			
+
+			SourceSet constants = sourceSets.register(SourceSets.CONSTANTS).get();
 		}
 		if (selection == TaskSelection.EXCEPTIONS_AND_SIGNATURES) {
 			Configuration decompileClasspath = configurations.register(Configurations.DECOMPILE_CLASSPATH).get();
@@ -483,6 +498,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 		PublishingExtension publishing = (PublishingExtension) project.getExtensions().getByName("publishing");
 		PublicationContainer publications = publishing.getPublications();
+
+		DefaultSourceSetContainer sourceSets = (DefaultSourceSetContainer) project.getExtensions().getByName("sourceSets");
 
 		TaskProvider<?> updateNamedMappingsBuilds = tasks.register("updateNamedMappingsBuildsCache", UpdateBuildsCacheTask.NamedMappings.class);
 		TaskProvider<?> updateExceptionsBuilds = tasks.register("updateExceptionsBuildsCache", UpdateBuildsCacheTask.Exceptions.class);
@@ -583,7 +600,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				task.dependsOn(downloadNests, fillIntermediary);
 				task.getSourceNamespace().set(Mapper.OFFICIAL);
 				task.getTargetNamespace().set(Mapper.INTERMEDIARY);
-				
 			});
 			TaskProvider<?> mergeIntermediaryNests = tasks.register("mergeIntermediaryNests", MergeNestsTask.class, task -> {
 				task.dependsOn(mapNestsToIntermediary);
@@ -591,6 +607,47 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			});
 
 			if (selection == TaskSelection.MAPPINGS) {
+				SourceSet constants = sourceSets.getByName(SourceSets.CONSTANTS);
+
+				TaskProvider<Jar> constantsJar = tasks.register("constantsJar", Jar.class, task -> {
+					task.from(constants.getOutput());
+					task.getArchiveFileName().set("constants.jar");
+					task.getDestinationDirectory().set(project.file("build/libs"));
+				});
+				TaskProvider<?> sourcesJar = tasks.register("sourcesJar", Jar.class, task -> {
+					task.from(constants.getAllSource());
+					task.getArchiveFileName().set("sources.jar");
+					task.getDestinationDirectory().set(project.file("build/libs"));
+				});
+
+				TaskProvider<?> prepareBuild = tasks.register("prepareBuild", PrepareBuildTask.class, task -> {
+					task.dependsOn(mergeIntermediaryNests);
+				});
+				TaskProvider<?> checkMappings = tasks.register("checkMappings", CheckMappingsTask.class, task -> {
+					task.dependsOn(mergeIntermediaryJars, prepareBuild);
+				});
+				TaskProvider<?> completeMappings = tasks.register("completeMappings", CompleteMappingsTask.class, task -> {
+					task.dependsOn(mergeIntermediaryJars, prepareBuild);
+				});
+				TaskProvider<?> buildMappings = tasks.register("buildMappings", BuildMappingsTask.class, task -> {
+					task.dependsOn(completeMappings);
+					task.getClassNamePattern().set("^(net/minecraft/|com/mojang/).*$");
+				});
+
+				TaskProvider<?> mapNestsToNamed = tasks.register("mapNestsToNamed", MapNestsTask.class, task -> {
+					task.dependsOn(mergeIntermediaryNests, prepareBuild);
+					task.getSourceNamespace().set(Mapper.INTERMEDIARY);
+					task.getTargetNamespace().set(Mapper.NAMED);
+				});
+
+				TaskProvider<?> loadUnpickDefinitions = tasks.register("loadUnpickDefinitions", LoadUnpickDefinitionsTask.class);
+				TaskProvider<?> mapUnpickDefinitionsToIntermediary = tasks.register("mapUnpickDefinitionsToIntermediary", MapUnpickDefinitionsToIntermediaryTask.class, task -> {
+					task.dependsOn(prepareBuild, loadUnpickDefinitions);
+				});
+				TaskProvider<?> buildUnpickDefinitions = tasks.register("buildUnpickDefinitions", BuildUnpickDefinitionsTask.class, task -> {
+					task.dependsOn(mapNestsToNamed, loadUnpickDefinitions);
+				});
+
 				TaskProvider<?> mapExceptionsToIntermediary = tasks.register("mapExceptionsToIntermediary", MapExceptionsTask.class, task -> {
 					task.dependsOn(downloadExceptions, fillIntermediary);
 					task.getSourceNamespace().set(Mapper.OFFICIAL);
@@ -616,6 +673,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.dependsOn(mergeIntermediaryJars, mergeIntermediaryExceptions, mergeIntermediarySignatures, mergeIntermediaryNests);
 					task.getObfuscateVariableNames().set(false);
 				});
+				TaskProvider<?> unpickMinecraft = tasks.register("unpickMinecraft", UnpickMinecraftTask.class, task -> {
+					task.dependsOn(constantsJar, mapUnpickDefinitionsToIntermediary, processMinecraft);
+					task.getUnpickConstantsJar().set(constantsJar.get().getArchiveFile().get().getAsFile());
+				});
+
 				TaskProvider<?> loadMappings = tasks.register("loadMappings", LoadMappingsFromGraphTask.class, task -> {
 					task.dependsOn(processMinecraft);
 				});
@@ -637,7 +699,12 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				});
 
 				TaskProvider<?> launchEnigma = tasks.register("enigma", LaunchEnigmaTask.class, task -> {
+					task.dependsOn(loadMappings, unpickMinecraft);
+					task.getUnpicked().set(true);
+				});
+				TaskProvider<?> launchEnigmaWithoutUnpick = tasks.register("enigmaWithoutUnpick", LaunchEnigmaTask.class, task -> {
 					task.dependsOn(loadMappings);
+					task.getUnpicked().set(false);
 				});
 
 				String classNamePattern = "^(net/minecraft/|com/mojang/).*$";
@@ -651,20 +718,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.dependsOn(processMinecraft);
 					task.getClassNamePattern().convention(classNamePattern);
 					task.getClassNamePattern().finalizeValueOnRead();
-				});
-
-				TaskProvider<?> prepareBuild = tasks.register("prepareBuild", PrepareBuildTask.class, task -> {
-					task.dependsOn(mergeIntermediaryNests);
-				});
-				TaskProvider<?> checkMappings = tasks.register("checkMappings", CheckMappingsTask.class, task -> {
-					task.dependsOn(mergeIntermediaryJars, prepareBuild);
-				});
-				TaskProvider<?> completeMappings = tasks.register("completeMappings", CompleteMappingsTask.class, task -> {
-					task.dependsOn(mergeIntermediaryJars, prepareBuild);
-				});
-				TaskProvider<?> buildMappings = tasks.register("buildMappings", BuildMappingsTask.class, task -> {
-					task.dependsOn(completeMappings);
-					task.getClassNamePattern().set("^(net/minecraft/|com/mojang/).*$");
 				});
 
 				TaskProvider<?> mapMinecraftToNamed = tasks.register("mapMinecraftToNamed", MapMinecraftTask.class, task -> {
@@ -709,22 +762,22 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 						task.dependsOn(genFakeSource);
 						task.setFailOnError(false);
 						task.setMaxMemory("2G");
-						task.source(files.getFakeSourceDirectory(minecraftVersion));
+						task.source(project.fileTree(files.getFakeSourceDirectory(minecraftVersion)).plus(constants.getAllJava()));
 						task.setClasspath(configurations.getByName(Configurations.javadocClasspath(minecraftVersion)).plus(configurations.getByName(Configurations.minecraftLibraries(minecraftVersion))));
 						task.setDestinationDir(files.getJavadocDirectory(minecraftVersion));
 					});
 
 					TaskProvider<?> mergedTinyV1Jar = tasks.register("%s_mergedTinyV1Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
-						task.dependsOn(buildMappings);
-						task.configure(minecraftVersion, files.getMergedTinyV1MappingsFile(minecraftVersion), "%s-merged-tiny-v1.jar");
+						task.dependsOn(buildMappings, buildUnpickDefinitions);
+						task.configure(minecraftVersion, files.getMergedTinyV1MappingsFile(minecraftVersion), files.getUnpickDefinitionsFile(minecraftVersion), "%s-merged-tiny-v1.jar");
 					});
 					TaskProvider<?> tinyV2Jar = tasks.register("%s_tinyV2Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
-						task.dependsOn(buildMappings);
-						task.configure(minecraftVersion, files.getTinyV2MappingsFile(minecraftVersion), "%s-tiny-v2.jar");
+						task.dependsOn(buildMappings, buildUnpickDefinitions);
+						task.configure(minecraftVersion, files.getTinyV2MappingsFile(minecraftVersion), files.getUnpickDefinitionsFile(minecraftVersion), "%s-tiny-v2.jar");
 					});
 					TaskProvider<?> mergedTinyV2Jar = tasks.register("%s_mergedTinyV2Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
-						task.dependsOn(buildMappings);
-						task.configure(minecraftVersion, files.getMergedTinyV2MappingsFile(minecraftVersion), "%s-merged-tiny-v2.jar");
+						task.dependsOn(buildMappings, buildUnpickDefinitions);
+						task.configure(minecraftVersion, files.getMergedTinyV2MappingsFile(minecraftVersion), files.getUnpickDefinitionsFile(minecraftVersion), "%s-merged-tiny-v2.jar");
 					});
 					TaskProvider<?> compressTinyV1 = tasks.register("%s_compressTinyV1".formatted(minecraftVersion), CompressMappingsTask.class, task -> {
 						task.dependsOn(buildMappings);
@@ -738,7 +791,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 						task.getDestinationDirectory().set(project.file("build/libs"));
 					});
 
-					tasks.getByName("build").dependsOn(mergedTinyV1Jar, tinyV2Jar, mergedTinyV2Jar, compressTinyV1, javadocJar);
+					tasks.getByName("build").dependsOn(mergedTinyV1Jar, tinyV2Jar, mergedTinyV2Jar, compressTinyV1, javadocJar, constantsJar, sourcesJar);
 
 					MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
 						publication.setGroupId(this.publications.getGroupId().get());
@@ -757,6 +810,12 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 						});
 						publication.artifact(javadocJar, config -> {
 							config.setClassifier("javadoc");
+						});
+						publication.artifact(constantsJar, config -> {
+							config.setClassifier("constants");
+						});
+						publication.artifact(sourcesJar, config -> {
+							config.setClassifier("sources");
 						});
 					});
 				}
@@ -852,6 +911,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		}
 	}
 
+	public MinecraftVersion getMinecraftVersion(String id) {
+		checkAccess("minecraft versions");
+		return minecraftVersionsById.get(id);
+	}
+
 	@Override
 	public OrnitheFiles getFiles() {
 		checkAccess("file management");
@@ -860,7 +924,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	@Override
 	public PublicationsAPI getPublications() {
-		checkAccess("publications");
+		checkAccess("publication management");
 		return publications;
 	}
 

@@ -8,6 +8,10 @@ public interface MappingsDevelopmentFilesAccess {
 
 	File getMappingsDirectory();
 
+	File getUnpickDirectory();
+
+	File getUnpickJson();
+
 	File getRunDirectory();
 
 	File getEnigmaProfileJson();
@@ -26,6 +30,14 @@ public interface MappingsDevelopmentFilesAccess {
 
 		File getCompletedMappingsFile(MinecraftVersion minecraftVersion);
 
+		File getNamedNestsFile(MinecraftVersion minecraftVersion);
+	
+		File getProcessedUnpickDefinitionsFile(MinecraftVersion minecraftVersion);
+
+		File getProcessedIntermediaryUnpickDefinitionsFile(MinecraftVersion minecraftVersion);
+
+		File getUnpickedProcessedIntermediaryJar(MinecraftVersion minecraftVersion);
+
 		File getTinyV1MappingsFile(String minecraftVersion);
 
 		File getTinyV2MappingsFile(String minecraftVersion);
@@ -35,6 +47,8 @@ public interface MappingsDevelopmentFilesAccess {
 		File getMergedTinyV2MappingsFile(String minecraftVersion);
 
 		File getCompressedMergedTinyV1MappingsFile(String minecraftVersion);
+
+		File getUnpickDefinitionsFile(String minecraftVersion);
 
 		File getNamedJar(String minecraftVersion);
 
