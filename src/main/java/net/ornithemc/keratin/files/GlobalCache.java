@@ -128,7 +128,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 		@Override
 		public File getDirectory() {
-			return files.getGlobalCache().file("version-jsons");
+			return files.getGlobalCache().file("metadata");
 		}
 
 		@Override
