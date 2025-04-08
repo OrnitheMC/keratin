@@ -28,7 +28,7 @@ public abstract class DownloadMinecraftJarsTask extends MinecraftTask implements
 				download.url(),
 				download.sha1(),
 				gameJars.getClientJar(minecraftVersion),
-				keratin.isCacheInvalid()
+				false
 			);
 		}
 		if (minecraftVersion.hasServer()) {
@@ -38,7 +38,7 @@ public abstract class DownloadMinecraftJarsTask extends MinecraftTask implements
 				download.url(),
 				download.sha1(),
 				gameJars.getServerJar(minecraftVersion),
-				keratin.isCacheInvalid()
+				false
 			);
 		}
 

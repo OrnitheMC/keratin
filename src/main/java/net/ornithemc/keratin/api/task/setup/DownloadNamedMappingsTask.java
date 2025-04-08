@@ -5,12 +5,12 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
-import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
+import net.ornithemc.keratin.api.task.DownloaderAndExtractor;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
 import net.ornithemc.keratin.files.OrnitheFiles;
 
-public abstract class DownloadNamedMappingsTask extends MinecraftTask implements DownloaderAndExtracter {
+public abstract class DownloadNamedMappingsTask extends MinecraftTask implements DownloaderAndExtractor {
 
 	private static final String PATH_IN_JAR = "mappings/mappings.tiny";
 
@@ -49,7 +49,7 @@ public abstract class DownloadNamedMappingsTask extends MinecraftTask implements
 				PATH_IN_JAR,
 				mappings.getNamedMappingsJar(minecraftVersion, build),
 				mappings.getNamedMappingsFile(minecraftVersion, build),
-				keratin.isCacheInvalid()
+				false
 			);
 		}
 

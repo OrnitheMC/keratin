@@ -6,12 +6,12 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.api.settings.BuildNumbers;
-import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
+import net.ornithemc.keratin.api.task.DownloaderAndExtractor;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.SignaturesCache;
 import net.ornithemc.keratin.files.OrnitheFiles;
 
-public abstract class DownloadSignaturesTask extends MinecraftTask implements DownloaderAndExtracter {
+public abstract class DownloadSignaturesTask extends MinecraftTask implements DownloaderAndExtractor {
 
 	private static final String PATH_IN_JAR = "signatures/mappings.sigs";
 
@@ -34,7 +34,7 @@ public abstract class DownloadSignaturesTask extends MinecraftTask implements Do
 					PATH_IN_JAR,
 					signatures.getMergedSignaturesJar(minecraftVersion, builds),
 					signatures.getMergedSignaturesFile(minecraftVersion, builds),
-					keratin.isCacheInvalid()
+					false
 				);
 			}
 		} else {
@@ -49,7 +49,7 @@ public abstract class DownloadSignaturesTask extends MinecraftTask implements Do
 						PATH_IN_JAR,
 						signatures.getClientSignaturesJar(minecraftVersion, builds),
 						signatures.getClientSignaturesFile(minecraftVersion, builds),
-						keratin.isCacheInvalid()
+						false
 					);
 				}
 			}
@@ -64,7 +64,7 @@ public abstract class DownloadSignaturesTask extends MinecraftTask implements Do
 						PATH_IN_JAR,
 						signatures.getServerSignaturesJar(minecraftVersion, builds),
 						signatures.getServerSignaturesFile(minecraftVersion, builds),
-						keratin.isCacheInvalid()
+						false
 					);
 				}
 			}

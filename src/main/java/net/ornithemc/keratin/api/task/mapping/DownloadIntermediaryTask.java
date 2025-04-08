@@ -5,12 +5,12 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.maven.SingleBuildMavenArtifacts;
-import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
+import net.ornithemc.keratin.api.task.DownloaderAndExtractor;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
 import net.ornithemc.keratin.files.OrnitheFiles;
 
-public abstract class DownloadIntermediaryTask extends MinecraftTask implements DownloaderAndExtracter {
+public abstract class DownloadIntermediaryTask extends MinecraftTask implements DownloaderAndExtractor {
 
 	private static final String PATH_IN_JAR = "mappings/mappings.tiny";
 
@@ -30,7 +30,7 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 				PATH_IN_JAR,
 				mappings.getMergedIntermediaryMappingsJar(minecraftVersion),
 				mappings.getMergedIntermediaryMappingsFile(minecraftVersion),
-				keratin.isCacheInvalid()
+				false
 			);
 		} else {
 			if (minecraftVersion.hasClient()) {
@@ -39,7 +39,7 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 					PATH_IN_JAR,
 					mappings.getClientIntermediaryMappingsJar(minecraftVersion),
 					mappings.getClientIntermediaryMappingsFile(minecraftVersion),
-					keratin.isCacheInvalid()
+					false
 				);
 			}
 			if (minecraftVersion.hasServer()) {
@@ -48,7 +48,7 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 					PATH_IN_JAR,
 					mappings.getServerIntermediaryMappingsJar(minecraftVersion),
 					mappings.getServerIntermediaryMappingsFile(minecraftVersion),
-					keratin.isCacheInvalid()
+					false
 				);
 			}
 		}

@@ -6,12 +6,12 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.api.settings.BuildNumbers;
-import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
+import net.ornithemc.keratin.api.task.DownloaderAndExtractor;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.ExceptionsCache;
 import net.ornithemc.keratin.files.OrnitheFiles;
 
-public abstract class DownloadExceptionsTask extends MinecraftTask implements DownloaderAndExtracter {
+public abstract class DownloadExceptionsTask extends MinecraftTask implements DownloaderAndExtractor {
 
 	private static final String PATH_IN_JAR = "exceptions/mappings.excs";
 
@@ -34,7 +34,7 @@ public abstract class DownloadExceptionsTask extends MinecraftTask implements Do
 					PATH_IN_JAR,
 					exceptions.getMergedExceptionsJar(minecraftVersion, builds),
 					exceptions.getMergedExceptionsFile(minecraftVersion, builds),
-					keratin.isCacheInvalid()
+					false
 				);
 			}
 		} else {
@@ -49,7 +49,7 @@ public abstract class DownloadExceptionsTask extends MinecraftTask implements Do
 						PATH_IN_JAR,
 						exceptions.getClientExceptionsJar(minecraftVersion, builds),
 						exceptions.getClientExceptionsFile(minecraftVersion, builds),
-						keratin.isCacheInvalid()
+						false
 					);
 				}
 			}
@@ -64,7 +64,7 @@ public abstract class DownloadExceptionsTask extends MinecraftTask implements Do
 						PATH_IN_JAR,
 						exceptions.getServerExceptionsJar(minecraftVersion, builds),
 						exceptions.getServerExceptionsFile(minecraftVersion, builds),
-						keratin.isCacheInvalid()
+						false
 					);
 				}
 			}

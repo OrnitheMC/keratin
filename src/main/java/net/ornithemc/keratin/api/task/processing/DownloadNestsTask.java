@@ -6,12 +6,12 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.api.settings.BuildNumbers;
-import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
+import net.ornithemc.keratin.api.task.DownloaderAndExtractor;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.NestsCache;
 import net.ornithemc.keratin.files.OrnitheFiles;
 
-public abstract class DownloadNestsTask extends MinecraftTask implements DownloaderAndExtracter {
+public abstract class DownloadNestsTask extends MinecraftTask implements DownloaderAndExtractor {
 
 	private static final String PATH_IN_JAR = "nests/mappings.nest";
 
@@ -34,7 +34,7 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 					PATH_IN_JAR,
 					nests.getMergedNestsJar(minecraftVersion, builds),
 					nests.getMergedNestsFile(minecraftVersion, builds),
-					keratin.isCacheInvalid()
+					false
 				);
 			}
 		} else {
@@ -49,7 +49,7 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 						PATH_IN_JAR,
 						nests.getClientNestsJar(minecraftVersion, builds),
 						nests.getClientNestsFile(minecraftVersion, builds),
-						keratin.isCacheInvalid()
+						false
 					);
 				}
 			}
@@ -64,7 +64,7 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 						PATH_IN_JAR,
 						nests.getServerNestsJar(minecraftVersion, builds),
 						nests.getServerNestsFile(minecraftVersion, builds),
-						keratin.isCacheInvalid()
+						false
 					);
 				}
 			}

@@ -222,7 +222,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.versionsManifest.convention(this.project.provider(() -> {
 			File file = KeratinGradleExtension.this.files.getGlobalCache().getVersionsManifestJson();
 
-			if (cacheInvalid || project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
+			if (project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
 				FileUtils.copyURLToFile(new URL(this.versionsManifestUrl.get()), file);
 			}
 
@@ -235,7 +235,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.versionInfos = new Versioned<>(minecraftVersion -> {
 			File file = this.files.getGlobalCache().getMetadataCache().getVersionInfoJson(minecraftVersion);
 
-			if (cacheInvalid || project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
+			if (project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
 				VersionsManifest manifest = versionsManifest.get();
 				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
@@ -250,7 +250,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.versionDetails = new Versioned<>(minecraftVersion -> {
 			File file = this.files.getGlobalCache().getMetadataCache().getVersionDetailJson(minecraftVersion);
 
-			if (cacheInvalid || project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
+			if (project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
 				VersionsManifest manifest = versionsManifest.get();
 				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
