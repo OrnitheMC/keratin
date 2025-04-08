@@ -951,7 +951,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	@Override
 	public void invalidateCache() {
 		if (!cacheInvalid) {
-			project.getLogger().info("The cache was either incomplete or invalid. This build will be slower than usual.");
+			project.getLogger().lifecycle("The cache was either incomplete or invalid. This build will be slower than usual.");
 		}
 
 		cacheInvalid = true;

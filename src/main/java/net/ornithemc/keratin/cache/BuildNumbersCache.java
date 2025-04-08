@@ -33,7 +33,7 @@ public class BuildNumbersCache {
 		try {
 			loadFromCache();
 		} catch (IOException e) {
-			keratin.getProject().getLogger().info("error while load build numbers from cache " + cacheFile.getName(), e);
+			keratin.getProject().getLogger().lifecycle("error while load build numbers from cache " + cacheFile.getName(), e);
 		}
 	}
 
