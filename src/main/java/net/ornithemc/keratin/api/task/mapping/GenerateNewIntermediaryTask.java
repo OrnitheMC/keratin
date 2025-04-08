@@ -8,6 +8,7 @@ import net.fabricmc.stitch.util.IntermediaryUtil;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.files.GlobalCache;
 import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
@@ -35,10 +36,12 @@ public abstract class GenerateNewIntermediaryTask extends GenerateIntermediaryTa
 			throw new IllegalStateException("generating intermediary for client-only/server-only versions is not supported");
 		}
 
+		BuildNumbers nestsBuilds = keratin.getNestsBuilds(minecraftVersion);
+
 		if (minecraftVersion.hasSharedObfuscation()) {
 			IntermediaryUtil.MergedArgsBuilder args = mergedArgs(minecraftVersion)
 				.newJarFile(gameJars.getMergedJar(minecraftVersion))
-				.newNests(nests.getMergedNestsFile(minecraftVersion))
+				.newNests(nests.getMergedNestsFile(minecraftVersion, nestsBuilds))
 				.newLibraries(libraries.getLibraries(minecraftVersion))
 				.newIntermediaryFile(intermediary.getTinyV1MappingsFile(minecraftVersion.id()));
 
@@ -48,10 +51,10 @@ public abstract class GenerateNewIntermediaryTask extends GenerateIntermediaryTa
 
 			IntermediaryUtil.SplitArgsBuilder args = splitArgs(minecraftVersion)
 				.newClientJarFile(gameJars.getClientJar(minecraftVersion))
-				.newClientNests(nests.getClientNestsFile(minecraftVersion))
+				.newClientNests(nests.getClientNestsFile(minecraftVersion, nestsBuilds))
 				.newClientLibraries(libraries.getLibraries(minecraftVersion.client().id()))
 				.newServerJarFile(gameJars.getServerJar(minecraftVersion))
-				.newServerNests(nests.getServerNestsFile(minecraftVersion))
+				.newServerNests(nests.getServerNestsFile(minecraftVersion, nestsBuilds))
 				.newServerLibraries(libraries.getLibraries(minecraftVersion.server().id()))
 				.clientServerMatchesFile(matches.file(), matches.inverted());
 

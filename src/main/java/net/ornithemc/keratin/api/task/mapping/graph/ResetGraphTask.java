@@ -9,6 +9,7 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.settings.ProcessorSettings;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
@@ -29,8 +30,10 @@ public abstract class ResetGraphTask extends MinecraftTask implements MappingsGr
 		ProcessedJarsCache processedJars = files.getGlobalCache().getProcessedJarsCache();
 		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();
 
+		ProcessorSettings processorSettings = keratin.getProcessorSettings(minecraftVersion);
+
 		File graphDir = mappings.getMappingsDirectory();
-		File rootMinecraftJar = processedJars.getMainProcessedIntermediaryJar(minecraftVersion);
+		File rootMinecraftJar = processedJars.getProcessedIntermediaryJar(minecraftVersion, processorSettings);
 		String classNamePattern = getClassNamePattern().getOrElse("");
 
 		resetGraph(graphDir, minecraftVersion, rootMinecraftJar, classNamePattern);

@@ -51,11 +51,24 @@ public interface Nester {
 
 	static void _nestJar(File input, File output, File nests) throws IOException {
 		try {
-			net.ornithemc.nester.Nester.nestJar(
-				input.toPath(),
-				output.toPath(),
-				nests.toPath()
-			);
+			if (input.equals(output)) {
+				File tmp = output;
+
+				while (tmp.exists()) {
+					tmp = new File(tmp.getParentFile(), tmp.getName() + ".tmp");
+				}
+
+				Files.copy(input, tmp);
+				_nestJar(tmp, output, nests);
+
+				tmp.delete();
+			} else {
+				net.ornithemc.nester.Nester.nestJar(
+					input.toPath(),
+					output.toPath(),
+					nests.toPath()
+				);
+			}
 		} catch (NesterException e) {
 			throw new IOException("failed to apply nests to jar", e);
 		}

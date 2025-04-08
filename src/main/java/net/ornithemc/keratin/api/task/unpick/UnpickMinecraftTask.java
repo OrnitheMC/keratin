@@ -8,6 +8,7 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.settings.ProcessorSettings;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
 import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
@@ -28,8 +29,10 @@ public abstract class UnpickMinecraftTask extends MinecraftTask implements Unpic
 		LibrariesCache libraries = files.getGlobalCache().getLibrariesCache();
 		BuildFiles buildFiles = files.getMappingsDevelopmentFiles().getBuildFiles();
 
+		ProcessorSettings processorSettings = keratin.getProcessorSettings(minecraftVersion);
+
 		workQueue.submit(UnpickMinecraft.class, parameters -> {
-			parameters.getInputJar().set(processedJars.getMainProcessedIntermediaryJar(minecraftVersion));
+			parameters.getInputJar().set(processedJars.getProcessedIntermediaryJar(minecraftVersion, processorSettings));
 			parameters.getUnpickDefinitionsFile().set(buildFiles.getProcessedIntermediaryUnpickDefinitionsFile(minecraftVersion));
 			parameters.getUnpickConstantsJar().set(getUnpickConstantsJar().get());
 			parameters.getUnpickClasspath().set(libraries.getLibraries(minecraftVersion));

@@ -1,4 +1,4 @@
-package net.ornithemc.keratin;
+package net.ornithemc.keratin.maven;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,6 +13,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.maven.MavenArtifact;
 import net.ornithemc.keratin.api.maven.MetaSourcedMavenArtifactsAPI;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;

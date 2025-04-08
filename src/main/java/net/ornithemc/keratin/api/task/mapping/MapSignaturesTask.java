@@ -3,8 +3,8 @@ package net.ornithemc.keratin.api.task.mapping;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
-import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
 import net.ornithemc.keratin.files.GlobalCache.SignaturesCache;
 import net.ornithemc.keratin.files.OrnitheFiles;
@@ -26,36 +26,34 @@ public abstract class MapSignaturesTask extends MappingTask {
 
 		boolean fromOfficial = OFFICIAL.equals(srcNs);
 
-		int clientBuild = keratin.getSignaturesBuild(minecraftVersion, GameSide.CLIENT);
-		int serverBuild = keratin.getSignaturesBuild(minecraftVersion, GameSide.SERVER);
-		int mergedBuild = keratin.getSignaturesBuild(minecraftVersion, GameSide.MERGED);
+		BuildNumbers builds = keratin.getSignaturesBuilds(minecraftVersion);
 
 		if (minecraftVersion.canBeMerged() && (!fromOfficial || minecraftVersion.hasSharedObfuscation())) {
-			if (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (clientBuild > 0 || serverBuild > 0)) {
+			if (minecraftVersion.hasSharedObfuscation() ? (builds.merged() > 0) : (builds.client() > 0 || builds.server() > 0)) {
 				workQueue.submit(MapSignatures.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(signatures.getMergedSignaturesFile(minecraftVersion));
-					parameters.getOutput().set(signatures.getIntermediaryMergedSignaturesFile(minecraftVersion));
+					parameters.getInput().set(signatures.getMergedSignaturesFile(minecraftVersion, builds));
+					parameters.getOutput().set(signatures.getIntermediaryMergedSignaturesFile(minecraftVersion, builds));
 					parameters.getMappings().set(mappings.getFilledMergedIntermediaryMappingsFile(minecraftVersion));
 				});
 			}
 		} else {
-			if (minecraftVersion.hasClient() && (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (clientBuild > 0))) {
+			if (minecraftVersion.hasClient() && (minecraftVersion.hasSharedObfuscation() ? (builds.merged() > 0) : (builds.client() > 0))) {
 				workQueue.submit(MapSignatures.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(signatures.getClientSignaturesFile(minecraftVersion));
-					parameters.getOutput().set(signatures.getIntermediaryClientSignaturesFile(minecraftVersion));
+					parameters.getInput().set(signatures.getClientSignaturesFile(minecraftVersion, builds));
+					parameters.getOutput().set(signatures.getIntermediaryClientSignaturesFile(minecraftVersion, builds));
 					parameters.getMappings().set(mappings.getFilledClientIntermediaryMappingsFile(minecraftVersion));
 				});
 			}
-			if (minecraftVersion.hasServer() && (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (serverBuild > 0))) {
+			if (minecraftVersion.hasServer() && (minecraftVersion.hasSharedObfuscation() ? (builds.merged() > 0) : (builds.server() > 0))) {
 				workQueue.submit(MapSignatures.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(signatures.getServerSignaturesFile(minecraftVersion));
-					parameters.getOutput().set(signatures.getIntermediaryServerSignaturesFile(minecraftVersion));
+					parameters.getInput().set(signatures.getServerSignaturesFile(minecraftVersion, builds));
+					parameters.getOutput().set(signatures.getIntermediaryServerSignaturesFile(minecraftVersion, builds));
 					parameters.getMappings().set(mappings.getFilledServerIntermediaryMappingsFile(minecraftVersion));
 				});
 			}

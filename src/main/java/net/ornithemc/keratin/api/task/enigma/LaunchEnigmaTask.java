@@ -11,6 +11,7 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.Configurations;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.settings.ProcessorSettings;
 import net.ornithemc.keratin.api.task.JavaExecution;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
@@ -47,9 +48,11 @@ public abstract class LaunchEnigmaTask extends MinecraftTask implements JavaExec
 		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();
 		BuildFiles buildFiles = mappings.getBuildFiles();
 
+		ProcessorSettings processorSettings = keratin.getProcessorSettings(minecraftVersion);
+
 		File processedJar = getUnpicked().get()
 			? buildFiles.getUnpickedProcessedIntermediaryJar(minecraftVersion)
-			: processedJars.getMainProcessedIntermediaryJar(minecraftVersion);
+			: processedJars.getProcessedIntermediaryJar(minecraftVersion, processorSettings);
 
 		workQueue.submit(EnigmaSessionAction.class, parameters -> {
 			parameters.getMinecraftVersion().set(minecraftVersion.id());

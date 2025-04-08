@@ -6,6 +6,7 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.settings.ProcessorSettings;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache;
 import net.ornithemc.keratin.files.GlobalCache.ExceptionsCache;
@@ -19,7 +20,7 @@ import net.ornithemc.keratin.files.OrnitheFiles;
 public abstract class ProcessMinecraftTask extends MinecraftTask implements Processor {
 
 	@Internal
-	public abstract Property<Boolean> getObfuscateVariableNames();
+	public abstract Property<Boolean> getForDecompile();
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
@@ -34,19 +35,19 @@ public abstract class ProcessMinecraftTask extends MinecraftTask implements Proc
 		NestsCache nests = globalCache.getNestsCache();
 		LibrariesCache libraries = globalCache.getLibrariesCache();
 
+		ProcessorSettings settings = getForDecompile().get()
+			? keratin.getProcessorSettingsForDecompile(minecraftVersion)
+			: keratin.getProcessorSettings(minecraftVersion);
+
 		workQueue.submit(ProcessMinecraft.class, parameters -> {
+			parameters.getOverwrite().set(keratin.isCacheInvalid());
 			parameters.getInputJar().set(mappedJars.getMainIntermediaryJar(minecraftVersion));
+			parameters.getOutputJar().set(processedJars.getProcessedIntermediaryJar(minecraftVersion, settings));
 			parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
-			parameters.getObfuscateVariableNames().set(getObfuscateVariableNames().get());
-			parameters.getLvtPatchedJar().set(processedJars.getMainLvtPatchedIntermediaryJar(minecraftVersion));
-			parameters.getExceptionsFile().set(exceptions.getMainIntermediaryExceptionsFile(minecraftVersion));
-			parameters.getExceptionsPatchedJar().set(processedJars.getMainExceptionsPatchedIntermediaryJar(minecraftVersion));
-			parameters.getSignaturesFile().set(signatures.getMainIntermediarySignaturesFile(minecraftVersion));
-			parameters.getSignaturePatchedJar().set(processedJars.getMainSignaturePatchedIntermediaryJar(minecraftVersion));
-			parameters.getPreenedJar().set(processedJars.getMainPreenedIntermediaryJar(minecraftVersion));
-			parameters.getNestsFile().set(nests.getMainIntermediaryNestsFile(minecraftVersion));
-			parameters.getNestedJar().set(processedJars.getMainNestedIntermediaryJar(minecraftVersion));
-			parameters.getOutputJar().set(processedJars.getMainProcessedIntermediaryJar(minecraftVersion));
+			parameters.getObfuscateVariableNames().set(settings.obfuscateLocalVariableNames());
+			parameters.getExceptionsFile().set(exceptions.getMainIntermediaryExceptionsFile(minecraftVersion, settings.exceptionsBuilds()));
+			parameters.getSignaturesFile().set(signatures.getMainIntermediarySignaturesFile(minecraftVersion, settings.signaturesBuilds()));
+			parameters.getNestsFile().set(nests.getMainIntermediaryNestsFile(minecraftVersion, settings.nestsBuilds()));
 		});
 	}
 }

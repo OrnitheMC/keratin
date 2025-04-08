@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Collection;
 
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.settings.BuildNumbers;
+import net.ornithemc.keratin.api.settings.ProcessorSettings;
 
 public interface GlobalCacheAccess {
 
@@ -69,53 +71,7 @@ public interface GlobalCacheAccess {
 
 		File getDirectory();
 
-		File getLvtPatchedIntermediaryClientJar(MinecraftVersion minecraftVersion);
-
-		File getLvtPatchedIntermediaryServerJar(MinecraftVersion minecraftVersion);
-
-		File getLvtPatchedIntermediaryMergedJar(MinecraftVersion minecraftVersion);
-
-		File getMainLvtPatchedIntermediaryJar(MinecraftVersion minecraftVersion);
-
-		File getExceptionsPatchedIntermediaryClientJar(MinecraftVersion minecraftVersion);
-
-		File getExceptionsPatchedIntermediaryServerJar(MinecraftVersion minecraftVersion);
-
-		File getExceptionsPatchedIntermediaryMergedJar(MinecraftVersion minecraftVersion);
-
-		File getMainExceptionsPatchedIntermediaryJar(MinecraftVersion minecraftVersion);
-
-		File getSignaturePatchedIntermediaryClientJar(MinecraftVersion minecraftVersion);
-
-		File getSignaturePatchedIntermediaryServerJar(MinecraftVersion minecraftVersion);
-
-		File getSignaturePatchedIntermediaryMergedJar(MinecraftVersion minecraftVersion);
-
-		File getMainSignaturePatchedIntermediaryJar(MinecraftVersion minecraftVersion);
-
-		File getPreenedIntermediaryClientJar(MinecraftVersion minecraftVersion);
-
-		File getPreenedIntermediaryServerJar(MinecraftVersion minecraftVersion);
-
-		File getPreenedIntermediaryMergedJar(MinecraftVersion minecraftVersion);
-
-		File getMainPreenedIntermediaryJar(MinecraftVersion minecraftVersion);
-
-		File getNestedIntermediaryClientJar(MinecraftVersion minecraftVersion);
-
-		File getNestedIntermediaryServerJar(MinecraftVersion minecraftVersion);
-
-		File getNestedIntermediaryMergedJar(MinecraftVersion minecraftVersion);
-
-		File getMainNestedIntermediaryJar(MinecraftVersion minecraftVersion);
-
-		File getProcessedIntermediaryClientJar(MinecraftVersion minecraftVersion);
-
-		File getProcessedIntermediaryServerJar(MinecraftVersion minecraftVersion);
-
-		File getProcessedIntermediaryMergedJar(MinecraftVersion minecraftVersion);
-
-		File getMainProcessedIntermediaryJar(MinecraftVersion minecraftVersion);
+		File getProcessedIntermediaryJar(MinecraftVersion minecraftVersion, ProcessorSettings processorSettings);
 
 	}
 
@@ -145,9 +101,9 @@ public interface GlobalCacheAccess {
 
 		File getMainFilledIntermediaryMappingsFile(MinecraftVersion minecraftVersion);
 
-		File getNamedMappingsJar(String minecraftVersion);
+		File getNamedMappingsJar(String minecraftVersion, int build);
 
-		File getNamedMappingsFile(String minecraftVersion);
+		File getNamedMappingsFile(String minecraftVersion, int build);
 
 	}
 
@@ -155,25 +111,25 @@ public interface GlobalCacheAccess {
 
 		File getDirectory();
 
-		File getClientExceptionsJar(MinecraftVersion minecraftVersion);
+		File getClientExceptionsJar(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getServerExceptionsJar(MinecraftVersion minecraftVersion);
+		File getServerExceptionsJar(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getMergedExceptionsJar(MinecraftVersion minecraftVersion);
+		File getMergedExceptionsJar(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getClientExceptionsFile(MinecraftVersion minecraftVersion);
+		File getClientExceptionsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getServerExceptionsFile(MinecraftVersion minecraftVersion);
+		File getServerExceptionsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getMergedExceptionsFile(MinecraftVersion minecraftVersion);
+		File getMergedExceptionsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getIntermediaryClientExceptionsFile(MinecraftVersion minecraftVersion);
+		File getIntermediaryClientExceptionsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getIntermediaryServerExceptionsFile(MinecraftVersion minecraftVersion);
+		File getIntermediaryServerExceptionsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getIntermediaryMergedExceptionsFile(MinecraftVersion minecraftVersion);
+		File getIntermediaryMergedExceptionsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getMainIntermediaryExceptionsFile(MinecraftVersion minecraftVersion);
+		File getMainIntermediaryExceptionsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
 	}
 
@@ -181,25 +137,25 @@ public interface GlobalCacheAccess {
 
 		File getDirectory();
 
-		File getClientSignaturesJar(MinecraftVersion minecraftVersion);
+		File getClientSignaturesJar(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getServerSignaturesJar(MinecraftVersion minecraftVersion);
+		File getServerSignaturesJar(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getMergedSignaturesJar(MinecraftVersion minecraftVersion);
+		File getMergedSignaturesJar(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getClientSignaturesFile(MinecraftVersion minecraftVersion);
+		File getClientSignaturesFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getServerSignaturesFile(MinecraftVersion minecraftVersion);
+		File getServerSignaturesFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getMergedSignaturesFile(MinecraftVersion minecraftVersion);
+		File getMergedSignaturesFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getIntermediaryClientSignaturesFile(MinecraftVersion minecraftVersion);
+		File getIntermediaryClientSignaturesFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getIntermediaryServerSignaturesFile(MinecraftVersion minecraftVersion);
+		File getIntermediaryServerSignaturesFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getIntermediaryMergedSignaturesFile(MinecraftVersion minecraftVersion);
+		File getIntermediaryMergedSignaturesFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getMainIntermediarySignaturesFile(MinecraftVersion minecraftVersion);
+		File getMainIntermediarySignaturesFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
 	}
 
@@ -207,25 +163,25 @@ public interface GlobalCacheAccess {
 
 		File getDirectory();
 
-		File getClientNestsJar(MinecraftVersion minecraftVersion);
+		File getClientNestsJar(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getServerNestsJar(MinecraftVersion minecraftVersion);
+		File getServerNestsJar(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getMergedNestsJar(MinecraftVersion minecraftVersion);
+		File getMergedNestsJar(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getClientNestsFile(MinecraftVersion minecraftVersion);
+		File getClientNestsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getServerNestsFile(MinecraftVersion minecraftVersion);
+		File getServerNestsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getMergedNestsFile(MinecraftVersion minecraftVersion);
+		File getMergedNestsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getIntermediaryClientNestsFile(MinecraftVersion minecraftVersion);
+		File getIntermediaryClientNestsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getIntermediaryServerNestsFile(MinecraftVersion minecraftVersion);
+		File getIntermediaryServerNestsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getIntermediaryMergedNestsFile(MinecraftVersion minecraftVersion);
+		File getIntermediaryMergedNestsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
-		File getMainIntermediaryNestsFile(MinecraftVersion minecraftVersion);
+		File getMainIntermediaryNestsFile(MinecraftVersion minecraftVersion, BuildNumbers builds);
 
 	}
 

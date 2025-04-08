@@ -10,33 +10,27 @@ import org.gradle.workers.WorkParameters;
 
 import com.google.common.io.Files;
 
+import net.ornithemc.keratin.KeratinGradleExtension;
+
 public interface Processor {
 
 	interface MinecraftProcessorParameters extends WorkParameters {
 
+		Property<Boolean> getOverwrite();
+
 		Property<File> getInputJar();
+
+		Property<File> getOutputJar();
 
 		ListProperty<File> getLibraries();
 
 		Property<Boolean> getObfuscateVariableNames();
 
-		Property<File> getLvtPatchedJar();
-
 		Property<File> getExceptionsFile();
-
-		Property<File> getExceptionsPatchedJar();
 
 		Property<File> getSignaturesFile();
 
-		Property<File> getSignaturePatchedJar();
-
-		Property<File> getPreenedJar();
-
 		Property<File> getNestsFile();
-
-		Property<File> getNestedJar();
-
-		Property<File> getOutputJar();
 
 	}
 
@@ -44,16 +38,26 @@ public interface Processor {
 
 		@Override
 		public void execute() {
+			boolean overwrite = getParameters().getOverwrite().get();
+
+			File data;
+			File jarIn = getParameters().getInputJar().get();
+			File jarOut = getParameters().getOutputJar().get();
+
 			try {
-				File data;
-				File jarIn;
-				File jarOut = getParameters().getInputJar().get();
+				if (KeratinGradleExtension.validateOutput(jarOut, overwrite)) {
+					return;
+				}
+
+				{
+					Files.copy(jarIn, jarOut);
+				}
 
 				data = null;
 
 				{
 					jarIn = jarOut;
-					jarOut = getParameters().getLvtPatchedJar().get();
+					jarOut = getParameters().getOutputJar().get();
 					List<File> libraries = getParameters().getLibraries().get();
 					boolean obfuscateNames = getParameters().getObfuscateVariableNames().get();
 
@@ -64,7 +68,7 @@ public interface Processor {
 
 				if (data != null) {
 					jarIn = jarOut;
-					jarOut = getParameters().getExceptionsPatchedJar().get();
+					jarOut = getParameters().getOutputJar().get();
 
 					exceptionsPatchJar(jarIn, jarOut, data);
 				}
@@ -73,7 +77,7 @@ public interface Processor {
 
 				if (data != null) {
 					jarIn = jarOut;
-					jarOut = getParameters().getSignaturePatchedJar().get();
+					jarOut = getParameters().getOutputJar().get();
 
 					signaturePatchJar(jarIn, jarOut, data);
 				}
@@ -82,7 +86,7 @@ public interface Processor {
 
 				{
 					jarIn = jarOut;
-					jarOut = getParameters().getPreenedJar().get();
+					jarOut = getParameters().getOutputJar().get();
 
 					modifyMergedBridgeMethodsAccess(jarIn, jarOut);
 				}
@@ -91,19 +95,10 @@ public interface Processor {
 
 				if (data != null) {
 					jarIn = jarOut;
-					jarOut = getParameters().getNestedJar().get();
+					jarOut = getParameters().getOutputJar().get();
 
 					nestJar(jarIn, jarOut, data);
 				}
-
-				jarIn = jarOut;
-				jarOut = getParameters().getOutputJar().get();
-
-				if (jarOut.exists()) {
-					jarOut.delete();
-				}
-
-				Files.copy(jarIn, jarOut);
 			} catch (Exception e) {
 				throw new RuntimeException("error while processing Minecraft", e);
 			}

@@ -6,6 +6,7 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.Exceptor;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.BuildFiles;
@@ -24,10 +25,12 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 		NestsCache nestsCache = files.getGlobalCache().getNestsCache();
 		BuildFiles buildFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getBuildFiles();
 
+		BuildNumbers nestsBuilds = keratin.getNestsBuilds(minecraftVersion);
+
 		if (minecraftVersion.hasSharedObfuscation()) {
 			File jar = buildFiles.getGeneratedMergedJar(minecraftVersion);
 			File excs = buildFiles.getGeneratedMergedExceptionsFile(minecraftVersion);
-			File nests = nestsCache.getMergedNestsFile(minecraftVersion);
+			File nests = nestsCache.getMergedNestsFile(minecraftVersion, nestsBuilds);
 
 			extractExceptions(
 				jar,
@@ -44,7 +47,7 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 			if (minecraftVersion.hasClient()) {
 				File jar = buildFiles.getGeneratedClientJar(minecraftVersion);
 				File excs = buildFiles.getGeneratedClientExceptionsFile(minecraftVersion);
-				File nests = nestsCache.getClientNestsFile(minecraftVersion);
+				File nests = nestsCache.getClientNestsFile(minecraftVersion, nestsBuilds);
 
 				extractExceptions(
 					jar,
@@ -61,7 +64,7 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 			if (minecraftVersion.hasServer()) {
 				File jar = buildFiles.getGeneratedServerJar(minecraftVersion);
 				File excs = buildFiles.getGeneratedServerExceptionsFile(minecraftVersion);
-				File nests = nestsCache.getServerNestsFile(minecraftVersion);
+				File nests = nestsCache.getServerNestsFile(minecraftVersion, nestsBuilds);
 
 				extractExceptions(
 					jar,

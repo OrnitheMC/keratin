@@ -7,7 +7,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -36,10 +35,7 @@ import org.gradle.api.tasks.javadoc.Javadoc;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
-import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.KeratinGradleExtensionAPI;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.PublicationsAPI;
@@ -51,6 +47,8 @@ import net.ornithemc.keratin.api.manifest.VersionInfo.Library.Downloads;
 import net.ornithemc.keratin.api.manifest.VersionInfo.Library.Downloads.Artifact;
 import net.ornithemc.keratin.api.manifest.VersionsManifest;
 import net.ornithemc.keratin.api.maven.MetaSourcedMavenArtifactsAPI;
+import net.ornithemc.keratin.api.settings.BuildNumbers;
+import net.ornithemc.keratin.api.settings.ProcessorSettings;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.build.BuildMappingsJarTask;
 import net.ornithemc.keratin.api.task.build.BuildMappingsTask;
@@ -118,10 +116,13 @@ import net.ornithemc.keratin.api.task.setup.SetUpSourceTask;
 import net.ornithemc.keratin.api.task.unpick.LoadUnpickDefinitionsTask;
 import net.ornithemc.keratin.api.task.unpick.MapUnpickDefinitionsToIntermediaryTask;
 import net.ornithemc.keratin.api.task.unpick.UnpickMinecraftTask;
+import net.ornithemc.keratin.cache.BuildNumbersCache;
 import net.ornithemc.keratin.files.IntermediaryDevelopmentFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
 import net.ornithemc.keratin.files.OrnitheFiles;
 import net.ornithemc.keratin.matching.Matches;
+import net.ornithemc.keratin.maven.MetaSourcedMultipleBuildsMavenArtifacts;
+import net.ornithemc.keratin.maven.MetaSourcedSingleBuildMavenArtifacts;
 import net.ornithemc.keratin.util.Versioned;
 
 import net.ornithemc.mappingutils.PropagationDirection;
@@ -157,10 +158,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private final Property<VersionsManifest> versionsManifest;
 	private final Versioned<String, VersionInfo> versionInfos;
 	private final Versioned<String, VersionDetails> versionDetails;
-	private final Versioned<String, Integer> namedMappingsBuilds;
-	private final Versioned<MinecraftVersion, Map<GameSide, Integer>> exceptionsBuilds;
-	private final Versioned<MinecraftVersion, Map<GameSide, Integer>> signaturesBuilds;
-	private final Versioned<MinecraftVersion, Map<GameSide, Integer>> nestsBuilds;
+	private final Property<BuildNumbersCache> namedMappingsBuilds;
+	private final Property<BuildNumbersCache> exceptionsBuilds;
+	private final Property<BuildNumbersCache> signaturesBuilds;
+	private final Property<BuildNumbersCache> nestsBuilds;
+	private final Versioned<MinecraftVersion, ProcessorSettings> processorSettings;
 
 	private boolean configured;
 	private boolean cacheInvalid;
@@ -260,67 +262,24 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 			return details;
 		});
-		this.namedMappingsBuilds = new Versioned<>(minecraftVersion -> {
-			File cacheFile = this.files.getSharedFiles().getNamedMappingsBuildsJson();
-
-			if (cacheFile.exists()) {
-				String s = FileUtils.readFileToString(cacheFile, Charset.defaultCharset());			
-				JsonObject json = GSON.fromJson(s, JsonObject.class);
-				JsonElement buildJson = json.get(minecraftVersion);
-
-				if (buildJson != null && buildJson.isJsonPrimitive()) {
-					return buildJson.getAsInt();
-				}
-			}
-
-			return 0;
+		this.namedMappingsBuilds = this.project.getObjects().property(BuildNumbersCache.class);
+		this.namedMappingsBuilds.convention(this.project.provider(() -> new BuildNumbersCache(this, this.files.getSharedFiles().getNamedMappingsBuildsJson(), false)));
+		this.namedMappingsBuilds.finalizeValueOnRead();
+		this.exceptionsBuilds = this.project.getObjects().property(BuildNumbersCache.class);
+		this.exceptionsBuilds.convention(this.project.provider(() -> new BuildNumbersCache(this, this.files.getSharedFiles().getExceptionsBuildsJson(), true)));
+		this.exceptionsBuilds.finalizeValueOnRead();
+		this.signaturesBuilds = this.project.getObjects().property(BuildNumbersCache.class);
+		this.signaturesBuilds.convention(this.project.provider(() -> new BuildNumbersCache(this, this.files.getSharedFiles().getSignaturesBuildsJson(), true)));
+		this.signaturesBuilds.finalizeValueOnRead();
+		this.nestsBuilds = this.project.getObjects().property(BuildNumbersCache.class);
+		this.nestsBuilds.convention(this.project.provider(() -> new BuildNumbersCache(this, this.files.getSharedFiles().getNestsBuildsJson(), true)));
+		this.nestsBuilds.finalizeValueOnRead();
+		this.processorSettings = new Versioned<>(minecraftVersion -> {
+			return ProcessorSettings.init(ProcessorSettings.PROCESSOR_VERSION)
+			                        .withExceptionsBuilds(this.exceptionsBuilds.get().getBuildNumbers(minecraftVersion))
+			                        .withSignaturesBuilds(this.signaturesBuilds.get().getBuildNumbers(minecraftVersion))
+			                        .withNestsBuilds(this.nestsBuilds.get().getBuildNumbers(minecraftVersion));
 		});
-		this.exceptionsBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getSharedFiles().getExceptionsBuildsJson()));
-		this.signaturesBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getSharedFiles().getSignaturesBuildsJson()));
-		this.nestsBuilds = new Versioned<>(minecraftVersion -> parseBuildsFromCache(minecraftVersion, this.files.getSharedFiles().getNestsBuildsJson()));
-	}
-
-	private static Map<GameSide, Integer> parseBuildsFromCache(MinecraftVersion minecraftVersion, File cacheFile) throws IOException {
-		if (!cacheFile.exists()) {
-			return Collections.emptyMap();
-		}
-
-		Map<GameSide, Integer> builds = new EnumMap<>(GameSide.class);
-
-		String s = FileUtils.readFileToString(cacheFile, Charset.defaultCharset());			
-		JsonObject json = GSON.fromJson(s, JsonObject.class);
-
-		for (GameSide side : GameSide.values()) {
-			if (minecraftVersion.hasSharedObfuscation()) {
-				if (side != GameSide.MERGED) {
-					continue;
-				}
-			} else if ((side == GameSide.CLIENT && !minecraftVersion.hasClient()) || (side == GameSide.SERVER && !minecraftVersion.hasServer())) {
-				continue;
-			}
-
-			String id = minecraftVersion.id();
-
-			if (!minecraftVersion.hasSharedObfuscation()) {
-				if (side == GameSide.CLIENT) {
-					id = minecraftVersion.client().id();
-				}
-				if (side == GameSide.SERVER) {
-					id = minecraftVersion.server().id();
-				}
-			}
-			if (minecraftVersion.hasSharedVersioning()) {
-				id += side.suffix();
-			}
-
-			JsonElement buildJson = json.get(id);
-
-			if (buildJson != null && buildJson.isJsonPrimitive()) {
-				builds.put(side, buildJson.getAsInt());
-			}
-		}
-
-		return builds;
 	}
 
 	public Project getProject() {
@@ -671,7 +630,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 				TaskProvider<?> processMinecraft = tasks.register("processMinecraft", ProcessMinecraftTask.class, task -> {
 					task.dependsOn(mergeIntermediaryJars, mergeIntermediaryExceptions, mergeIntermediarySignatures, mergeIntermediaryNests);
-					task.getObfuscateVariableNames().set(false);
+					task.getForDecompile().set(false);
 				});
 				TaskProvider<?> unpickMinecraft = tasks.register("unpickMinecraft", UnpickMinecraftTask.class, task -> {
 					task.dependsOn(constantsJar, mapUnpickDefinitionsToIntermediary, processMinecraft);
@@ -728,24 +687,25 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 				TaskProvider<?> processMinecraftForDecompile = tasks.register("processMinecraftForDecompile", ProcessMinecraftTask.class, task -> {
 					task.dependsOn(mergeIntermediaryJars, mergeIntermediaryExceptions, mergeIntermediarySignatures, mergeIntermediaryNests);
-					task.getObfuscateVariableNames().set(true);
+					task.getForDecompile().set(true);
 				});
 
 				TaskProvider<?> buildProcessedMappings = tasks.register("buildProcessedMappings", BuildProcessedMappingsTask.class, task -> {
 					task.dependsOn(processMinecraftForDecompile);
 				});
 
-				TaskProvider<?> mapProcessedMinecraftToNamed = tasks.register("mapProcessedMinecraftToNamed", MapProcessedMinecraftTask.class, task -> {
+				TaskProvider<?> mapProcessedMinecraftToNamedForDecompile = tasks.register("mapProcessedMinecraftToNamedForDecompile", MapProcessedMinecraftTask.class, task -> {
 					task.dependsOn(buildProcessedMappings);
 					task.getSourceNamespace().set(Mapper.INTERMEDIARY);
 					task.getTargetNamespace().set(Mapper.NAMED);
+					task.getForDecompile().set(true);
 				});
 
 				TaskProvider<?> decompileWithCfr = tasks.register("decompileWithCfr", DecompileMinecraftWithCfrTask.class, task -> {
-					task.dependsOn(mapProcessedMinecraftToNamed);
+					task.dependsOn(mapProcessedMinecraftToNamedForDecompile);
 				});
 				TaskProvider<?> decompileWithVineflower = tasks.register("decompileWithVineflower", DecompileMinecraftWithVineflowerTask.class, task -> {
-					task.dependsOn(mapProcessedMinecraftToNamed);
+					task.dependsOn(mapProcessedMinecraftToNamedForDecompile);
 				});
 
 				TaskProvider<?> mapMinecraftForJavadoc = tasks.register("mapMinecraftForJavadoc", MapMinecraftForJavadocTask.class, task -> {
@@ -1031,28 +991,32 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		return versionDetails.get(minecraftVersion);
 	}
 
-	@Override
 	public int getNamedMappingsBuild(String minecraftVersion) {
-		checkAccess("named mappings builds");
-		return namedMappingsBuilds.get(minecraftVersion);
+		return namedMappingsBuilds.get().getBuild(minecraftVersion);
 	}
 
-	@Override
-	public int getExceptionsBuild(MinecraftVersion minecraftVersion, GameSide side) {
-		checkAccess("exceptions builds");
-		return exceptionsBuilds.get(minecraftVersion).getOrDefault(side, -1);
+	public BuildNumbers getNamedMappingsBuilds(MinecraftVersion minecraftVersion) {
+		return namedMappingsBuilds.get().getBuildNumbers(minecraftVersion);
 	}
 
-	@Override
-	public int getSignaturesBuild(MinecraftVersion minecraftVersion, GameSide side) {
-		checkAccess("signatures builds");
-		return signaturesBuilds.get(minecraftVersion).getOrDefault(side, -1);
+	public BuildNumbers getExceptionsBuilds(MinecraftVersion minecraftVersion) {
+		return exceptionsBuilds.get().getBuildNumbers(minecraftVersion);
 	}
 
-	@Override
-	public int getNestsBuild(MinecraftVersion minecraftVersion, GameSide side) {
-		checkAccess("nests builds");
-		return nestsBuilds.get(minecraftVersion).getOrDefault(side, -1);
+	public BuildNumbers getSignaturesBuilds(MinecraftVersion minecraftVersion) {
+		return signaturesBuilds.get().getBuildNumbers(minecraftVersion);
+	}
+
+	public BuildNumbers getNestsBuilds(MinecraftVersion minecraftVersion) {
+		return nestsBuilds.get().getBuildNumbers(minecraftVersion);
+	}
+
+	public ProcessorSettings getProcessorSettings(MinecraftVersion minecraftVersion) {
+		return processorSettings.get(minecraftVersion);
+	}
+
+	public ProcessorSettings getProcessorSettingsForDecompile(MinecraftVersion minecraftVersion) {
+		return processorSettings.get(minecraftVersion).withObfuscateLocalVariableNames(true);
 	}
 
 	public Matches findMatches(String sideA, String versionA, String sideB, String versionB) {

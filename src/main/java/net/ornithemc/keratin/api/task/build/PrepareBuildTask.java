@@ -13,6 +13,7 @@ import com.google.common.io.Files;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.graph.MappingsGraph;
 import net.ornithemc.keratin.api.task.mapping.graph.Validators;
@@ -20,6 +21,7 @@ import net.ornithemc.keratin.files.GlobalCache.NestsCache;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
 import net.ornithemc.keratin.files.OrnitheFiles;
+
 import net.ornithemc.mappingutils.MappingUtils;
 import net.ornithemc.mappingutils.io.Format;
 
@@ -34,10 +36,12 @@ public abstract class PrepareBuildTask extends MinecraftTask implements Mappings
 		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();
 		BuildFiles buildFiles = mappings.getBuildFiles();
 
+		BuildNumbers nestsBuilds = keratin.getNestsBuilds(minecraftVersion);
+
 		workQueue.submit(PrepareBuild.class, parameters -> {
 			parameters.getMinecraftVersion().set(minecraftVersion.id());
 			parameters.getGraphDirectory().set(mappings.getMappingsDirectory());
-			parameters.getNests().set(nests.getMainIntermediaryNestsFile(minecraftVersion));
+			parameters.getNests().set(nests.getMainIntermediaryNestsFile(minecraftVersion, nestsBuilds));
 			parameters.getProcessedOutput().set(buildFiles.getProcessedMappingsFile(minecraftVersion));
 			parameters.getOutput().set(buildFiles.getMappingsFile(minecraftVersion));
 		});

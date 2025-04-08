@@ -1,13 +1,11 @@
 package net.ornithemc.keratin.api.task.processing;
 
-import java.io.File;
-
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
-import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
+import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.SignaturesCache;
@@ -25,54 +23,47 @@ public abstract class DownloadSignaturesTask extends MinecraftTask implements Do
 
 		SignaturesCache signatures = files.getGlobalCache().getSignaturesCache();
 
+		BuildNumbers builds = keratin.getSignaturesBuilds(minecraftVersion);
+
 		boolean signaturesChanged = false;
 
 		if (minecraftVersion.hasSharedObfuscation()) {
-			int build = keratin.getSignaturesBuild(minecraftVersion, GameSide.MERGED);
-
-			if (build > 0) {
-				File outputJar = minecraftVersion.hasClient() && minecraftVersion.hasServer()
-					? signatures.getMergedSignaturesJar(minecraftVersion)
-					: minecraftVersion.hasClient()
-						? signatures.getClientSignaturesJar(minecraftVersion)
-						: signatures.getServerSignaturesJar(minecraftVersion);
-				File output = minecraftVersion.hasClient() && minecraftVersion.hasServer()
-					? signatures.getMergedSignaturesFile(minecraftVersion)
-					: minecraftVersion.hasClient()
-						? signatures.getClientSignaturesFile(minecraftVersion)
-						: signatures.getServerSignaturesFile(minecraftVersion);
-
+			if (builds.merged() > 0) {
 				signaturesChanged |= downloadAndExtract(
-					signaturesArtifacts.get(minecraftVersion.key(GameSide.MERGED), build),
+					signaturesArtifacts.get(minecraftVersion.id(), builds.merged()),
 					PATH_IN_JAR,
-					outputJar,
-					output,
+					signatures.getMergedSignaturesJar(minecraftVersion, builds),
+					signatures.getMergedSignaturesFile(minecraftVersion, builds),
 					keratin.isCacheInvalid()
 				);
 			}
 		} else {
 			if (minecraftVersion.hasClient()) {
-				int build = keratin.getSignaturesBuild(minecraftVersion, GameSide.CLIENT);
+				if (builds.client() > 0) {
+					String versionKey = minecraftVersion.hasSharedVersioning()
+						? minecraftVersion.clientKey()
+						: minecraftVersion.client().id();
 
-				if (build > 0) {
 					signaturesChanged |= downloadAndExtract(
-						signaturesArtifacts.get(minecraftVersion.key(GameSide.CLIENT), build),
+						signaturesArtifacts.get(versionKey, builds.client()),
 						PATH_IN_JAR,
-						signatures.getClientSignaturesJar(minecraftVersion),
-						signatures.getClientSignaturesFile(minecraftVersion),
+						signatures.getClientSignaturesJar(minecraftVersion, builds),
+						signatures.getClientSignaturesFile(minecraftVersion, builds),
 						keratin.isCacheInvalid()
 					);
 				}
 			}
 			if (minecraftVersion.hasServer()) {
-				int build = keratin.getSignaturesBuild(minecraftVersion, GameSide.SERVER);
+				if (builds.server() > 0) {
+					String versionKey = minecraftVersion.hasSharedVersioning()
+						? minecraftVersion.serverKey()
+						: minecraftVersion.server().id();
 
-				if (build > 0) {
 					signaturesChanged |= downloadAndExtract(
-						signaturesArtifacts.get(minecraftVersion.key(GameSide.SERVER), build),
+						signaturesArtifacts.get(versionKey, builds.server()),
 						PATH_IN_JAR,
-						signatures.getServerSignaturesJar(minecraftVersion),
-						signatures.getServerSignaturesFile(minecraftVersion),
+						signatures.getServerSignaturesJar(minecraftVersion, builds),
+						signatures.getServerSignaturesFile(minecraftVersion, builds),
 						keratin.isCacheInvalid()
 					);
 				}

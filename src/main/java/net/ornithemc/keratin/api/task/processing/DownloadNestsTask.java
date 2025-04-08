@@ -1,13 +1,11 @@
 package net.ornithemc.keratin.api.task.processing;
 
-import java.io.File;
-
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
-import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
+import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.api.task.DownloaderAndExtracter;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.NestsCache;
@@ -25,54 +23,47 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 
 		NestsCache nests = files.getGlobalCache().getNestsCache();
 
+		BuildNumbers builds = keratin.getNestsBuilds(minecraftVersion);
+
 		boolean nestsChanged = false;
 
 		if (minecraftVersion.hasSharedObfuscation()) {
-			int build = keratin.getNestsBuild(minecraftVersion, GameSide.MERGED);
-
-			if (build > 0) {
-				File outputJar = minecraftVersion.hasClient() && minecraftVersion.hasServer()
-					? nests.getMergedNestsJar(minecraftVersion)
-					: minecraftVersion.hasClient()
-						? nests.getClientNestsJar(minecraftVersion)
-						: nests.getServerNestsJar(minecraftVersion);
-				File output = minecraftVersion.hasClient() && minecraftVersion.hasServer()
-					? nests.getMergedNestsFile(minecraftVersion)
-					: minecraftVersion.hasClient()
-						? nests.getClientNestsFile(minecraftVersion)
-						: nests.getServerNestsFile(minecraftVersion);
-
+			if (builds.merged() > 0) {
 				nestsChanged |= downloadAndExtract(
-					nestsArtifacts.get(minecraftVersion.key(GameSide.MERGED), build),
+					nestsArtifacts.get(minecraftVersion.id(), builds.merged()),
 					PATH_IN_JAR,
-					outputJar,
-					output,
+					nests.getMergedNestsJar(minecraftVersion, builds),
+					nests.getMergedNestsFile(minecraftVersion, builds),
 					keratin.isCacheInvalid()
 				);
 			}
 		} else {
 			if (minecraftVersion.hasClient()) {
-				int build = keratin.getNestsBuild(minecraftVersion, GameSide.CLIENT);
+				if (builds.client() > 0) {
+					String versionKey = minecraftVersion.hasSharedVersioning()
+						? minecraftVersion.clientKey()
+						: minecraftVersion.client().id();
 
-				if (build > 0) {
 					nestsChanged |= downloadAndExtract(
-						nestsArtifacts.get(minecraftVersion.key(GameSide.CLIENT), build),
+						nestsArtifacts.get(versionKey, builds.client()),
 						PATH_IN_JAR,
-						nests.getClientNestsJar(minecraftVersion),
-						nests.getClientNestsFile(minecraftVersion),
+						nests.getClientNestsJar(minecraftVersion, builds),
+						nests.getClientNestsFile(minecraftVersion, builds),
 						keratin.isCacheInvalid()
 					);
 				}
 			}
 			if (minecraftVersion.hasServer()) {
-				int build = keratin.getNestsBuild(minecraftVersion, GameSide.SERVER);
+				if (builds.server() > 0) {
+					String versionKey = minecraftVersion.hasSharedVersioning()
+						? minecraftVersion.serverKey()
+						: minecraftVersion.server().id();
 
-				if (build > 0) {
 					nestsChanged |= downloadAndExtract(
-						nestsArtifacts.get(minecraftVersion.key(GameSide.SERVER), build),
+						nestsArtifacts.get(versionKey, builds.server()),
 						PATH_IN_JAR,
-						nests.getServerNestsJar(minecraftVersion),
-						nests.getServerNestsFile(minecraftVersion),
+						nests.getServerNestsJar(minecraftVersion, builds),
+						nests.getServerNestsFile(minecraftVersion, builds),
 						keratin.isCacheInvalid()
 					);
 				}

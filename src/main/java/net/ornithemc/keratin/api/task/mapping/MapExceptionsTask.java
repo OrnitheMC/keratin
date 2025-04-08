@@ -3,8 +3,8 @@ package net.ornithemc.keratin.api.task.mapping;
 import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
-import net.ornithemc.keratin.api.GameSide;
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.files.GlobalCache.ExceptionsCache;
 import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
 import net.ornithemc.keratin.files.OrnitheFiles;
@@ -24,38 +24,36 @@ public abstract class MapExceptionsTask extends MappingTask {
 		MappingsCache mappings = files.getGlobalCache().getMappingsCache();
 		ExceptionsCache exceptions = files.getGlobalCache().getExceptionsCache();
 
+		BuildNumbers builds = keratin.getExceptionsBuilds(minecraftVersion);
+
 		boolean fromOfficial = OFFICIAL.equals(srcNs);
 
-		int clientBuild = keratin.getExceptionsBuild(minecraftVersion, GameSide.CLIENT);
-		int serverBuild = keratin.getExceptionsBuild(minecraftVersion, GameSide.SERVER);
-		int mergedBuild = keratin.getExceptionsBuild(minecraftVersion, GameSide.MERGED);
-
 		if (minecraftVersion.canBeMerged() && (!fromOfficial || minecraftVersion.hasSharedObfuscation())) {
-			if (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (clientBuild > 0 || serverBuild > 0)) {
+			if (minecraftVersion.hasSharedObfuscation() ? (builds.merged() > 0) : (builds.client() > 0 || builds.server() > 0)) {
 				workQueue.submit(MapExceptions.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(exceptions.getMergedExceptionsFile(minecraftVersion));
-					parameters.getOutput().set(exceptions.getIntermediaryMergedExceptionsFile(minecraftVersion));
+					parameters.getInput().set(exceptions.getMergedExceptionsFile(minecraftVersion, builds));
+					parameters.getOutput().set(exceptions.getIntermediaryMergedExceptionsFile(minecraftVersion, builds));
 					parameters.getMappings().set(mappings.getFilledMergedIntermediaryMappingsFile(minecraftVersion));
 				});
 			}
 		} else {
-			if (minecraftVersion.hasClient() && (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (clientBuild > 0))) {
+			if (minecraftVersion.hasClient() && (minecraftVersion.hasSharedObfuscation() ? (builds.merged() > 0) : (builds.client() > 0))) {
 				workQueue.submit(MapExceptions.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(exceptions.getClientExceptionsFile(minecraftVersion));
-					parameters.getOutput().set(exceptions.getIntermediaryClientExceptionsFile(minecraftVersion));
+					parameters.getInput().set(exceptions.getClientExceptionsFile(minecraftVersion, builds));
+					parameters.getOutput().set(exceptions.getIntermediaryClientExceptionsFile(minecraftVersion, builds));
 					parameters.getMappings().set(mappings.getFilledClientIntermediaryMappingsFile(minecraftVersion));
 				});
 			}
-			if (minecraftVersion.hasServer() && (minecraftVersion.hasSharedObfuscation() ? (mergedBuild > 0) : (serverBuild > 0))) {
+			if (minecraftVersion.hasServer() && (minecraftVersion.hasSharedObfuscation() ? (builds.merged() > 0) : (builds.server() > 0))) {
 				workQueue.submit(MapExceptions.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getBrokenInnerClasses().set(fromOfficial && minecraftVersion.hasBrokenInnerClasses());
-					parameters.getInput().set(exceptions.getServerExceptionsFile(minecraftVersion));
-					parameters.getOutput().set(exceptions.getIntermediaryServerExceptionsFile(minecraftVersion));
+					parameters.getInput().set(exceptions.getServerExceptionsFile(minecraftVersion, builds));
+					parameters.getOutput().set(exceptions.getIntermediaryServerExceptionsFile(minecraftVersion, builds));
 					parameters.getMappings().set(mappings.getFilledServerIntermediaryMappingsFile(minecraftVersion));
 				});
 			}

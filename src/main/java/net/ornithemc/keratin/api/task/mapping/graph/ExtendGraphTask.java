@@ -55,10 +55,10 @@ public abstract class ExtendGraphTask extends MinecraftTask implements MappingsG
 		File graphDir = mappings.getMappingsDirectory();
 		String classNamePattern = getClassNamePattern().getOrElse("");
 
-		File jar = processedJars.getMainProcessedIntermediaryJar(minecraftVersion);
+		File jar = processedJars.getProcessedIntermediaryJar(minecraftVersion, keratin.getProcessorSettings(minecraftVersion));
 		List<File> fromJars = new ArrayList<>();
 		for (MinecraftVersion fromMinecraftVersion : fromMinecraftVersions) {
-			fromJars.add(processedJars.getMainProcessedIntermediaryJar(fromMinecraftVersion));
+			fromJars.add(processedJars.getProcessedIntermediaryJar(fromMinecraftVersion, keratin.getProcessorSettings(fromMinecraftVersion)));
 		}
 
 		extendGraph(graphDir, minecraftVersion, fromMinecraftVersions, jar, fromJars, classNamePattern);

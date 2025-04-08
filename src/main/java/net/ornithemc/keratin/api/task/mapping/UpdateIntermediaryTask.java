@@ -14,6 +14,7 @@ import net.fabricmc.stitch.util.IntermediaryUtil;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.files.GlobalCache;
 import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
@@ -57,6 +58,8 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 		for (String fromMinecraftVersion : fromMinecraftVersionStrings) {
 			fromMinecraftVersions.add(MinecraftVersion.parse(keratin, fromMinecraftVersion));
 		}
+
+		getProject().getLogger().lifecycle(":updating intermediary from Minecraft " + String.join("/", fromMinecraftVersionStrings) + " to " + minecraftVersion.id());
 
 		if (minecraftVersion.hasSharedObfuscation()) {
 			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
@@ -115,12 +118,12 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 			}
 		}
 
-		getProject().getLogger().lifecycle(":updating intermediary from Minecraft " + String.join("/", fromMinecraftVersionStrings) + " to " + minecraftVersion.id());
+		BuildNumbers builds = keratin.getNestsBuilds(minecraftVersion);
 
 		if (minecraftVersion.hasSharedObfuscation()) {
 			IntermediaryUtil.MergedArgsBuilder args = mergedArgs(minecraftVersion)
 				.newJarFile(gameJars.getMergedJar(minecraftVersion))
-				.newNests(nests.getMergedNestsFile(minecraftVersion))
+				.newNests(nests.getMergedNestsFile(minecraftVersion, builds))
 				.newLibraries(libraries.getLibraries(minecraftVersion))
 				.newCheckSerializable(minecraftVersion.usesSerializableForLevelSaving())
 				.newIntermediaryFile(intermediary.getTinyV1MappingsFile(minecraftVersion.id()));
@@ -143,14 +146,14 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 			if (minecraftVersion.hasClient()) {
 				args
 					.newClientJarFile(gameJars.getClientJar(minecraftVersion))
-					.newClientNests(nests.getClientNestsFile(minecraftVersion))
+					.newClientNests(nests.getClientNestsFile(minecraftVersion, builds))
 					.newClientLibraries(libraries.getLibraries(minecraftVersion.client().id()))
 					.newClientCheckSerializable(minecraftVersion.usesSerializableForLevelSaving());
 			}
 			if (minecraftVersion.hasServer()) {
 				args
 					.newServerJarFile(gameJars.getServerJar(minecraftVersion))
-					.newServerNests(nests.getServerNestsFile(minecraftVersion))
+					.newServerNests(nests.getServerNestsFile(minecraftVersion, builds))
 					.newServerLibraries(libraries.getLibraries(minecraftVersion.server().id()))
 					.newServerCheckSerializable(minecraftVersion.usesSerializableForLevelSaving());
 			}

@@ -14,6 +14,7 @@ import com.google.common.io.Files;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.Condor;
 import net.ornithemc.keratin.api.task.processing.Exceptor;
@@ -41,6 +42,8 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 		SetupFiles setupFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getSetupFiles();
 		SourceJars sourceJars = files.getExceptionsAndSignaturesDevelopmentFiles().getSourceJars();
 
+		BuildNumbers nestsBuilds = keratin.getNestsBuilds(minecraftVersion);
+
 		if (minecraftVersion.hasSharedObfuscation()) {
 			workQueue.submit(MakeSourceJar.class, parameters -> {
 				parameters.getInput().set(gameJars.getMergedJar(minecraftVersion));
@@ -48,7 +51,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 				parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 				parameters.getExceptions().set(setupFiles.getMergedExceptionsFile(minecraftVersion));
 				parameters.getSignatures().set(setupFiles.getMergedSignaturesFile(minecraftVersion));
-				parameters.getNests().set(nests.getMergedNestsFile(minecraftVersion));
+				parameters.getNests().set(nests.getMergedNestsFile(minecraftVersion, nestsBuilds));
 			});
 		} else {
 			if (minecraftVersion.hasClient()) {
@@ -58,7 +61,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 					parameters.getExceptions().set(setupFiles.getClientExceptionsFile(minecraftVersion));
 					parameters.getSignatures().set(setupFiles.getClientSignaturesFile(minecraftVersion));
-					parameters.getNests().set(nests.getClientNestsFile(minecraftVersion));
+					parameters.getNests().set(nests.getClientNestsFile(minecraftVersion, nestsBuilds));
 				});
 			}
 			if (minecraftVersion.hasServer()) {
@@ -68,7 +71,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 					parameters.getExceptions().set(setupFiles.getServerExceptionsFile(minecraftVersion));
 					parameters.getSignatures().set(setupFiles.getServerSignaturesFile(minecraftVersion));
-					parameters.getNests().set(nests.getServerNestsFile(minecraftVersion));
+					parameters.getNests().set(nests.getServerNestsFile(minecraftVersion, nestsBuilds));
 				});
 			}
 		}

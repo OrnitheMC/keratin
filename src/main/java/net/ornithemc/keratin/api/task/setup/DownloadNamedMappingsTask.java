@@ -47,8 +47,8 @@ public abstract class DownloadNamedMappingsTask extends MinecraftTask implements
 			return downloadAndExtract(
 				namedMappings.get(minecraftVersion, build),
 				PATH_IN_JAR,
-				mappings.getNamedMappingsJar(minecraftVersion),
-				mappings.getNamedMappingsFile(minecraftVersion),
+				mappings.getNamedMappingsJar(minecraftVersion, build),
+				mappings.getNamedMappingsFile(minecraftVersion, build),
 				keratin.isCacheInvalid()
 			);
 		}

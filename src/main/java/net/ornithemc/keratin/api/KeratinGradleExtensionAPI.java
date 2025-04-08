@@ -55,12 +55,4 @@ public interface KeratinGradleExtensionAPI {
 
 	VersionsManifest getVersionsManifest();
 
-	int getNamedMappingsBuild(String minecraftVersion);
-
-	int getExceptionsBuild(MinecraftVersion minecraftVersion, GameSide side);
-
-	int getSignaturesBuild(MinecraftVersion minecraftVersion, GameSide side);
-
-	int getNestsBuild(MinecraftVersion minecraftVersion, GameSide side);
-
 }
