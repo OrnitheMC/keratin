@@ -635,6 +635,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				TaskProvider<?> unpickMinecraft = tasks.register("unpickMinecraft", UnpickMinecraftTask.class, task -> {
 					task.dependsOn(constantsJar, mapUnpickDefinitionsToIntermediary, processMinecraft);
 					task.getUnpickConstantsJar().set(constantsJar.get().getArchiveFile().get().getAsFile());
+					task.getForDecompile().set(false);
 				});
 
 				TaskProvider<?> loadMappings = tasks.register("loadMappings", LoadMappingsFromGraphTask.class, task -> {
@@ -689,13 +690,16 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.dependsOn(mergeIntermediaryJars, mergeIntermediaryExceptions, mergeIntermediarySignatures, mergeIntermediaryNests);
 					task.getForDecompile().set(true);
 				});
-
-				TaskProvider<?> buildProcessedMappings = tasks.register("buildProcessedMappings", BuildProcessedMappingsTask.class, task -> {
-					task.dependsOn(processMinecraftForDecompile);
+				TaskProvider<?> unpickMinecraftForDecompile = tasks.register("unpickMinecraftForDecompile", UnpickMinecraftTask.class, task -> {
+					task.dependsOn(constantsJar, mapUnpickDefinitionsToIntermediary, processMinecraftForDecompile);
+					task.getUnpickConstantsJar().set(constantsJar.get().getArchiveFile().get().getAsFile());
+					task.getForDecompile().set(true);
 				});
 
+				TaskProvider<?> buildProcessedMappings = tasks.register("buildProcessedMappings", BuildProcessedMappingsTask.class);
+
 				TaskProvider<?> mapProcessedMinecraftToNamedForDecompile = tasks.register("mapProcessedMinecraftToNamedForDecompile", MapProcessedMinecraftTask.class, task -> {
-					task.dependsOn(buildProcessedMappings);
+					task.dependsOn(unpickMinecraftForDecompile, buildProcessedMappings);
 					task.getSourceNamespace().set(Mapper.INTERMEDIARY);
 					task.getTargetNamespace().set(Mapper.NAMED);
 					task.getForDecompile().set(true);

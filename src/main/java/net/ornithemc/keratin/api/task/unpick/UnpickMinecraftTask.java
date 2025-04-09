@@ -20,6 +20,9 @@ public abstract class UnpickMinecraftTask extends MinecraftTask implements Unpic
 	@Internal
 	public abstract Property<File> getUnpickConstantsJar();
 
+	@Internal
+	public abstract Property<Boolean> getForDecompile();
+
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
@@ -29,7 +32,9 @@ public abstract class UnpickMinecraftTask extends MinecraftTask implements Unpic
 		LibrariesCache libraries = files.getGlobalCache().getLibrariesCache();
 		BuildFiles buildFiles = files.getMappingsDevelopmentFiles().getBuildFiles();
 
-		ProcessorSettings processorSettings = keratin.getProcessorSettings(minecraftVersion);
+		ProcessorSettings processorSettings = getForDecompile().get()
+			? keratin.getProcessorSettingsForDecompile(minecraftVersion)
+			: keratin.getProcessorSettings(minecraftVersion);
 
 		workQueue.submit(UnpickMinecraft.class, parameters -> {
 			parameters.getInputJar().set(processedJars.getProcessedIntermediaryJar(minecraftVersion, processorSettings));
