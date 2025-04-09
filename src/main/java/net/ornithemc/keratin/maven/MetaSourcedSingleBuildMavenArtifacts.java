@@ -1,8 +1,8 @@
 package net.ornithemc.keratin.maven;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +79,7 @@ public class MetaSourcedSingleBuildMavenArtifacts implements MetaSourcedMavenArt
 		String metaEndpointUrl = metaUrl + metaEndpoint.formatted(keratin.getIntermediaryGen().get());
 
 		try {
-			try (InputStreamReader ir = new InputStreamReader(new URL(metaEndpointUrl).openStream())) {
+			try (InputStreamReader ir = new InputStreamReader(new URI(metaEndpointUrl).toURL().openStream())) {
 				JsonArray jsonArray = KeratinGradleExtension.GSON.fromJson(ir, JsonArray.class);
 
 				for (JsonElement jsonEntry : jsonArray) {
@@ -92,7 +92,7 @@ public class MetaSourcedSingleBuildMavenArtifacts implements MetaSourcedMavenArt
 					}
 				}
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			keratin.getProject().getLogger().warn("unable to parse maven artifact versions from " + metaEndpointUrl + "!", e);
 		}
 	}
@@ -106,12 +106,12 @@ public class MetaSourcedSingleBuildMavenArtifacts implements MetaSourcedMavenArt
 
 			try {
 				String sha1Path = artifact.url() + ".sha1";
-				URL sha1Url = new URL(sha1Path);
+				URL sha1Url = new URI(sha1Path).toURL();
 
 				try (BufferedReader br = new BufferedReader(new InputStreamReader(sha1Url.openStream()))) {
 					artifact = artifact.withSha1(br.readLine());
 				}
-			} catch (IOException e) {
+			} catch (Exception e) {
 				keratin.getProject().getLogger().warn("unable to find maven artifact sha1 hash for " + artifact.artifactId() + " version " + artifact.version() + "!", e);
 			}
 		}

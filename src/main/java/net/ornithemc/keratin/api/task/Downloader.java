@@ -2,7 +2,7 @@ package net.ornithemc.keratin.api.task;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 
 import org.gradle.api.Project;
@@ -49,7 +49,7 @@ public interface Downloader extends TaskAware {
 		if (overwrite || !output.exists() || isRefreshDependencies() || !validateChecksum(output, sha1)) {
 			DownloadAction downloader = new DownloadAction(project, (org.gradle.api.Task) this);
 
-			downloader.src(new URL(url));
+			downloader.src(new URI(url));
 			downloader.dest(output);
 			downloader.overwrite(true);
 

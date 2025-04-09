@@ -2,7 +2,7 @@ package net.ornithemc.keratin;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -223,7 +223,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			File file = KeratinGradleExtension.this.files.getGlobalCache().getVersionsManifestJson();
 
 			if (project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
-				FileUtils.copyURLToFile(new URL(this.versionsManifestUrl.get()), file);
+				FileUtils.copyURLToFile(new URI(this.versionsManifestUrl.get()).toURL(), file);
 			}
 
 			String json = FileUtils.readFileToString(file, Charset.defaultCharset());
@@ -239,7 +239,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				VersionsManifest manifest = versionsManifest.get();
 				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
-				FileUtils.copyURLToFile(new URL(entry.url()), file);
+				FileUtils.copyURLToFile(new URI(entry.url()).toURL(), file);
 			}
 
 			String json = FileUtils.readFileToString(file, Charset.defaultCharset());
@@ -254,7 +254,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				VersionsManifest manifest = versionsManifest.get();
 				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
-				FileUtils.copyURLToFile(new URL(entry.details()), file);
+				FileUtils.copyURLToFile(new URI(entry.details()).toURL(), file);
 			}
 
 			String json = FileUtils.readFileToString(file, Charset.defaultCharset());
