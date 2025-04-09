@@ -7,10 +7,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -152,7 +150,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private final Property<String> localCacheDir;
 	private final Property<String> versionsManifestUrl;
 	private final ListProperty<MinecraftVersion> minecraftVersions;
-	private final Map<String, MinecraftVersion> minecraftVersionsById;
+	private final Versioned<String, MinecraftVersion> minecraftVersionsById;
 	private final Property<Integer> intermediaryGen;
 
 	private final Property<VersionsManifest> versionsManifest;
@@ -213,7 +211,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.minecraftVersions = this.project.getObjects().listProperty(MinecraftVersion.class);
 		this.minecraftVersions.convention(Collections.emptyList());
 		this.minecraftVersions.finalizeValueOnRead();
-		this.minecraftVersionsById = new HashMap<>();
+		this.minecraftVersionsById = new Versioned<>(minecraftVersionId -> MinecraftVersion.parse(this, minecraftVersionId));
 		this.intermediaryGen = this.project.getObjects().property(Integer.class);
 		this.intermediaryGen.convention(1);
 		this.intermediaryGen.finalizeValueOnRead();
@@ -369,15 +367,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			minecraftVersions.addAll(selectedMinecraftVersions);
 		}
 
-		minecraftVersionsById.clear();
-
 		for (MinecraftVersion minecraftVersion : minecraftVersions) {
 			if (minecraftVersion.hasClient())
 				minecraftVersionIds.add(minecraftVersion.client().id());
 			if (minecraftVersion.hasServer())
 				minecraftVersionIds.add(minecraftVersion.server().id());
-
-			minecraftVersionsById.put(minecraftVersion.id(), minecraftVersion);
 		}
 
 		files.mkdirs(selection);
