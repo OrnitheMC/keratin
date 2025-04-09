@@ -8,6 +8,8 @@ import org.gradle.workers.WorkAction;
 import org.gradle.workers.WorkParameters;
 import org.gradle.workers.WorkQueue;
 
+import com.google.common.io.Files;
+
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
@@ -67,7 +69,15 @@ public abstract class BuildUnpickDefinitionsTask extends MinecraftTask {
 			File output = getParameters().getUnpickDefinitions().get();
 
 			try {
-				unnestUnpickDefinitions(input, output, nests);
+				if (output.exists()) {
+					output.delete();
+				}
+
+				Files.copy(input, output);
+
+				if (nests.exists()) {
+					unnestUnpickDefinitions(output, output, nests);
+				}
 			} catch (IOException e) {
 				throw new RuntimeException("error while building unpick definitions");
 			}
