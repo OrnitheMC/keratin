@@ -79,7 +79,7 @@ public interface UnpickDefinitions {
 					System.out.println(" ignoring " + file.getName() + ": unknown mc version(s) " + versionA + "/" + versionB);
 					return; // one of the mc versions is unknown
 				}
-				if (minecraftVersion.isBefore(minecraftVersionA) || minecraftVersion.isAfter(minecraftVersionB)) {
+				if (minecraftVersion.compareTo(minecraftVersionA) < 0 || minecraftVersion.compareTo(minecraftVersionB) > 0) {
 					System.out.println(" ignoring " + file.getName() + ": mc version " + minecraftVersion.id() + " not in range " + minecraftVersionA.id() + " - " + minecraftVersionB.id());
 					return; // mc version is not contained in the version range covered by this dir
 				}

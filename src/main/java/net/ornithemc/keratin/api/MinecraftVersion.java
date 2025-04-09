@@ -2,11 +2,13 @@ package net.ornithemc.keratin.api;
 
 import java.util.Objects;
 
+import com.vdurmont.semver4j.Semver;
+
 import net.ornithemc.keratin.Constants;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 
-public record MinecraftVersion(String id, VersionDetails client, VersionDetails server) {
+public record MinecraftVersion(String id, VersionDetails client, VersionDetails server) implements Comparable<MinecraftVersion> {
 
 	public static MinecraftVersion parse(KeratinGradleExtension keratin, String s) {
 		String[] parts = s.split("[~]");
@@ -104,11 +106,21 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 				|| client.id().equals("c0.0.13a-launcher"));
 	}
 
-	public boolean isBefore(MinecraftVersion other) {
-		return (client != null ? client : server).releaseTime().compareTo((other.client != null ? other.client : other.server).releaseTime()) < 0;
-	}
+	@Override
+	public int compareTo(MinecraftVersion o) {
+		if (!hasSharedVersioning() || !o.hasSharedVersioning()) {
+			// one of the two versions is pre-Beta, if it is Alpha in particular
+			// we cannot use semver because the client and server have different
+			// versioning
+			// luckily there are no adjacent development branches pre-Beta so we
+			// can just compare release times instead
+			return (client != null ? client : server).releaseTime().compareTo((o.client != null ? o.client : o.server).releaseTime());
+		}
 
-	public boolean isAfter(MinecraftVersion other) {
-		return (client != null ? client : server).releaseTime().compareTo((other.client != null ? other.client : other.server).releaseTime()) > 0;
+		// both versions are Beta or later so we can safely use the semantic version
+		Semver v = new Semver((client != null ? client : server).normalizedVersion());
+		Semver ov = new Semver((o.client != null ? o.client : o.server).normalizedVersion());
+
+		return v.compareTo(ov);
 	}
 }
