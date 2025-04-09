@@ -862,6 +862,13 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			task.doFirst(t -> {
 				project.delete(files.getLocalCache().getDirectory());
 			});
+			task.doLast(t -> {
+				try {
+					files.getLocalCache().mkdirs();
+				} catch (IOException e) {
+					throw new RuntimeException("error creating local cache directory", e);
+				}
+			});
 		});
 	}
 
