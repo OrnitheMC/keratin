@@ -41,7 +41,6 @@ public interface UnpickDefinitions {
 		Set<File> unpickDefinitions = new HashSet<>();
 
 		if (dir.isDirectory()) {
-			System.out.println("collecting unpick definitions from " + dir.getName());
 			collectUnpickDefinitions(keratin, minecraftVersion, dir, unpickDefinitions);
 		}
 
@@ -51,17 +50,13 @@ public interface UnpickDefinitions {
 	default void collectUnpickDefinitions(KeratinGradleExtension keratin, MinecraftVersion minecraftVersion, File dir, Set<File> unpickDefinitions) {
 		for (File file : dir.listFiles()) {
 			if (file.isFile() && file.getName().endsWith(FILE_EXTENSION)) {
-				System.out.println(" adding " + file.getName());
 				unpickDefinitions.add(file);
-			} else if (file.isFile()) {
-				System.out.println(" ignoring " + file.getName());
 			}
 			if (file.isDirectory()) {
 				String fileName = file.getName();
 				String[] parts = fileName.split("mc");
 
 				if (parts.length != 3) {
-					System.out.println(" ignoring " + file.getName() + ": not formatted correctly: " + String.join(", ", parts));
 					return; // directory does not hold unpick files or is formatted in an unknown way
 				}
 
@@ -76,11 +71,9 @@ public interface UnpickDefinitions {
 				MinecraftVersion minecraftVersionB = keratin.getMinecraftVersion(versionB);
 
 				if (minecraftVersionA == null || minecraftVersionB == null) {
-					System.out.println(" ignoring " + file.getName() + ": unknown mc version(s) " + versionA + "/" + versionB);
 					return; // one of the mc versions is unknown
 				}
 				if (minecraftVersion.compareTo(minecraftVersionA) < 0 || minecraftVersion.compareTo(minecraftVersionB) > 0) {
-					System.out.println(" ignoring " + file.getName() + ": mc version " + minecraftVersion.id() + " not in range " + minecraftVersionA.id() + " - " + minecraftVersionB.id());
 					return; // mc version is not contained in the version range covered by this dir
 				}
 
