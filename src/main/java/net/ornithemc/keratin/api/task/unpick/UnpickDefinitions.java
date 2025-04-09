@@ -133,7 +133,7 @@ public interface UnpickDefinitions {
 
 				Files.writeString(output.toPath(), writer.getOutput());
 			} catch (IOException e) {
-				throw new RuntimeException("error while combining unpick definitions");
+				throw new RuntimeException("error while combining unpick definitions", e);
 			}
 		}
 	}
@@ -198,7 +198,7 @@ public interface UnpickDefinitions {
 					Files.writeString(output.toPath(), writer.getOutput());
 				}
 			} catch (IOException e) {
-				throw new RuntimeException("error while remapping unpick definitions");
+				throw new RuntimeException("error while remapping unpick definitions", e);
 			}
 		}
 	}
