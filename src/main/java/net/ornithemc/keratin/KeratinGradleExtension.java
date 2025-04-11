@@ -514,16 +514,18 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 				tasks.getByName("build").dependsOn(tinyV1Jar, tinyV2Jar);
 
-				MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
-					publication.setGroupId(this.publications.getGroupId().get());
-					publication.setArtifactId(this.publications.getArtifactId().get());
-					publication.setVersion(minecraftVersion);
+				if (!intermediaryArtifacts.contains(minecraftVersion)) {
+					MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
+						publication.setGroupId(this.publications.getGroupId().get());
+						publication.setArtifactId(this.publications.getArtifactId().get());
+						publication.setVersion(minecraftVersion);
 
-					publication.artifact(tinyV1Jar);
-					publication.artifact(tinyV2Jar, config -> {
-						config.setClassifier("v2");
+						publication.artifact(tinyV1Jar);
+						publication.artifact(tinyV2Jar, config -> {
+							config.setClassifier("v2");
+						});
 					});
-				});
+				}
 			}
 		}
 		if (selection == TaskSelection.MAPPINGS || selection == TaskSelection.EXCEPTIONS_AND_SIGNATURES) {
@@ -751,31 +753,36 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 					tasks.getByName("build").dependsOn(mergedTinyV1Jar, tinyV2Jar, mergedTinyV2Jar, compressTinyV1, javadocJar, constantsJar, sourcesJar);
 
-					MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
-						publication.setGroupId(this.publications.getGroupId().get());
-						publication.setArtifactId(this.publications.getArtifactId().get());
-						publication.setVersion("%s+build.%d".formatted(minecraftVersion, getNamedMappingsBuild(minecraftVersion) + 1));
+					int latestBuild = namedMappingsArtifacts.getLatestBuild(minecraftVersion);
+					int nextBuild = namedMappingsBuilds.get().getBuild(minecraftVersion) + 1;
 
-						publication.artifact(mergedTinyV1Jar);
-						publication.artifact(tinyV2Jar, config -> {
-							config.setClassifier("v2");
+					if (nextBuild > latestBuild) {
+						MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
+							publication.setGroupId(this.publications.getGroupId().get());
+							publication.setArtifactId(this.publications.getArtifactId().get());
+							publication.setVersion("%s+build.%d".formatted(minecraftVersion, nextBuild));
+
+							publication.artifact(mergedTinyV1Jar);
+							publication.artifact(tinyV2Jar, config -> {
+								config.setClassifier("v2");
+							});
+							publication.artifact(mergedTinyV2Jar, config -> {
+								config.setClassifier("mergedv2");
+							});
+							publication.artifact(compressTinyV1, config -> {
+								config.setClassifier("tiny"); // for backwards compat with gen1
+							});
+							publication.artifact(javadocJar, config -> {
+								config.setClassifier("javadoc");
+							});
+							publication.artifact(constantsJar, config -> {
+								config.setClassifier("constants");
+							});
+							publication.artifact(sourcesJar, config -> {
+								config.setClassifier("sources");
+							});
 						});
-						publication.artifact(mergedTinyV2Jar, config -> {
-							config.setClassifier("mergedv2");
-						});
-						publication.artifact(compressTinyV1, config -> {
-							config.setClassifier("tiny"); // for backwards compat with gen1
-						});
-						publication.artifact(javadocJar, config -> {
-							config.setClassifier("javadoc");
-						});
-						publication.artifact(constantsJar, config -> {
-							config.setClassifier("constants");
-						});
-						publication.artifact(sourcesJar, config -> {
-							config.setClassifier("sources");
-						});
-					});
+					}
 				}
 			}
 			if (selection == TaskSelection.EXCEPTIONS_AND_SIGNATURES) {
