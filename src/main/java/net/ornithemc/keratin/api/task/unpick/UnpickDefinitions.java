@@ -57,7 +57,7 @@ public interface UnpickDefinitions {
 				String[] parts = fileName.split("mc");
 
 				if (parts.length != 3) {
-					return; // directory does not hold unpick files or is formatted in an unknown way
+					continue; // directory does not hold unpick files or is formatted in an unknown way
 				}
 
 				String versionA = parts[1];
@@ -71,10 +71,10 @@ public interface UnpickDefinitions {
 				MinecraftVersion minecraftVersionB = keratin.getMinecraftVersion(versionB);
 
 				if (minecraftVersionA == null || minecraftVersionB == null) {
-					return; // one of the mc versions is unknown
+					continue; // one of the mc versions is unknown
 				}
 				if (minecraftVersion.compareTo(minecraftVersionA) < 0 || minecraftVersion.compareTo(minecraftVersionB) > 0) {
-					return; // mc version is not contained in the version range covered by this dir
+					continue; // mc version is not contained in the version range covered by this dir
 				}
 
 				collectUnpickDefinitions(keratin, minecraftVersion, file, unpickDefinitions);
