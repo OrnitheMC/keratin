@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,7 +78,7 @@ public class MetaSourcedMultipleBuildsMavenArtifacts implements MetaSourcedMaven
 			findVersions();
 		}
 
-		return versions.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().keySet().stream().max(Comparator.naturalOrder()).get()));
+		return versions.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().keySet().stream().max(Comparator.naturalOrder()).orElse(0)));
 	}
 
 	@Override
@@ -86,7 +87,7 @@ public class MetaSourcedMultipleBuildsMavenArtifacts implements MetaSourcedMaven
 			findVersions();
 		}
 
-		return versions.get(minecraftVersion).keySet().stream().max(Comparator.naturalOrder()).get();
+		return versions.getOrDefault(minecraftVersion, Collections.emptyMap()).keySet().stream().max(Comparator.naturalOrder()).orElse(0);
 	}
 
 	@Override
