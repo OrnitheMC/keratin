@@ -81,7 +81,7 @@ public class BuildNumbersCache {
 			int clientBuild = minecraftVersion.hasClient() ? getBuild(minecraftVersion.clientKey()) : -1;
 			int serverBuild = minecraftVersion.hasServer() ? getBuild(minecraftVersion.serverKey()) : -1;
 
-			if (clientBuild > 0 && serverBuild > 0) {
+			if (clientBuild > 0 || serverBuild > 0) {
 				buildNumbers = buildNumbers.withBuilds(clientBuild, serverBuild);
 			}
 		} else {
