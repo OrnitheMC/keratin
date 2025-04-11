@@ -363,7 +363,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 		@Override
 		public File getClientExceptionsJar(MinecraftVersion minecraftVersion, BuildNumbers builds) {
-			return file("%s-exceptions+build.%d-client.jar".formatted(minecraftVersion.server().id(), builds.client()));
+			return file("%s-exceptions+build.%d-client.jar".formatted(minecraftVersion.client().id(), builds.client()));
 		}
 
 		@Override
