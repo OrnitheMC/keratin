@@ -64,6 +64,14 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 		return server != null;
 	}
 
+	public boolean hasServerJar() {
+		return server != null && server.downloads().server() != null;
+	}
+
+	public boolean hasServerZip() {
+		return server != null && server.downloads().server_zip() != null;
+	}
+
 	public boolean hasSharedObfuscation() {
 		// either side could be missing but for versions >=1.3 we still consider them to have shared obfuscation
 		return (client != null && client.sharedMappings()) || (server != null && server.sharedMappings());

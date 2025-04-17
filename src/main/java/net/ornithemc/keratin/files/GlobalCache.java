@@ -173,6 +173,15 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		}
 
 		@Override
+		public File getServerZip(MinecraftVersion minecraftVersion) {
+			if (!minecraftVersion.hasServerZip()) {
+				throw new IllegalArgumentException("server zip for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else {
+				return file("%s-server.zip".formatted(minecraftVersion.server().id()));
+			}
+		}
+
+		@Override
 		public File getMergedJar(MinecraftVersion minecraftVersion) {
 			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("game jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");

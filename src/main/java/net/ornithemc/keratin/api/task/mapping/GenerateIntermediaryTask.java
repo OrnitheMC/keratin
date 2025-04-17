@@ -52,7 +52,10 @@ public abstract class GenerateIntermediaryTask extends MinecraftTask {
 		if (minecraftVersion.hasClient())
 			options.clientHash(minecraftVersion.client().downloads().client().sha1());
 		if (minecraftVersion.hasServer())
-			options.serverHash(minecraftVersion.server().downloads().server().sha1());
+			if (minecraftVersion.hasServerJar())
+				options.serverHash(minecraftVersion.server().downloads().server().sha1());
+			else
+				options.serverHash(minecraftVersion.server().downloads().server_zip().sha1());
 
 		return options;
 	}
