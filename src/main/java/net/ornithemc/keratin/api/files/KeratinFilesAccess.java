@@ -1,6 +1,6 @@
 package net.ornithemc.keratin.api.files;
 
-public interface OrnitheFilesAccess {
+public interface KeratinFilesAccess {
 
 	GlobalCacheAccess getGlobalCache();
 

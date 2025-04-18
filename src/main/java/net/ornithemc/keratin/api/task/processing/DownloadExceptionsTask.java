@@ -9,7 +9,7 @@ import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.api.task.DownloaderAndExtractor;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.ExceptionsCache;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class DownloadExceptionsTask extends MinecraftTask implements DownloaderAndExtractor {
 
@@ -18,7 +18,7 @@ public abstract class DownloadExceptionsTask extends MinecraftTask implements Do
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 		MultipleBuildsMavenArtifacts exceptionsArtifacts = keratin.getExceptionsArtifacts();
 
 		ExceptionsCache exceptions = files.getGlobalCache().getExceptionsCache();

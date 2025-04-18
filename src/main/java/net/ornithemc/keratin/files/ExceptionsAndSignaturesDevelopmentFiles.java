@@ -15,7 +15,7 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 	private final SourceMappings sourceMappings;
 	private final BuildFiles buildFiles;
 
-	public ExceptionsAndSignaturesDevelopmentFiles(KeratinGradleExtension keratin, OrnitheFiles files) {
+	public ExceptionsAndSignaturesDevelopmentFiles(KeratinGradleExtension keratin, KeratinFiles files) {
 		super(keratin, files);
 
 		this.setupJars = new SetupJars(keratin, files);
@@ -138,7 +138,7 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 
 	public static class SetupJars extends FileContainer implements ExceptionsAndSignaturesDevelopmentFilesAccess.SetupJarsAccess {
 
-		public SetupJars(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public SetupJars(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 
@@ -211,7 +211,7 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 
 	public static class SetupFiles extends FileContainer implements ExceptionsAndSignaturesDevelopmentFilesAccess.SetupFilesAccess {
 
-		public SetupFiles(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public SetupFiles(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 
@@ -330,7 +330,7 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 
 	public static class SourceJars extends FileContainer implements ExceptionsAndSignaturesDevelopmentFilesAccess.SourceJarsAccess {
 
-		public SourceJars(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public SourceJars(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 
@@ -408,7 +408,7 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 
 	public static class SourceMappings extends FileContainer implements ExceptionsAndSignaturesDevelopmentFilesAccess.SourceMappingsAccess {
 
-		public SourceMappings(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public SourceMappings(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 
@@ -446,7 +446,7 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 
 	public static class BuildFiles extends FileContainer implements ExceptionsAndSignaturesDevelopmentFilesAccess.BuildFilesAccess {
 
-		public BuildFiles(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public BuildFiles(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 

@@ -13,8 +13,8 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class CheckMappingsTask extends MinecraftTask {
 
@@ -24,7 +24,7 @@ public abstract class CheckMappingsTask extends MinecraftTask {
 		getProject().getLogger().lifecycle(":checking mappings for Minecraft " + minecraftVersion.id());
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		MappedJarsCache mappedJars = files.getGlobalCache().getMappedJarsCache();
 		BuildFiles buildFiles = files.getMappingsDevelopmentFiles().getBuildFiles();

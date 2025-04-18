@@ -6,8 +6,8 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.Configurations;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 import net.ornithemc.keratin.files.SharedFiles;
 
 public abstract class DecompileMinecraftWithCfrTask extends DecompileTask {
@@ -16,7 +16,7 @@ public abstract class DecompileMinecraftWithCfrTask extends DecompileTask {
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
 		Project project = keratin.getProject();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		SharedFiles sharedFiles = files.getSharedFiles();
 		BuildFiles buildFiles = files.getMappingsDevelopmentFiles().getBuildFiles();

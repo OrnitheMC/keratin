@@ -9,14 +9,14 @@ import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SetupFiles;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SetupJars;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SourceMappings;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class MakeSourceMappingsTask extends MinecraftTask implements MappingsPatcher {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		ExceptionsAndSignaturesDevelopmentFiles excsAndSigs = files.getExceptionsAndSignaturesDevelopmentFiles();
 		SetupJars setupJars = excsAndSigs.getSetupJars();

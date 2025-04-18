@@ -7,8 +7,8 @@ import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
 import net.ornithemc.keratin.files.GlobalCache.NestsCache;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MapNestsTask extends MappingTask {
 
@@ -20,7 +20,7 @@ public abstract class MapNestsTask extends MappingTask {
 		validateNamespaces(srcNs, dstNs);
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		MappingsCache mappings = files.getGlobalCache().getMappingsCache();
 		NestsCache nests = files.getGlobalCache().getNestsCache();

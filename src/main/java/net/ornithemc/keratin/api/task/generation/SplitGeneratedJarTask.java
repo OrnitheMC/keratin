@@ -6,14 +6,14 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.BuildFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class SplitGeneratedJarTask extends MinecraftTask implements JarSplitter {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		BuildFiles buildFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getBuildFiles();
 

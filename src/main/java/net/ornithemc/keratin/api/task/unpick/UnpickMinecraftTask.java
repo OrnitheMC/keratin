@@ -12,8 +12,8 @@ import net.ornithemc.keratin.api.settings.ProcessorSettings;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
 import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class UnpickMinecraftTask extends MinecraftTask implements Unpick {
 
@@ -26,7 +26,7 @@ public abstract class UnpickMinecraftTask extends MinecraftTask implements Unpic
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		ProcessedJarsCache processedJars = files.getGlobalCache().getProcessedJarsCache();
 		LibrariesCache libraries = files.getGlobalCache().getLibrariesCache();

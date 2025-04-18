@@ -7,7 +7,7 @@ import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
 import net.ornithemc.keratin.files.GlobalCache.NestsCache;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class MergeNestsTask extends MergeTask {
 
@@ -18,7 +18,7 @@ public abstract class MergeNestsTask extends MergeTask {
 		validateNamespace(namespace);
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		NestsCache nests = files.getGlobalCache().getNestsCache();
 

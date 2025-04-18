@@ -22,7 +22,7 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.matching.Matches;
 import net.ornithemc.keratin.matching.MatchesUtil;
 
@@ -34,7 +34,7 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		ExceptionsAndSignaturesDevelopmentFiles excsAndSigs = files.getExceptionsAndSignaturesDevelopmentFiles();
 

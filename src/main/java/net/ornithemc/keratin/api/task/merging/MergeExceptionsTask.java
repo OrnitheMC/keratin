@@ -7,7 +7,7 @@ import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
 import net.ornithemc.keratin.files.GlobalCache.ExceptionsCache;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class MergeExceptionsTask extends MergeTask {
 
@@ -18,7 +18,7 @@ public abstract class MergeExceptionsTask extends MergeTask {
 		validateNamespace(namespace);
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		ExceptionsCache exceptions = files.getGlobalCache().getExceptionsCache();
 

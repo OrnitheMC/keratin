@@ -10,8 +10,8 @@ import net.ornithemc.keratin.api.settings.ProcessorSettings;
 import net.ornithemc.keratin.api.task.merging.Merger;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
 import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MapProcessedMinecraftTask extends MappingTask implements Merger {
 
@@ -26,7 +26,7 @@ public abstract class MapProcessedMinecraftTask extends MappingTask implements M
 		validateNamespaces(srcNs, dstNs);
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		ProcessedJarsCache processedJars = files.getGlobalCache().getProcessedJarsCache();
 		LibrariesCache libraries = files.getGlobalCache().getLibrariesCache();

@@ -8,7 +8,7 @@ import net.ornithemc.keratin.api.files.IntermediaryDevelopmentFilesAccess;
 
 public class IntermediaryDevelopmentFiles extends FileContainer implements IntermediaryDevelopmentFilesAccess {
 
-	public IntermediaryDevelopmentFiles(KeratinGradleExtension keratin, OrnitheFiles files) {
+	public IntermediaryDevelopmentFiles(KeratinGradleExtension keratin, KeratinFiles files) {
 		super(keratin, files);
 	}
 

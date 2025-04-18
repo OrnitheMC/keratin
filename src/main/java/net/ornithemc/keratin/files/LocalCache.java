@@ -8,7 +8,7 @@ import net.ornithemc.keratin.api.files.LocalCacheAccess;
 
 public class LocalCache extends FileContainer implements FileCache, LocalCacheAccess {
 
-	public LocalCache(KeratinGradleExtension keratin, OrnitheFiles files) {
+	public LocalCache(KeratinGradleExtension keratin, KeratinFiles files) {
 		super(keratin, files);
 	}
 

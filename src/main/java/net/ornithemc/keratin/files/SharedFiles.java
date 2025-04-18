@@ -8,7 +8,7 @@ import net.ornithemc.keratin.api.files.SharedFilesAccess;
 
 public class SharedFiles extends FileContainer implements SharedFilesAccess {
 
-	public SharedFiles(KeratinGradleExtension keratin, OrnitheFiles files) {
+	public SharedFiles(KeratinGradleExtension keratin, KeratinFiles files) {
 		super(keratin, files);
 	}
 

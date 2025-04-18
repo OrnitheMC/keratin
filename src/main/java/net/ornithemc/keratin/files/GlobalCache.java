@@ -28,7 +28,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 	private final NestsCache nestsCache;
 	private final LibrariesCache librariesCache;
 
-	public GlobalCache(KeratinGradleExtension keratin, OrnitheFiles files) {
+	public GlobalCache(KeratinGradleExtension keratin, KeratinFiles files) {
 		super(keratin, files);
 
 		this.caches = new LinkedHashSet<>();
@@ -119,7 +119,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 	public static class MetadataCache extends FileContainer implements FileCache, GlobalCacheAccess.MetadataCacheAccess {
 
-		public MetadataCache(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public MetadataCache(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 
@@ -141,7 +141,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 	public static class GameJarsCache extends FileContainer implements FileCache, GlobalCacheAccess.GameJarsCacheAccess {
 
-		public GameJarsCache(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public GameJarsCache(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 
@@ -191,7 +191,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 	public static class MappedJarsCache extends FileContainer implements FileCache, GlobalCacheAccess.MappedJarsCacheAccess {
 
-		public MappedJarsCache(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public MappedJarsCache(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 
@@ -239,7 +239,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 	public static class ProcessedJarsCache extends FileContainer implements FileCache, GlobalCacheAccess.ProcessedJarsCacheAccess {
 
-		public ProcessedJarsCache(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public ProcessedJarsCache(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 
@@ -256,7 +256,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 	public static class MappingsCache extends FileContainer implements FileCache, GlobalCacheAccess.MappingsCacheAccess {
 
-		public MappingsCache(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public MappingsCache(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 
@@ -357,7 +357,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 	public static class ExceptionsCache extends FileContainer implements FileCache, GlobalCacheAccess.ExceptionsCacheAccess {
 
-		public ExceptionsCache(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public ExceptionsCache(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 
@@ -479,7 +479,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 	public static class SignaturesCache extends FileContainer implements FileCache, GlobalCacheAccess.SignaturesCacheAccess {
 
-		public SignaturesCache(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public SignaturesCache(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 
@@ -601,7 +601,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 	public static class NestsCache extends FileContainer implements FileCache, GlobalCacheAccess.NestsCacheAccess {
 
-		public NestsCache(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public NestsCache(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 
@@ -723,7 +723,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 	public static class LibrariesCache extends FileContainer implements GlobalCacheAccess.LibrariesCacheAccess {
 
-		public LibrariesCache(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public LibrariesCache(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 

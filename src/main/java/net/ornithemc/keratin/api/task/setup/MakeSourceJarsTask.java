@@ -26,14 +26,14 @@ import net.ornithemc.keratin.files.GlobalCache;
 import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
 import net.ornithemc.keratin.files.GlobalCache.NestsCache;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class MakeSourceJarsTask extends MinecraftTask {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		GlobalCache globalCache = files.getGlobalCache();
 		GameJarsCache gameJars = globalCache.getGameJarsCache();

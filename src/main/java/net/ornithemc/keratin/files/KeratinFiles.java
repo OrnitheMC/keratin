@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.TaskSelection;
-import net.ornithemc.keratin.api.files.OrnitheFilesAccess;
+import net.ornithemc.keratin.api.files.KeratinFilesAccess;
 
-public class OrnitheFiles extends FileContainer implements OrnitheFilesAccess {
+public class KeratinFiles extends FileContainer implements KeratinFilesAccess {
 
 	private final GlobalCache globalCache;
 	private final LocalCache localCache;
@@ -15,7 +15,7 @@ public class OrnitheFiles extends FileContainer implements OrnitheFilesAccess {
 	private final MappingsDevelopmentFiles mappingsDevelopmentFiles;
 	private final ExceptionsAndSignaturesDevelopmentFiles exceptionsAndSignaturesDevelopmentFiles;
 
-	public OrnitheFiles(KeratinGradleExtension keratin) {
+	public KeratinFiles(KeratinGradleExtension keratin) {
 		super(keratin, null);
 
 		this.globalCache = new GlobalCache(keratin, this);

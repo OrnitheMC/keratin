@@ -7,8 +7,8 @@ import org.gradle.api.Project;
 import org.gradle.api.tasks.bundling.Jar;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class BuildMappingsJarTask extends Jar {
 
@@ -25,7 +25,7 @@ public abstract class BuildMappingsJarTask extends Jar {
 			copy.rename(mappings.getName(), "mappings.tiny");
 		});
 		if (unpickDefinitions != null) {
-			OrnitheFiles files = keratin.getFiles();
+			KeratinFiles files = keratin.getFiles();
 			MappingsDevelopmentFiles mappingsFiles = files.getMappingsDevelopmentFiles();
 
 			File unpickJson = mappingsFiles.getUnpickJson();

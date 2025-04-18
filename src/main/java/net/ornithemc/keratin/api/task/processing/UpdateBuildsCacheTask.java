@@ -11,7 +11,7 @@ import org.gradle.api.tasks.TaskAction;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.api.task.KeratinTask;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.SharedFiles;
 
 public abstract class UpdateBuildsCacheTask extends KeratinTask {
@@ -29,7 +29,7 @@ public abstract class UpdateBuildsCacheTask extends KeratinTask {
 		@TaskAction
 		public void run() throws IOException {
 			KeratinGradleExtension keratin = getExtension();
-			OrnitheFiles files = keratin.getFiles();
+			KeratinFiles files = keratin.getFiles();
 			MultipleBuildsMavenArtifacts namedMappings = keratin.getNamedMappingsArtifacts();
 
 			SharedFiles sharedFiles = files.getSharedFiles();
@@ -46,7 +46,7 @@ public abstract class UpdateBuildsCacheTask extends KeratinTask {
 		@TaskAction
 		public void run() throws IOException {
 			KeratinGradleExtension keratin = getExtension();
-			OrnitheFiles files = keratin.getFiles();
+			KeratinFiles files = keratin.getFiles();
 			MultipleBuildsMavenArtifacts exceptions = keratin.getExceptionsArtifacts();
 
 			SharedFiles sharedFiles = files.getSharedFiles();
@@ -63,7 +63,7 @@ public abstract class UpdateBuildsCacheTask extends KeratinTask {
 		@TaskAction
 		public void run() throws IOException {
 			KeratinGradleExtension keratin = getExtension();
-			OrnitheFiles files = keratin.getFiles();
+			KeratinFiles files = keratin.getFiles();
 			MultipleBuildsMavenArtifacts signatures = keratin.getSignaturesArtifacts();
 
 			SharedFiles sharedFiles = files.getSharedFiles();
@@ -80,7 +80,7 @@ public abstract class UpdateBuildsCacheTask extends KeratinTask {
 		@TaskAction
 		public void run() throws IOException {
 			KeratinGradleExtension keratin = getExtension();
-			OrnitheFiles files = keratin.getFiles();
+			KeratinFiles files = keratin.getFiles();
 			MultipleBuildsMavenArtifacts nests = keratin.getNestsArtifacts();
 
 			SharedFiles sharedFiles = files.getSharedFiles();

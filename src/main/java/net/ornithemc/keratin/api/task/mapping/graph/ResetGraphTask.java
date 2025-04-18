@@ -12,8 +12,8 @@ import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.settings.ProcessorSettings;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class ResetGraphTask extends MinecraftTask implements MappingsGraph {
 
@@ -25,7 +25,7 @@ public abstract class ResetGraphTask extends MinecraftTask implements MappingsGr
 		getProject().getLogger().lifecycle(":resetting the graph with Minecraft " + minecraftVersion.id() + " as the root");
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		ProcessedJarsCache processedJars = files.getGlobalCache().getProcessedJarsCache();
 		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();

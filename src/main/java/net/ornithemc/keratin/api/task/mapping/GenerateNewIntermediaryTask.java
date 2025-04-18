@@ -14,7 +14,7 @@ import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
 import net.ornithemc.keratin.files.GlobalCache.NestsCache;
 import net.ornithemc.keratin.files.IntermediaryDevelopmentFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.matching.Matches;
 
 public abstract class GenerateNewIntermediaryTask extends GenerateIntermediaryTask {
@@ -24,7 +24,7 @@ public abstract class GenerateNewIntermediaryTask extends GenerateIntermediaryTa
 		getProject().getLogger().lifecycle(":generating intermediary for Minecraft " + minecraftVersion.id());
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		GlobalCache globalCache = files.getGlobalCache();
 		GameJarsCache gameJars = globalCache.getGameJarsCache();

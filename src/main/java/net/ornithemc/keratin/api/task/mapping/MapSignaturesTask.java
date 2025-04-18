@@ -7,7 +7,7 @@ import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
 import net.ornithemc.keratin.files.GlobalCache.SignaturesCache;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class MapSignaturesTask extends MappingTask {
 
@@ -19,7 +19,7 @@ public abstract class MapSignaturesTask extends MappingTask {
 		validateNamespaces(srcNs, dstNs);
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		MappingsCache mappings = files.getGlobalCache().getMappingsCache();
 		SignaturesCache signatures = files.getGlobalCache().getSignaturesCache();

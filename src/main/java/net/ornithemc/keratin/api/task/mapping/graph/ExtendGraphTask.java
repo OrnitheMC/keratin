@@ -15,8 +15,8 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class ExtendGraphTask extends MinecraftTask implements MappingsGraph {
 
@@ -39,7 +39,7 @@ public abstract class ExtendGraphTask extends MinecraftTask implements MappingsG
 		}
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		ProcessedJarsCache processedJars = files.getGlobalCache().getProcessedJarsCache();
 		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();

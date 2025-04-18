@@ -11,7 +11,7 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.Exceptor;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.BuildFiles;
 import net.ornithemc.keratin.files.GlobalCache.NestsCache;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 import net.ornithemc.mappingutils.MappingUtils;
 
@@ -20,7 +20,7 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		NestsCache nestsCache = files.getGlobalCache().getNestsCache();
 		BuildFiles buildFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getBuildFiles();

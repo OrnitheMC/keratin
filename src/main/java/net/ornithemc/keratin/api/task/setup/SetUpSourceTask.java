@@ -10,7 +10,7 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.SharedFiles;
 
 public abstract class SetUpSourceTask extends MinecraftTask {
@@ -19,7 +19,7 @@ public abstract class SetUpSourceTask extends MinecraftTask {
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		Project project = getProject();
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		SharedFiles sharedFiles = files.getSharedFiles();
 

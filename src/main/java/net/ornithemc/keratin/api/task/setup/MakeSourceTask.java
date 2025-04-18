@@ -10,7 +10,7 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.decompiling.DecompileTask;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SourceJars;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.SharedFiles;
 
 public abstract class MakeSourceTask extends DecompileTask {
@@ -19,7 +19,7 @@ public abstract class MakeSourceTask extends DecompileTask {
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
 		Project project = keratin.getProject();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		SharedFiles sharedFiles = files.getSharedFiles();
 		SourceJars sourceJars = files.getExceptionsAndSignaturesDevelopmentFiles().getSourceJars();

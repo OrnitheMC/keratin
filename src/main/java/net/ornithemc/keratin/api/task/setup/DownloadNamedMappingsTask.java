@@ -8,7 +8,7 @@ import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.api.task.DownloaderAndExtractor;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class DownloadNamedMappingsTask extends MinecraftTask implements DownloaderAndExtractor {
 
@@ -36,7 +36,7 @@ public abstract class DownloadNamedMappingsTask extends MinecraftTask implements
 
 	private boolean downloadNamedMappings(String minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 		MultipleBuildsMavenArtifacts namedMappings = keratin.getNamedMappingsArtifacts();
 
 		MappingsCache mappings = files.getGlobalCache().getMappingsCache();

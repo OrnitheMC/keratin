@@ -115,8 +115,8 @@ import net.ornithemc.keratin.api.task.unpick.MapUnpickDefinitionsToIntermediaryT
 import net.ornithemc.keratin.api.task.unpick.UnpickMinecraftTask;
 import net.ornithemc.keratin.cache.BuildNumbersCache;
 import net.ornithemc.keratin.files.IntermediaryDevelopmentFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 import net.ornithemc.keratin.matching.Matches;
 import net.ornithemc.keratin.maven.MetaSourcedMultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.maven.MetaSourcedSingleBuildMavenArtifacts;
@@ -154,7 +154,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private final Versioned<String, VersionDetails> versionDetails;
 	private final Versioned<MinecraftVersion, ProcessorSettings> processorSettings;
 
-	private OrnitheFiles files;
+	private KeratinFiles files;
 
 	private VersionsManifest versionsManifest;
 	private BuildNumbersCache namedMappingsBuilds;
@@ -328,7 +328,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			throw new RuntimeException("gen1 is no longer supported!");
 		}
 
-		files = new OrnitheFiles(this);
+		files = new KeratinFiles(this);
 		files.mkdirs(selection);
 
 		File manifestFile = files.getGlobalCache().getVersionsManifestJson();
@@ -864,7 +864,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	}
 
 	@Override
-	public OrnitheFiles getFiles() {
+	public KeratinFiles getFiles() {
 		checkAccess("file management");
 		return files;
 	}

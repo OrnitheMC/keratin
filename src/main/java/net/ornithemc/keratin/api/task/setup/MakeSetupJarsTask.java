@@ -10,14 +10,14 @@ import net.ornithemc.keratin.api.task.processing.Nester;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SetupJars;
 import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
 import net.ornithemc.keratin.files.GlobalCache.NestsCache;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class MakeSetupJarsTask extends MinecraftTask implements Nester {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		GameJarsCache gameJars = files.getGlobalCache().getGameJarsCache();
 		NestsCache nests = files.getGlobalCache().getNestsCache();

@@ -15,7 +15,7 @@ import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
 import net.ornithemc.keratin.files.GlobalCache.NestsCache;
 import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
 import net.ornithemc.keratin.files.GlobalCache.SignaturesCache;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class ProcessMinecraftTask extends MinecraftTask implements Processor {
 
@@ -25,7 +25,7 @@ public abstract class ProcessMinecraftTask extends MinecraftTask implements Proc
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		GlobalCache globalCache = files.getGlobalCache();
 		MappedJarsCache mappedJars = globalCache.getMappedJarsCache();

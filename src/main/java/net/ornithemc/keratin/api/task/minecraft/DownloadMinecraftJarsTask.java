@@ -8,7 +8,7 @@ import net.ornithemc.keratin.api.manifest.VersionDetails.Downloads.Download;
 import net.ornithemc.keratin.api.task.DownloaderAndExtractor;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class DownloadMinecraftJarsTask extends MinecraftTask implements DownloaderAndExtractor {
 
@@ -17,7 +17,7 @@ public abstract class DownloadMinecraftJarsTask extends MinecraftTask implements
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		GameJarsCache gameJars = files.getGlobalCache().getGameJarsCache();
 

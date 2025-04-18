@@ -9,8 +9,8 @@ import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
 import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
 import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MapMinecraftTask extends MappingTask {
 
@@ -22,7 +22,7 @@ public abstract class MapMinecraftTask extends MappingTask {
 		validateNamespaces(srcNs, dstNs);
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		GlobalCache globalCache = files.getGlobalCache();
 		GameJarsCache gameJars = globalCache.getGameJarsCache();

@@ -11,8 +11,8 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.enigma.EnigmaSession;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 
 import net.ornithemc.mappingutils.io.Format;
 
@@ -21,7 +21,7 @@ public abstract class LoadMappingsFromGraphTask extends MinecraftTask implements
 	@Override
 	public void run() throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();
 
@@ -41,7 +41,7 @@ public abstract class LoadMappingsFromGraphTask extends MinecraftTask implements
 		getProject().getLogger().lifecycle(":loading mappings from the graph for Minecraft " + minecraftVersion.id());
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();
 

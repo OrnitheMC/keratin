@@ -8,14 +8,14 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.processing.Exceptor;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.BuildFiles;
 import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class MakeBaseExceptionsTask extends MinecraftTask implements Exceptor {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		GameJarsCache gameJars = files.getGlobalCache().getGameJarsCache();
 		BuildFiles buildFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getBuildFiles();

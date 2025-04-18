@@ -9,14 +9,14 @@ import net.ornithemc.keratin.api.task.mapping.Mapper;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SetupFiles;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SetupJars;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class MapSetupJarsTask extends MinecraftTask implements Mapper {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		LibrariesCache libraries = files.getGlobalCache().getLibrariesCache();
 		SetupJars setupJars = files.getExceptionsAndSignaturesDevelopmentFiles().getSetupJars();

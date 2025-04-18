@@ -14,9 +14,9 @@ public class FileContainer {
 
 	protected final Project project;
 	protected final KeratinGradleExtension keratin;
-	protected final OrnitheFiles files;
+	protected final KeratinFiles files;
 
-	protected FileContainer(KeratinGradleExtension keratin, OrnitheFiles files) {
+	protected FileContainer(KeratinGradleExtension keratin, KeratinFiles files) {
 		this.project = keratin.getProject();
 		this.keratin = keratin;
 		this.files = files;

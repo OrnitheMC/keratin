@@ -13,7 +13,7 @@ public class MappingsDevelopmentFiles extends FileContainer implements MappingsD
 
 	private final BuildFiles buildFiles;
 
-	public MappingsDevelopmentFiles(KeratinGradleExtension keratin, OrnitheFiles files) {
+	public MappingsDevelopmentFiles(KeratinGradleExtension keratin, KeratinFiles files) {
 		super(keratin, files);
 
 		this.buildFiles = new BuildFiles(keratin, files);
@@ -68,7 +68,7 @@ public class MappingsDevelopmentFiles extends FileContainer implements MappingsD
 
 	public static class BuildFiles extends FileContainer implements MappingsDevelopmentFilesAccess.BuildFilesAccess {
 
-		public BuildFiles(KeratinGradleExtension keratin, OrnitheFiles files) {
+		public BuildFiles(KeratinGradleExtension keratin, KeratinFiles files) {
 			super(keratin, files);
 		}
 

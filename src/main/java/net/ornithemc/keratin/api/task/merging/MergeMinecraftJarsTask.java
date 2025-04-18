@@ -7,7 +7,7 @@ import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
 import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
 import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
-import net.ornithemc.keratin.files.OrnitheFiles;
+import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class MergeMinecraftJarsTask extends MergeTask {
 
@@ -18,7 +18,7 @@ public abstract class MergeMinecraftJarsTask extends MergeTask {
 		validateNamespace(namespace);
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		GameJarsCache gameJars = files.getGlobalCache().getGameJarsCache();
 		MappedJarsCache mappedJars = files.getGlobalCache().getMappedJarsCache();

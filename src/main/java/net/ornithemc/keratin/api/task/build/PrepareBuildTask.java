@@ -18,9 +18,9 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.graph.MappingsGraph;
 import net.ornithemc.keratin.api.task.mapping.graph.Validators;
 import net.ornithemc.keratin.files.GlobalCache.NestsCache;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 
 import net.ornithemc.mappingutils.MappingUtils;
 import net.ornithemc.mappingutils.io.Format;
@@ -30,7 +30,7 @@ public abstract class PrepareBuildTask extends MinecraftTask implements Mappings
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		NestsCache nests = files.getGlobalCache().getNestsCache();
 		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();

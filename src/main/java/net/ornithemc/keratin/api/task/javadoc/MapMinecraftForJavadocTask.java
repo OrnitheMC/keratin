@@ -8,15 +8,15 @@ import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
 import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 
 public abstract class MapMinecraftForJavadocTask extends MinecraftTask implements Mapper {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		MappedJarsCache mappedJars = files.getGlobalCache().getMappedJarsCache();
 		LibrariesCache libraries = files.getGlobalCache().getLibrariesCache();

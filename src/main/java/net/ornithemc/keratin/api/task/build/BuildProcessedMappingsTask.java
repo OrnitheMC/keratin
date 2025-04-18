@@ -21,9 +21,9 @@ import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.graph.MappingsGraph;
 import net.ornithemc.keratin.api.task.mapping.graph.Validators;
+import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
-import net.ornithemc.keratin.files.OrnitheFiles;
 import net.ornithemc.mappingutils.io.Format;
 
 public abstract class BuildProcessedMappingsTask extends MinecraftTask {
@@ -33,7 +33,7 @@ public abstract class BuildProcessedMappingsTask extends MinecraftTask {
 		getProject().getLogger().lifecycle(":building processed mappings for Minecraft " + minecraftVersion.id());
 
 		KeratinGradleExtension keratin = getExtension();
-		OrnitheFiles files = keratin.getFiles();
+		KeratinFiles files = keratin.getFiles();
 
 		MappingsDevelopmentFiles mappings = files.getMappingsDevelopmentFiles();
 		BuildFiles buildFiles = mappings.getBuildFiles();
