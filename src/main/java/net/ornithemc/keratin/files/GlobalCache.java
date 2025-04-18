@@ -44,7 +44,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		this.exceptionsCache = addCache(ExceptionsCache.class, () -> new ExceptionsCache(keratin, files));
 		this.signaturesCache = addCache(SignaturesCache.class, () -> new SignaturesCache(keratin, files));
 		this.nestsCache = addCache(NestsCache.class, () -> new NestsCache(keratin, files));
-		this.librariesCache = addCache(LibrariesCache.class, () -> new LibrariesCache(keratin, files));
+		this.librariesCache = property(LibrariesCache.class, () -> new LibrariesCache(keratin, files));
 	}
 
 	private <C extends FileCache> Property<C> addCache(Class<C> type, Callable<C> provider) {
@@ -725,15 +725,10 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		}
 	}
 
-	public static class LibrariesCache extends FileContainer implements FileCache, GlobalCacheAccess.LibrariesCacheAccess {
+	public static class LibrariesCache extends FileContainer implements GlobalCacheAccess.LibrariesCacheAccess {
 
 		public LibrariesCache(KeratinGradleExtension keratin, OrnitheFiles files) {
 			super(keratin, files);
-		}
-
-		@Override
-		public File getDirectory() {
-			return files.getGlobalCache().file("libraries");
 		}
 
 		@Override

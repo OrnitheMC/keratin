@@ -57,6 +57,7 @@ dependencies {
 	implementation 'net.fabricmc:tiny-remapper:0.9.0'
 	implementation 'net.fabricmc:name-proposal:0.2.0'
 	implementation 'net.fabricmc:mapping-io:0.5.1'
+	implementation 'net.fabricmc.filament:net.fabricmc.filament.gradle.plugin:0.10.1'
 	implementation 'io.github.gaming32:signature-changer:1.0.0'
 }
 

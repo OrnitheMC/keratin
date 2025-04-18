@@ -11,7 +11,5 @@ public class Configurations {
 	public static final String javadocClasspath(String minecraftVersion) {
 		return "%s_javadocClasspath".formatted(minecraftVersion);
 	}
-	public static final String MAPPING_POET_JAR    = "mappingPoetJar";
-	public static final String MAPPING_POET        = "mappingPoet";
 
 }

@@ -1,13 +1,16 @@
 package net.ornithemc.keratin.api.task.javadoc;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Set;
+import java.util.List;
 
-import org.gradle.api.Project;
+import org.gradle.api.provider.ListProperty;
+import org.gradle.api.provider.Property;
+import org.gradle.workers.WorkAction;
+import org.gradle.workers.WorkParameters;
 import org.gradle.workers.WorkQueue;
 
-import net.ornithemc.keratin.Configurations;
+import net.fabricmc.filament.mappingpoet.MappingPoet;
+
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.JavaExecution;
@@ -21,57 +24,65 @@ public abstract class GenerateFakeSourceTask extends MinecraftTask implements Ja
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
-		Project project = keratin.getProject();
 		OrnitheFiles files = keratin.getFiles();
 
 		LibrariesCache libraries = files.getGlobalCache().getLibrariesCache();
 		BuildFiles buildFiles = files.getMappingsDevelopmentFiles().getBuildFiles();
 
-		Set<File> classpath = project.getConfigurations().getByName(Configurations.MAPPING_POET).getFiles();
-
 		if (minecraftVersion.hasSharedVersioning() && minecraftVersion.canBeMerged()) {
-			submit(
-				workQueue,
-				buildFiles.getMergedTinyV2MappingsFile(minecraftVersion.id()),
-				buildFiles.getJavadocNamedJar(minecraftVersion.id()),
-				buildFiles.getFakeSourceDirectory(minecraftVersion.id()),
-				libraries.getDirectory(),
-				classpath
-			);
+			workQueue.submit(MappingPoetAction.class, parameters -> {
+				parameters.getMappings().set(buildFiles.getMergedTinyV2MappingsFile(minecraftVersion.id()));
+				parameters.getJar().set(buildFiles.getJavadocNamedJar(minecraftVersion.id()));
+				parameters.getLibraries().set(libraries.getLibraries(minecraftVersion.id()));
+				parameters.getOutputDirectory().set(buildFiles.getFakeSourceDirectory(minecraftVersion.id()));
+			});
 		} else {
 			if (minecraftVersion.hasClient()) {
-				submit(
-					workQueue,
-					buildFiles.getMergedTinyV2MappingsFile(minecraftVersion.client().id()),
-					buildFiles.getJavadocNamedJar(minecraftVersion.client().id()),
-					buildFiles.getFakeSourceDirectory(minecraftVersion.client().id()),
-					libraries.getDirectory(),
-					classpath
-				);
+				workQueue.submit(MappingPoetAction.class, parameters -> {
+					parameters.getMappings().set(buildFiles.getMergedTinyV2MappingsFile(minecraftVersion.client().id()));
+					parameters.getJar().set(buildFiles.getJavadocNamedJar(minecraftVersion.client().id()));
+					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion.client().id()));
+					parameters.getOutputDirectory().set(buildFiles.getFakeSourceDirectory(minecraftVersion.client().id()));
+				});
 			}
 			if (minecraftVersion.hasServer()) {
-				submit(
-					workQueue,
-					buildFiles.getMergedTinyV2MappingsFile(minecraftVersion.server().id()),
-					buildFiles.getJavadocNamedJar(minecraftVersion.server().id()),
-					buildFiles.getFakeSourceDirectory(minecraftVersion.server().id()),
-					libraries.getDirectory(),
-					classpath
-				);
+				workQueue.submit(MappingPoetAction.class, parameters -> {
+					parameters.getMappings().set(buildFiles.getMergedTinyV2MappingsFile(minecraftVersion.server().id()));
+					parameters.getJar().set(buildFiles.getJavadocNamedJar(minecraftVersion.server().id()));
+					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion.server().id()));
+					parameters.getOutputDirectory().set(buildFiles.getFakeSourceDirectory(minecraftVersion.server().id()));
+				});
 			}
 		}
 	}
 
-	private void submit(WorkQueue workQueue, File mappings, File jar, File dir, File libs, Iterable<File> classpath) {
-		workQueue.submit(JavaExecutionAction.class, parameters -> {
-			parameters.getMainClass().set("net.fabricmc.mappingpoet.Main");
-			parameters.getClasspath().set(classpath);
-			parameters.getArgs().set(Arrays.asList(
-				mappings.getAbsolutePath(),
-				jar.getAbsolutePath(),
-				dir.getAbsolutePath(),
-				libs.getAbsolutePath()
-			));
-		});
+	public interface MappingPoetParameters extends WorkParameters {
+
+		Property<File> getMappings();
+
+		Property<File> getJar();
+
+		ListProperty<File> getLibraries();
+
+		Property<File> getOutputDirectory();
+
+	}
+
+	public static abstract class MappingPoetAction implements WorkAction<MappingPoetParameters> {
+
+		@Override
+		public void execute() {
+			File mappings = getParameters().getMappings().get();
+			File jar = getParameters().getJar().get();
+			List<File> libs = getParameters().getLibraries().get();
+			File outputDir = getParameters().getOutputDirectory().get();
+
+			MappingPoet.generate(
+				mappings.toPath(),
+				jar.toPath(),
+				outputDir.toPath(),
+				libs.stream().map(File::toPath).toList()
+			);
+		}
 	}
 }

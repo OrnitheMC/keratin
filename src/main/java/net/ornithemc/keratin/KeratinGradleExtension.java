@@ -25,7 +25,6 @@ import org.gradle.api.publish.PublicationContainer;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Jar;
@@ -406,19 +405,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		if (selection == TaskSelection.MAPPINGS) {
 			Configuration decompileClasspath = configurations.register(Configurations.DECOMPILE_CLASSPATH).get();
 			Configuration enigmaRuntime = configurations.register(Configurations.ENIGMA_RUNTIME).get();
-			Configuration mappingPoetJar = configurations.register(Configurations.MAPPING_POET_JAR, configuration -> {
-				configuration.setTransitive(false);
-			}).get();
-			Configuration mappingPoet = configurations.register(Configurations.MAPPING_POET, configuration -> {
-				configuration.extendsFrom(mappingPoetJar);
-				configuration.setTransitive(true);
-			}).get();
 
 			dependencies.add(decompileClasspath.getName(), "org.vineflower:vineflower:1.11.0");
 			dependencies.add(decompileClasspath.getName(), "net.fabricmc:cfr:0.0.9");
 			dependencies.add(enigmaRuntime.getName(), "net.ornithemc:enigma-swing:2.5.1");
 			dependencies.add(enigmaRuntime.getName(), "org.quiltmc:quilt-enigma-plugin:2.3.1");
-			dependencies.add(mappingPoetJar.getName(), "net.fabricmc:mappingpoet:0.3.0");
 
 			SourceSet constants = sourceSets.register(SourceSets.CONSTANTS).get();
 		}
@@ -459,12 +450,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		TaskProvider<?> updateSignaturesBuilds = tasks.register("updateSignaturesBuildsCache", UpdateBuildsCacheTask.Signatures.class);
 		TaskProvider<?> updateNestsBuilds = tasks.register("updateNestsBuildsCache", UpdateBuildsCacheTask.Nests.class);
 
-		TaskProvider<Sync> syncLibraries = tasks.register("syncMinecraftLibraries", Sync.class, task -> {
-			for (String minecraftVersion : minecraftVersionIds) {
-				task.from(configurations.getByName(Configurations.minecraftLibraries(minecraftVersion)));
-			}
-			task.into(files.getGlobalCache().getLibrariesCache().getDirectory());
-		});
 		TaskProvider<?> downloadJars = tasks.register("downloadMinecraftJars", DownloadMinecraftJarsTask.class);
 		TaskProvider<?> mergeJars = tasks.register("mergeMinecraftJars", MergeMinecraftJarsTask.class, task -> {
 			task.dependsOn(downloadJars);
@@ -542,7 +527,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				task.dependsOn(splitIntermediary);
 			});
 			TaskProvider<?> mapMinecraftToIntermediary = tasks.register("mapMinecraftToIntermediary", MapMinecraftTask.class, task -> {
-				task.dependsOn(syncLibraries, splitIntermediary);
+				task.dependsOn(mergeJars, splitIntermediary);
 				task.getSourceNamespace().set(Mapper.OFFICIAL);
 				task.getTargetNamespace().set(Mapper.INTERMEDIARY);
 			});

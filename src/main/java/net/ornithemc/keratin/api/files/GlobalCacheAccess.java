@@ -189,8 +189,6 @@ public interface GlobalCacheAccess {
 
 	interface LibrariesCacheAccess {
 
-		File getDirectory();
-
 		Collection<File> getLibraries(String minecraftVersion);
 
 		Collection<File> getLibraries(MinecraftVersion minecraftVersion);
