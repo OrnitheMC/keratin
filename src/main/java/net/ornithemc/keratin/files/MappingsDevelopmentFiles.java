@@ -3,8 +3,6 @@ package net.ornithemc.keratin.files;
 import java.io.File;
 import java.io.IOException;
 
-import org.gradle.api.provider.Property;
-
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.files.MappingsDevelopmentFilesAccess;
@@ -13,12 +11,12 @@ import net.ornithemc.keratin.api.task.unpick.UnpickDefinitions;
 
 public class MappingsDevelopmentFiles extends FileContainer implements MappingsDevelopmentFilesAccess {
 
-	private final Property<BuildFiles> buildFiles;
+	private final BuildFiles buildFiles;
 
 	public MappingsDevelopmentFiles(KeratinGradleExtension keratin, OrnitheFiles files) {
 		super(keratin, files);
 
-		this.buildFiles = property(BuildFiles.class, () -> new BuildFiles(keratin, files));
+		this.buildFiles = new BuildFiles(keratin, files);
 	}
 
 	@Override
@@ -26,8 +24,6 @@ public class MappingsDevelopmentFiles extends FileContainer implements MappingsD
 		mkdirs(getMappingsDirectory());
 		mkdirs(getUnpickDirectory());
 		mkdirs(getRunDirectory());
-
-		getBuildFiles().mkdirs();
 	}
 
 	@Override
@@ -67,7 +63,7 @@ public class MappingsDevelopmentFiles extends FileContainer implements MappingsD
 
 	@Override
 	public BuildFiles getBuildFiles() {
-		return buildFiles.get();
+		return buildFiles;
 	}
 
 	public static class BuildFiles extends FileContainer implements MappingsDevelopmentFilesAccess.BuildFilesAccess {

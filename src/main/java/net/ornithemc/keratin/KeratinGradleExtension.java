@@ -135,8 +135,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 	private final Project project;
-	private final OrnitheFiles files;
-
 	private final PublicationsAPI publications;
 	
 	private final MetaSourcedSingleBuildMavenArtifacts intermediaryArtifacts;
@@ -149,25 +147,26 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private final Property<String> localCacheDir;
 	private final Property<String> versionsManifestUrl;
 	private final ListProperty<MinecraftVersion> minecraftVersions;
-	private final Versioned<String, MinecraftVersion> minecraftVersionsById;
 	private final Property<Integer> intermediaryGen;
 
-	private final Property<VersionsManifest> versionsManifest;
+	private final Versioned<String, MinecraftVersion> minecraftVersionsById;
 	private final Versioned<String, VersionInfo> versionInfos;
 	private final Versioned<String, VersionDetails> versionDetails;
-	private final Property<BuildNumbersCache> namedMappingsBuilds;
-	private final Property<BuildNumbersCache> exceptionsBuilds;
-	private final Property<BuildNumbersCache> signaturesBuilds;
-	private final Property<BuildNumbersCache> nestsBuilds;
 	private final Versioned<MinecraftVersion, ProcessorSettings> processorSettings;
+
+	private OrnitheFiles files;
+
+	private VersionsManifest versionsManifest;
+	private BuildNumbersCache namedMappingsBuilds;
+	private BuildNumbersCache exceptionsBuilds;
+	private BuildNumbersCache signaturesBuilds;
+	private BuildNumbersCache nestsBuilds;
 
 	private boolean configured;
 	private boolean cacheInvalid;
 
 	public KeratinGradleExtension(Project project) {
 		this.project = project;
-		this.files = new OrnitheFiles(this);
-
 		this.publications = this.project.getObjects().newInstance(PublicationsAPI.class);
 
 		this.intermediaryArtifacts = new MetaSourcedSingleBuildMavenArtifacts(this);
@@ -210,30 +209,18 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.minecraftVersions = this.project.getObjects().listProperty(MinecraftVersion.class);
 		this.minecraftVersions.convention(Collections.emptyList());
 		this.minecraftVersions.finalizeValueOnRead();
-		this.minecraftVersionsById = new Versioned<>(minecraftVersionId -> MinecraftVersion.parse(this, minecraftVersionId));
 		this.intermediaryGen = this.project.getObjects().property(Integer.class);
 		this.intermediaryGen.convention(1);
 		this.intermediaryGen.finalizeValueOnRead();
 
-		this.versionsManifest = this.project.getObjects().property(VersionsManifest.class);
-		this.versionsManifest.convention(this.project.provider(() -> {
-			File file = KeratinGradleExtension.this.files.getGlobalCache().getVersionsManifestJson();
-
-			if (project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
-				FileUtils.copyURLToFile(new URI(this.versionsManifestUrl.get()).toURL(), file);
-			}
-
-			String json = FileUtils.readFileToString(file, Charset.defaultCharset());
-			VersionsManifest manifest = KeratinGradleExtension.GSON.fromJson(json, VersionsManifest.class);
-
-			return manifest;
-		}));
-		this.versionsManifest.finalizeValueOnRead();
+		this.minecraftVersionsById = new Versioned<>(minecraftVersionId -> {
+			return MinecraftVersion.parse(this, minecraftVersionId);
+		});
 		this.versionInfos = new Versioned<>(minecraftVersion -> {
 			File file = this.files.getGlobalCache().getMetadataCache().getVersionInfoJson(minecraftVersion);
 
 			if (project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
-				VersionsManifest manifest = versionsManifest.get();
+				VersionsManifest manifest = versionsManifest;
 				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
 				FileUtils.copyURLToFile(new URI(entry.url()).toURL(), file);
@@ -248,7 +235,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			File file = this.files.getGlobalCache().getMetadataCache().getVersionDetailJson(minecraftVersion);
 
 			if (project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
-				VersionsManifest manifest = versionsManifest.get();
+				VersionsManifest manifest = versionsManifest;
 				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
 				FileUtils.copyURLToFile(new URI(entry.details()).toURL(), file);
@@ -259,23 +246,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 			return details;
 		});
-		this.namedMappingsBuilds = this.project.getObjects().property(BuildNumbersCache.class);
-		this.namedMappingsBuilds.convention(this.project.provider(() -> new BuildNumbersCache(this, this.files.getSharedFiles().getNamedMappingsBuildsJson(), false)));
-		this.namedMappingsBuilds.finalizeValueOnRead();
-		this.exceptionsBuilds = this.project.getObjects().property(BuildNumbersCache.class);
-		this.exceptionsBuilds.convention(this.project.provider(() -> new BuildNumbersCache(this, this.files.getSharedFiles().getExceptionsBuildsJson(), true)));
-		this.exceptionsBuilds.finalizeValueOnRead();
-		this.signaturesBuilds = this.project.getObjects().property(BuildNumbersCache.class);
-		this.signaturesBuilds.convention(this.project.provider(() -> new BuildNumbersCache(this, this.files.getSharedFiles().getSignaturesBuildsJson(), true)));
-		this.signaturesBuilds.finalizeValueOnRead();
-		this.nestsBuilds = this.project.getObjects().property(BuildNumbersCache.class);
-		this.nestsBuilds.convention(this.project.provider(() -> new BuildNumbersCache(this, this.files.getSharedFiles().getNestsBuildsJson(), true)));
-		this.nestsBuilds.finalizeValueOnRead();
 		this.processorSettings = new Versioned<>(minecraftVersion -> {
 			return ProcessorSettings.init(ProcessorSettings.PROCESSOR_VERSION)
-			                        .withExceptionsBuilds(this.exceptionsBuilds.get().getBuildNumbers(minecraftVersion))
-			                        .withSignaturesBuilds(this.signaturesBuilds.get().getBuildNumbers(minecraftVersion))
-			                        .withNestsBuilds(this.nestsBuilds.get().getBuildNumbers(minecraftVersion));
+			                        .withExceptionsBuilds(this.exceptionsBuilds.getBuildNumbers(minecraftVersion))
+			                        .withSignaturesBuilds(this.signaturesBuilds.getBuildNumbers(minecraftVersion))
+			                        .withNestsBuilds(this.nestsBuilds.getBuildNumbers(minecraftVersion));
 		});
 	}
 
@@ -349,11 +324,28 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	@SuppressWarnings("unused")
 	private Set<String> configure(TaskSelection selection) throws Exception {
-		configured = true;
-
 		if (intermediaryGen.get() < 2) {
 			throw new RuntimeException("gen1 is no longer supported!");
 		}
+
+		files = new OrnitheFiles(this);
+		files.mkdirs(selection);
+
+		File manifestFile = files.getGlobalCache().getVersionsManifestJson();
+
+		if (project.getGradle().getStartParameter().isRefreshDependencies() || !manifestFile.exists()) {
+			FileUtils.copyURLToFile(new URI(versionsManifestUrl.get()).toURL(), manifestFile);
+		}
+
+		String manifestJson = FileUtils.readFileToString(manifestFile, Charset.defaultCharset());
+
+		versionsManifest = GSON.fromJson(manifestJson, VersionsManifest.class);
+		namedMappingsBuilds = new BuildNumbersCache(this, files.getSharedFiles().getNamedMappingsBuildsJson(), false);
+		exceptionsBuilds = new BuildNumbersCache(this, files.getSharedFiles().getExceptionsBuildsJson(), true);
+		signaturesBuilds = new BuildNumbersCache(this, files.getSharedFiles().getSignaturesBuildsJson(), true);
+		nestsBuilds = new BuildNumbersCache(this, files.getSharedFiles().getNestsBuildsJson(), true);
+
+		configured = true;
 
 		List<MinecraftVersion> selectedMinecraftVersions = minecraftVersions.get();
 
@@ -372,8 +364,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			if (minecraftVersion.hasServer())
 				minecraftVersionIds.add(minecraftVersion.server().id());
 		}
-
-		files.mkdirs(selection);
 
 		ConfigurationContainer configurations = project.getConfigurations();
 		DependencyHandler dependencies = project.getDependencies();
@@ -739,7 +729,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					tasks.getByName("build").dependsOn(mergedTinyV1Jar, tinyV2Jar, mergedTinyV2Jar, compressTinyV1, javadocJar, constantsJar, sourcesJar);
 
 					int latestBuild = namedMappingsArtifacts.getLatestBuild(minecraftVersion);
-					int nextBuild = namedMappingsBuilds.get().getBuild(minecraftVersion) + 1;
+					int nextBuild = namedMappingsBuilds.getBuild(minecraftVersion) + 1;
 
 					if (nextBuild > latestBuild) {
 						MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
@@ -977,7 +967,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	@Override
 	public VersionsManifest getVersionsManifest() {
 		checkAccess("versions manifest");
-		return versionsManifest.get();
+		return versionsManifest;
 	}
 
 	public VersionInfo getVersionInfo(String minecraftVersion) {
@@ -989,23 +979,23 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	}
 
 	public int getNamedMappingsBuild(String minecraftVersion) {
-		return namedMappingsBuilds.get().getBuild(minecraftVersion);
+		return namedMappingsBuilds.getBuild(minecraftVersion);
 	}
 
 	public BuildNumbers getNamedMappingsBuilds(MinecraftVersion minecraftVersion) {
-		return namedMappingsBuilds.get().getBuildNumbers(minecraftVersion);
+		return namedMappingsBuilds.getBuildNumbers(minecraftVersion);
 	}
 
 	public BuildNumbers getExceptionsBuilds(MinecraftVersion minecraftVersion) {
-		return exceptionsBuilds.get().getBuildNumbers(minecraftVersion);
+		return exceptionsBuilds.getBuildNumbers(minecraftVersion);
 	}
 
 	public BuildNumbers getSignaturesBuilds(MinecraftVersion minecraftVersion) {
-		return signaturesBuilds.get().getBuildNumbers(minecraftVersion);
+		return signaturesBuilds.getBuildNumbers(minecraftVersion);
 	}
 
 	public BuildNumbers getNestsBuilds(MinecraftVersion minecraftVersion) {
-		return nestsBuilds.get().getBuildNumbers(minecraftVersion);
+		return nestsBuilds.getBuildNumbers(minecraftVersion);
 	}
 
 	public ProcessorSettings getProcessorSettings(MinecraftVersion minecraftVersion) {

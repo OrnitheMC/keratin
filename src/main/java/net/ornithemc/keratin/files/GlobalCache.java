@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.Callable;
-
-import org.gradle.api.provider.Property;
 
 import net.ornithemc.keratin.Configurations;
 import net.ornithemc.keratin.Constants;
@@ -19,44 +16,43 @@ import net.ornithemc.keratin.api.settings.ProcessorSettings;
 
 public class GlobalCache extends FileContainer implements FileCache, GlobalCacheAccess {
 
-	private final Set<Property<? extends FileCache>> caches;
+	private final Set<FileCache> caches;
 
-	private final Property<MetadataCache> metadataCache;
-	private final Property<GameJarsCache> gameJarsCache;
-	private final Property<MappedJarsCache> mappedJarsCache;
-	private final Property<ProcessedJarsCache> processedJarsCache;
-	private final Property<MappingsCache> mappingsCache;
-	private final Property<ExceptionsCache> exceptionsCache;
-	private final Property<SignaturesCache> signaturesCache;
-	private final Property<NestsCache> nestsCache;
-	private final Property<LibrariesCache> librariesCache;
+	private final MetadataCache metadataCache;
+	private final GameJarsCache  gameJarsCache;
+	private final MappedJarsCache mappedJarsCache;
+	private final ProcessedJarsCache processedJarsCache;
+	private final MappingsCache mappingsCache;
+	private final ExceptionsCache exceptionsCache;
+	private final SignaturesCache signaturesCache;
+	private final NestsCache nestsCache;
+	private final LibrariesCache librariesCache;
 
 	public GlobalCache(KeratinGradleExtension keratin, OrnitheFiles files) {
 		super(keratin, files);
 
 		this.caches = new LinkedHashSet<>();
 
-		this.metadataCache = addCache(MetadataCache.class, () -> new MetadataCache(keratin, files));
-		this.gameJarsCache = addCache(GameJarsCache.class, () -> new GameJarsCache(keratin, files));
-		this.mappedJarsCache = addCache(MappedJarsCache.class, () -> new MappedJarsCache(keratin, files));
-		this.processedJarsCache = addCache(ProcessedJarsCache.class, () -> new ProcessedJarsCache(keratin, files));
-		this.mappingsCache = addCache(MappingsCache.class, () -> new MappingsCache(keratin, files));
-		this.exceptionsCache = addCache(ExceptionsCache.class, () -> new ExceptionsCache(keratin, files));
-		this.signaturesCache = addCache(SignaturesCache.class, () -> new SignaturesCache(keratin, files));
-		this.nestsCache = addCache(NestsCache.class, () -> new NestsCache(keratin, files));
-		this.librariesCache = property(LibrariesCache.class, () -> new LibrariesCache(keratin, files));
+		this.metadataCache = addCache(new MetadataCache(keratin, files));
+		this.gameJarsCache = addCache(new GameJarsCache(keratin, files));
+		this.mappedJarsCache = addCache(new MappedJarsCache(keratin, files));
+		this.processedJarsCache = addCache(new ProcessedJarsCache(keratin, files));
+		this.mappingsCache = addCache(new MappingsCache(keratin, files));
+		this.exceptionsCache = addCache(new ExceptionsCache(keratin, files));
+		this.signaturesCache = addCache(new SignaturesCache(keratin, files));
+		this.nestsCache = addCache(new NestsCache(keratin, files));
+		this.librariesCache = new LibrariesCache(keratin, files);
 	}
 
-	private <C extends FileCache> Property<C> addCache(Class<C> type, Callable<C> provider) {
-		Property<C> cache = property(type, provider);
+	private <C extends FileCache> C addCache(C cache) {
 		caches.add(cache);
 		return cache;
 	}
 
 	@Override
 	public void mkdirs() throws IOException {
-		for (Property<? extends FileCache> cache : caches) {
-			mkdirs(cache.get().getDirectory());
+		for (FileCache cache : caches) {
+			mkdirs(cache.getDirectory());
 		}
 	}
 
@@ -78,47 +74,47 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 	@Override
 	public MetadataCache getMetadataCache() {
-		return metadataCache.get();
+		return metadataCache;
 	}
 
 	@Override
 	public GameJarsCache getGameJarsCache() {
-		return gameJarsCache.get();
+		return gameJarsCache;
 	}
 
 	@Override
 	public MappedJarsCache getMappedJarsCache() {
-		return mappedJarsCache.get();
+		return mappedJarsCache;
 	}
 
 	@Override
 	public ProcessedJarsCache getProcessedJarsCache() {
-		return processedJarsCache.get();
+		return processedJarsCache;
 	}
 
 	@Override
 	public MappingsCache getMappingsCache() {
-		return mappingsCache.get();
+		return mappingsCache;
 	}
 
 	@Override
 	public ExceptionsCache getExceptionsCache() {
-		return exceptionsCache.get();
+		return exceptionsCache;
 	}
 
 	@Override
 	public SignaturesCache getSignaturesCache() {
-		return signaturesCache.get();
+		return signaturesCache;
 	}
 
 	@Override
 	public NestsCache getNestsCache() {
-		return nestsCache.get();
+		return nestsCache;
 	}
 
 	@Override
 	public LibrariesCache getLibrariesCache() {
-		return librariesCache.get();
+		return librariesCache;
 	}
 
 	public static class MetadataCache extends FileContainer implements FileCache, GlobalCacheAccess.MetadataCacheAccess {

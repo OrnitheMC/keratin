@@ -3,28 +3,26 @@ package net.ornithemc.keratin.files;
 import java.io.File;
 import java.io.IOException;
 
-import org.gradle.api.provider.Property;
-
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.files.ExceptionsAndSignaturesDevelopmentFilesAccess;
 
 public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer implements ExceptionsAndSignaturesDevelopmentFilesAccess {
 
-	private final Property<SetupJars> setupJars;
-	private final Property<SetupFiles> setupFiles;
-	private final Property<SourceJars> sourceJars;
-	private final Property<SourceMappings> sourceMappings;
-	private final Property<BuildFiles> buildFiles;
+	private final SetupJars setupJars;
+	private final SetupFiles setupFiles;
+	private final SourceJars sourceJars;
+	private final SourceMappings sourceMappings;
+	private final BuildFiles buildFiles;
 
 	public ExceptionsAndSignaturesDevelopmentFiles(KeratinGradleExtension keratin, OrnitheFiles files) {
 		super(keratin, files);
 
-		this.setupJars = property(SetupJars.class, () -> new SetupJars(keratin, files));
-		this.setupFiles = property(SetupFiles.class, () -> new SetupFiles(keratin, files));
-		this.sourceJars = property(SourceJars.class, () -> new SourceJars(keratin, files));
-		this.sourceMappings = property(SourceMappings.class, () -> new SourceMappings(keratin, files));
-		this.buildFiles = property(BuildFiles.class, () -> new BuildFiles(keratin, files));
+		this.setupJars = new SetupJars(keratin, files);
+		this.setupFiles = new SetupFiles(keratin, files);
+		this.sourceJars = new SourceJars(keratin, files);
+		this.sourceMappings = new SourceMappings(keratin, files);
+		this.buildFiles = new BuildFiles(keratin, files);
 	}
 
 	@Override
@@ -115,27 +113,27 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 
 	@Override
 	public SetupJars getSetupJars() {
-		return setupJars.get();
+		return setupJars;
 	}
 
 	@Override
 	public SetupFiles getSetupFiles() {
-		return setupFiles.get();
+		return setupFiles;
 	}
 
 	@Override
 	public SourceJars getSourceJars() {
-		return sourceJars.get();
+		return sourceJars;
 	}
 
 	@Override
 	public SourceMappings getSourceMappings() {
-		return sourceMappings.get();
+		return sourceMappings;
 	}
 
 	@Override
 	public BuildFiles getBuildFiles() {
-		return buildFiles.get();
+		return buildFiles;
 	}
 
 	public static class SetupJars extends FileContainer implements ExceptionsAndSignaturesDevelopmentFilesAccess.SetupJarsAccess {
