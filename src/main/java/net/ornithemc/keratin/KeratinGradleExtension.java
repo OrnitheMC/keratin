@@ -146,7 +146,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private final Property<String> globalCacheDir;
 	private final Property<String> localCacheDir;
 	private final Property<String> versionsManifestUrl;
-	private final ListProperty<MinecraftVersion> minecraftVersions;
+	private final ListProperty<String> minecraftVersions;
 	private final Property<Integer> intermediaryGen;
 
 	private final Versioned<String, MinecraftVersion> minecraftVersionsById;
@@ -206,7 +206,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.versionsManifestUrl.convention(Constants.VERSIONS_MANIFEST_URL);
 		this.versionsManifestUrl.finalizeValueOnRead();
 
-		this.minecraftVersions = this.project.getObjects().listProperty(MinecraftVersion.class);
+		this.minecraftVersions = this.project.getObjects().listProperty(String.class);
 		this.minecraftVersions.convention(Collections.emptyList());
 		this.minecraftVersions.finalizeValueOnRead();
 		this.intermediaryGen = this.project.getObjects().property(Integer.class);
@@ -281,7 +281,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	@Override
 	public void minecraftVersions(String... minecraftVersions) {
 		for (String minecraftVersion : minecraftVersions) {
-			this.minecraftVersions.add(MinecraftVersion.parse(this, minecraftVersion));
+			this.minecraftVersions.add(minecraftVersion);
 		}
 	}
 
@@ -323,7 +323,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	}
 
 	@SuppressWarnings("unused")
-	private Set<String> configure(TaskSelection selection) throws Exception {
+	private Set<MinecraftVersion> configure(TaskSelection selection) throws Exception {
 		if (intermediaryGen.get() < 2) {
 			throw new RuntimeException("gen1 is no longer supported!");
 		}
@@ -347,7 +347,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 		configured = true;
 
-		List<MinecraftVersion> selectedMinecraftVersions = minecraftVersions.get();
+		List<String> selectedMinecraftVersions = minecraftVersions.get();
 
 		Set<MinecraftVersion> minecraftVersions = new LinkedHashSet<>();
 		Set<String> minecraftVersionIds = new LinkedHashSet<>();
@@ -355,7 +355,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		if (selectedMinecraftVersions.isEmpty()) {
 			findMinecraftVersions(selection, minecraftVersions);
 		} else {
-			minecraftVersions.addAll(selectedMinecraftVersions);
+			for (String minecraftVersion : selectedMinecraftVersions) {
+				minecraftVersions.add(MinecraftVersion.parse(this, minecraftVersion));
+			}
 		}
 
 		for (MinecraftVersion minecraftVersion : minecraftVersions) {
@@ -419,13 +421,21 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			publications.getArtifactId().convention(project.provider(() -> "feather-gen%d".formatted(intermediaryGen.get())));
 		}
 
-		return minecraftVersionIds;
+		return minecraftVersions;
 	}
 
 	@SuppressWarnings("unused")
 	@Override
 	public void tasks(TaskSelection selection) throws Exception {
-		Set<String> minecraftVersionIds = configure(selection);
+		Set<MinecraftVersion> minecraftVersions = configure(selection);
+		Set<String> minecraftVersionIds = new LinkedHashSet<>();
+
+		for (MinecraftVersion minecraftVersion : minecraftVersions) {
+			if (minecraftVersion.hasClient())
+				minecraftVersionIds.add(minecraftVersion.client().id());
+			if (minecraftVersion.hasServer())
+				minecraftVersionIds.add(minecraftVersion.server().id());
+		}
 
 		ConfigurationContainer configurations = project.getConfigurations();
 		TaskContainer tasks = project.getTasks();
