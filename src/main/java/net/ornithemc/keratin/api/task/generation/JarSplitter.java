@@ -517,6 +517,7 @@ public interface JarSplitter {
 					if (s != null) s.visitFieldInsn(opcode, owner, name, descriptor);
 				}
 
+				@SuppressWarnings("deprecation")
 				@Override
 				public void visitMethodInsn(int opcode, String owner, String name, String descriptor) {
 					if (c != null) c.visitMethodInsn(opcode, owner, name, descriptor);
