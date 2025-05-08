@@ -53,31 +53,34 @@ public interface UnpickDefinitions {
 				unpickDefinitions.add(file);
 			}
 			if (file.isDirectory()) {
+				// check if this dir specifies a mc version range
 				String fileName = file.getName();
 				String[] parts = fileName.split("mc");
 
 				if (parts.length != 3) {
-					continue; // directory does not hold unpick files or is formatted in an unknown way
+					// arbitrarily named dir, find more unpick definitions inside
+					collectUnpickDefinitions(keratin, minecraftVersion, file, unpickDefinitions);
+				} else {
+					// dir specifies mc version range, check that it matches
+					String versionA = parts[1];
+					String versionB = parts[2];
+
+					if (versionA.charAt(versionA.length() - 1) == '-') {
+						versionA = versionA.substring(0, versionA.length() - 1);
+					}
+
+					MinecraftVersion minecraftVersionA = keratin.getMinecraftVersion(versionA);
+					MinecraftVersion minecraftVersionB = keratin.getMinecraftVersion(versionB);
+
+					if (minecraftVersionA == null || minecraftVersionB == null) {
+						continue; // one of the mc versions is unknown
+					}
+					if (minecraftVersion.compareTo(minecraftVersionA) < 0 || minecraftVersion.compareTo(minecraftVersionB) > 0) {
+						continue; // mc version is not contained in the version range covered by this dir
+					}
+
+					collectUnpickDefinitions(keratin, minecraftVersion, file, unpickDefinitions);
 				}
-
-				String versionA = parts[1];
-				String versionB = parts[2];
-
-				if (versionA.charAt(versionA.length() - 1) == '-') {
-					versionA = versionA.substring(0, versionA.length() - 1);
-				}
-
-				MinecraftVersion minecraftVersionA = keratin.getMinecraftVersion(versionA);
-				MinecraftVersion minecraftVersionB = keratin.getMinecraftVersion(versionB);
-
-				if (minecraftVersionA == null || minecraftVersionB == null) {
-					continue; // one of the mc versions is unknown
-				}
-				if (minecraftVersion.compareTo(minecraftVersionA) < 0 || minecraftVersion.compareTo(minecraftVersionB) > 0) {
-					continue; // mc version is not contained in the version range covered by this dir
-				}
-
-				collectUnpickDefinitions(keratin, minecraftVersion, file, unpickDefinitions);
 			}
 		}
 	}
