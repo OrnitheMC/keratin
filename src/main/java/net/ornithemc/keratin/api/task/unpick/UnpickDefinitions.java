@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
@@ -30,7 +31,7 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-
+import net.ornithemc.keratin.util.Patterns;
 import net.ornithemc.mappingutils.MappingUtils;
 
 public interface UnpickDefinitions {
@@ -53,21 +54,13 @@ public interface UnpickDefinitions {
 				unpickDefinitions.add(file);
 			}
 			if (file.isDirectory()) {
-				// check if this dir specifies a mc version range
-				String fileName = file.getName();
-				String[] parts = fileName.split("mc");
+				// check if the dir name specifies a mc version range
+				Matcher mcVersionRange = Patterns.MC_VERSION_RANGE.matcher(file.getName());
 
-				if (parts.length != 3) {
-					// arbitrarily named dir, find more unpick definitions inside
-					collectUnpickDefinitions(keratin, minecraftVersion, file, unpickDefinitions);
-				} else {
+				if (mcVersionRange.matches()) {
 					// dir specifies mc version range, check that it matches
-					String versionA = parts[1];
-					String versionB = parts[2];
-
-					if (versionA.charAt(versionA.length() - 1) == '-') {
-						versionA = versionA.substring(0, versionA.length() - 1);
-					}
+					String versionA = mcVersionRange.group(1);
+					String versionB = mcVersionRange.group(2);
 
 					MinecraftVersion minecraftVersionA = keratin.getMinecraftVersion(versionA);
 					MinecraftVersion minecraftVersionB = keratin.getMinecraftVersion(versionB);
@@ -78,9 +71,9 @@ public interface UnpickDefinitions {
 					if (minecraftVersion.compareTo(minecraftVersionA) < 0 || minecraftVersion.compareTo(minecraftVersionB) > 0) {
 						continue; // mc version is not contained in the version range covered by this dir
 					}
-
-					collectUnpickDefinitions(keratin, minecraftVersion, file, unpickDefinitions);
 				}
+
+				collectUnpickDefinitions(keratin, minecraftVersion, file, unpickDefinitions);
 			}
 		}
 	}
