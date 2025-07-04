@@ -114,21 +114,64 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 				|| client.id().equals("c0.0.13a-launcher"));
 	}
 
+	public boolean hasCommonSide(MinecraftVersion o) {
+		return (hasClient() && o.hasClient()) || (hasServer() && o.hasServer());
+	}
+
 	@Override
 	public int compareTo(MinecraftVersion o) {
-		if (!hasSharedVersioning() || !o.hasSharedVersioning()) {
-			// one of the two versions is pre-Beta, if it is Alpha in particular
-			// we cannot use semver because the client and server have different
-			// versioning
-			// luckily there are no adjacent development branches pre-Beta so we
-			// can just compare release times instead
-			return (client != null ? client : server).releaseTime().compareTo((o.client != null ? o.client : o.server).releaseTime());
+		MinecraftVersion v = this;
+		MinecraftVersion ov = o;
+
+		boolean sharedVersioning = hasSharedVersioning();
+		boolean oSharedVersioning = o.hasSharedVersioning();
+
+		boolean bothSides = hasClient() && hasServer();
+		boolean oBothSides = o.hasClient() && o.hasServer();
+
+		if (!sharedVersioning && !oSharedVersioning) {
+			if (bothSides && oBothSides) {
+				throw new UnsupportedOperationException("cannot compare two combined pre-Beta versions (" + id + " and " + o.id + ")");
+			}
+			if (!hasCommonSide(o)) {
+				throw new UnsupportedOperationException("cannot compare two pre-Beta versions without a common side (" + id + " and " + o.id + ")");
+			}
 		}
 
-		// both versions are Beta or later so we can safely use the semantic version
-		Semver v = new Semver((client != null ? client : server).normalizedVersion());
-		Semver ov = new Semver((o.client != null ? o.client : o.server).normalizedVersion());
+		if (!sharedVersioning && bothSides) {
+			v = this;
+			ov = o;
+		}
+		if (!oSharedVersioning && oBothSides) {
+			v = o;
+			ov = this;
+		}
 
-		return v.compareTo(ov);
+		return compare(v, ov);
+	}
+
+	private static int compare(MinecraftVersion v, MinecraftVersion ov) {
+		int cc = 0;
+		int sc = 0;
+
+		if (v.hasClient() && (ov.hasClient() || ov.hasSharedVersioning())) {
+			cc = compare(v.client(), ov.hasClient() ? ov.client() : ov.server());
+		}
+		if (v.hasServer() && (ov.hasServer() || ov.hasSharedVersioning())) {
+			sc = compare(v.server(), ov.hasServer() ? ov.server() : ov.client());
+		}
+
+		if ((cc < 0 && sc > 0) || (cc > 0 && sc < 0)) {
+			throw new UnsupportedOperationException("ambiguous version comparison: " + v.client().id() + ".compareTo(" + ov.client().id() + ") = " + cc + " / " + v.server().id() + ".compareTo(" + ov.server().id() + ") = " + sc);
+		}
+
+		return cc == 0 ? sc : cc;
+	}
+
+	private static int compare(VersionDetails v, VersionDetails ov) {
+		Semver sv = new Semver(v.normalizedVersion());
+		Semver osv = new Semver(ov.normalizedVersion());
+
+		return sv.compareTo(osv);
 	}
 }
