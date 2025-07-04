@@ -223,7 +223,15 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				VersionsManifest manifest = versionsManifest;
 				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
-				FileUtils.copyURLToFile(new URI(entry.url()).toURL(), file);
+				try {
+					FileUtils.copyURLToFile(new URI(entry.url()).toURL(), file);
+				} catch (IOException e) {
+					// if the file already exits, just use it despite the download failing
+					// it is likely still valid anyway
+					if (!file.exists()) {
+						throw new Exception("failed to download version info for " + minecraftVersion, e);
+					}
+				}
 			}
 
 			String json = FileUtils.readFileToString(file, Charset.defaultCharset());
@@ -238,7 +246,15 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				VersionsManifest manifest = versionsManifest;
 				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
-				FileUtils.copyURLToFile(new URI(entry.details()).toURL(), file);
+				try {
+					FileUtils.copyURLToFile(new URI(entry.details()).toURL(), file);
+				} catch (IOException e) {
+					// if the file already exits, just use it despite the download failing
+					// it is likely still valid anyway
+					if (!file.exists()) {
+						throw new Exception("failed to download version details for " + minecraftVersion, e);
+					}
+				}
 			}
 
 			String json = FileUtils.readFileToString(file, Charset.defaultCharset());
@@ -334,7 +350,15 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		File manifestFile = files.getGlobalCache().getVersionsManifestJson();
 
 		if (project.getGradle().getStartParameter().isRefreshDependencies() || !manifestFile.exists()) {
-			FileUtils.copyURLToFile(new URI(versionsManifestUrl.get()).toURL(), manifestFile);
+			try {
+				FileUtils.copyURLToFile(new URI(versionsManifestUrl.get()).toURL(), manifestFile);
+			} catch (IOException e) {
+				// if the file already exits, just use it despite the download failing
+				// it is likely still valid anyway
+				if (!manifestFile.exists()) {
+					throw new Exception("failed to download versions manifest!", e);
+				}
+			}
 		}
 
 		String manifestJson = FileUtils.readFileToString(manifestFile, Charset.defaultCharset());
