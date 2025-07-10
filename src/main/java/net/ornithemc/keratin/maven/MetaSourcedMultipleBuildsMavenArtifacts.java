@@ -10,48 +10,26 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.maven.MavenArtifact;
-import net.ornithemc.keratin.api.maven.MetaSourcedMavenArtifactsAPI;
+import net.ornithemc.keratin.api.maven.MetaSourcedMavenArtifacts;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 
-public class MetaSourcedMultipleBuildsMavenArtifacts implements MetaSourcedMavenArtifactsAPI, MultipleBuildsMavenArtifacts {
+public abstract class MetaSourcedMultipleBuildsMavenArtifacts implements MetaSourcedMavenArtifacts, MultipleBuildsMavenArtifacts {
 
 	private final KeratinGradleExtension keratin;
 	private Map<String, Map<Integer, String>> versions;
 	private Map<String, Map<Integer, MavenArtifact>> artifacts;
 
-	private String metaUrl;
-	private String metaEndpoint;
-	private String repositoryUrl;
-	private String classifier;
-
+	@Inject
 	public MetaSourcedMultipleBuildsMavenArtifacts(KeratinGradleExtension keratin) {
 		this.keratin = keratin;
-	}
-
-	@Override
-	public void setMetaUrl(String metaUrl) {
-		this.metaUrl = metaUrl;
-	}
-
-	@Override
-	public void setMetaEndpoint(String metaEndpoint) {
-		this.metaEndpoint = metaEndpoint;
-	}
-
-	@Override
-	public void setRepositoryUrl(String repositoryUrl) {
-		this.repositoryUrl = repositoryUrl;
-	}
-
-	@Override
-	public void setClassifier(String classifier) {
-		this.classifier = classifier;
 	}
 
 	@Override
@@ -106,7 +84,10 @@ public class MetaSourcedMultipleBuildsMavenArtifacts implements MetaSourcedMaven
 		versions = new HashMap<>();
 		artifacts = new HashMap<>();
 
-		String metaEndpointUrl = metaUrl + metaEndpoint.formatted(keratin.getIntermediaryGen().get());
+		String metaEndpointUrl = String.format("%s%s",
+			getMetaUrl().get(),
+			getMetaEndpoint().get().formatted(keratin.getIntermediaryGen().get())
+		);
 
 		try {
 			try (InputStreamReader ir = new InputStreamReader(new URI(metaEndpointUrl).toURL().openStream())) {
@@ -136,7 +117,9 @@ public class MetaSourcedMultipleBuildsMavenArtifacts implements MetaSourcedMaven
 			String maven = builds.get(build);
 
 			if (maven != null) {
-				artifact = MavenArtifact.of(maven).withRepositoryUrl(repositoryUrl).withClassifier(classifier);
+				artifact = MavenArtifact.of(maven)
+					.withRepositoryUrl(getRepositoryUrl().get())
+					.withClassifier(getClassifier().getOrNull());
 
 				try {
 					String sha1Path = artifact.url() + ".sha1";

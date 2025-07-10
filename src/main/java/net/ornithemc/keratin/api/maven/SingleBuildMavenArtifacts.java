@@ -1,6 +1,6 @@
 package net.ornithemc.keratin.api.maven;
 
-public interface SingleBuildMavenArtifacts {
+public interface SingleBuildMavenArtifacts extends MavenArtifacts {
 
 	boolean contains(String minecraftVersion);
 

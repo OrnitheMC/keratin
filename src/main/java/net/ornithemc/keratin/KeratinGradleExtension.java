@@ -43,7 +43,10 @@ import net.ornithemc.keratin.api.manifest.VersionInfo.Library;
 import net.ornithemc.keratin.api.manifest.VersionInfo.Library.Downloads;
 import net.ornithemc.keratin.api.manifest.VersionInfo.Library.Downloads.Artifact;
 import net.ornithemc.keratin.api.manifest.VersionsManifest;
-import net.ornithemc.keratin.api.maven.MetaSourcedMavenArtifactsAPI;
+import net.ornithemc.keratin.api.maven.MavenSourcedMavenArtifacts;
+import net.ornithemc.keratin.api.maven.MetaSourcedMavenArtifacts;
+import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
+import net.ornithemc.keratin.api.maven.SingleBuildMavenArtifacts;
 import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.api.settings.ProcessorSettings;
 import net.ornithemc.keratin.api.task.MinecraftTask;
@@ -118,6 +121,8 @@ import net.ornithemc.keratin.files.IntermediaryDevelopmentFiles;
 import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
 import net.ornithemc.keratin.matching.Matches;
+import net.ornithemc.keratin.maven.MavenSourcedMultipleBuildsMavenArtifacts;
+import net.ornithemc.keratin.maven.MavenSourcedSingleBuildMavenArtifacts;
 import net.ornithemc.keratin.maven.MetaSourcedMultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.maven.MetaSourcedSingleBuildMavenArtifacts;
 import net.ornithemc.keratin.util.Versioned;
@@ -136,12 +141,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	private final Project project;
 	private final PublicationsAPI publications;
-	
-	private final MetaSourcedSingleBuildMavenArtifacts intermediaryArtifacts;
-	private final MetaSourcedMultipleBuildsMavenArtifacts namedMappingsArtifacts;
-	private final MetaSourcedMultipleBuildsMavenArtifacts exceptionsArtifacts;
-	private final MetaSourcedMultipleBuildsMavenArtifacts signaturesArtifacts;
-	private final MetaSourcedMultipleBuildsMavenArtifacts nestsArtifacts;
 
 	private final Property<String> globalCacheDir;
 	private final Property<String> localCacheDir;
@@ -161,6 +160,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private BuildNumbersCache exceptionsBuilds;
 	private BuildNumbersCache signaturesBuilds;
 	private BuildNumbersCache nestsBuilds;
+	private SingleBuildMavenArtifacts intermediaryArtifacts;
+	private MultipleBuildsMavenArtifacts namedMappingsArtifacts;
+	private MultipleBuildsMavenArtifacts exceptionsArtifacts;
+	private MultipleBuildsMavenArtifacts signaturesArtifacts;
+	private MultipleBuildsMavenArtifacts nestsArtifacts;
 
 	private boolean configured;
 	private boolean cacheInvalid;
@@ -168,33 +172,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	public KeratinGradleExtension(Project project) {
 		this.project = project;
 		this.publications = this.project.getObjects().newInstance(PublicationsAPI.class);
-
-		this.intermediaryArtifacts = new MetaSourcedSingleBuildMavenArtifacts(this);
-		this.intermediaryArtifacts.setMetaUrl(Constants.META_URL);
-		this.intermediaryArtifacts.setMetaEndpoint(Constants.INTERMEDIARY_ENDPOINT);
-		this.intermediaryArtifacts.setRepositoryUrl(Constants.MAVEN_URL);
-		this.intermediaryArtifacts.setClassifier("v2");
-
-		this.namedMappingsArtifacts = new MetaSourcedMultipleBuildsMavenArtifacts(this);
-		this.namedMappingsArtifacts.setMetaUrl(Constants.META_URL);
-		this.namedMappingsArtifacts.setMetaEndpoint(Constants.FEATHER_ENDPOINT);
-		this.namedMappingsArtifacts.setRepositoryUrl(Constants.MAVEN_URL);
-		this.namedMappingsArtifacts.setClassifier("mergedv2");
-
-		this.exceptionsArtifacts = new MetaSourcedMultipleBuildsMavenArtifacts(this);
-		this.exceptionsArtifacts.setMetaUrl(Constants.META_URL);
-		this.exceptionsArtifacts.setMetaEndpoint(Constants.RAVEN_ENDPOINT);
-		this.exceptionsArtifacts.setRepositoryUrl(Constants.MAVEN_URL);
-
-		this.signaturesArtifacts = new MetaSourcedMultipleBuildsMavenArtifacts(this);
-		this.signaturesArtifacts.setMetaUrl(Constants.META_URL);
-		this.signaturesArtifacts.setMetaEndpoint(Constants.SPARROW_ENDPOINT);
-		this.signaturesArtifacts.setRepositoryUrl(Constants.MAVEN_URL);
-
-		this.nestsArtifacts = new MetaSourcedMultipleBuildsMavenArtifacts(this);
-		this.nestsArtifacts.setMetaUrl(Constants.META_URL);
-		this.nestsArtifacts.setMetaEndpoint(Constants.NESTS_ENDPOINT);
-		this.nestsArtifacts.setRepositoryUrl(Constants.MAVEN_URL);
 
 		this.globalCacheDir = this.project.getObjects().property(String.class);
 		this.globalCacheDir.convention(Constants.ORNITHE_GLOBAL_CACHE_DIR);
@@ -267,6 +244,34 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			                        .withExceptionsBuilds(this.exceptionsBuilds.getBuildNumbers(minecraftVersion))
 			                        .withSignaturesBuilds(this.signaturesBuilds.getBuildNumbers(minecraftVersion))
 			                        .withNestsBuilds(this.nestsBuilds.getBuildNumbers(minecraftVersion));
+		});
+
+		this.metaSourcedIntermediaryArtifacts(artifacts -> {
+			artifacts.getMetaUrl().set(Constants.META_URL);
+			artifacts.getMetaEndpoint().set(Constants.INTERMEDIARY_ENDPOINT);
+			artifacts.getRepositoryUrl().set(Constants.MAVEN_URL);
+			artifacts.getClassifier().set("v2");
+		});
+		this.metaSourcedNamedMappingsArtifacts(artifacts -> {
+			artifacts.getMetaUrl().set(Constants.META_URL);
+			artifacts.getMetaEndpoint().set(Constants.FEATHER_ENDPOINT);
+			artifacts.getRepositoryUrl().set(Constants.MAVEN_URL);
+			artifacts.getClassifier().set("mergedv2");
+		});
+		this.metaSourcedExceptionsArtifacts(artifacts -> {
+			artifacts.getMetaUrl().set(Constants.META_URL);
+			artifacts.getMetaEndpoint().set(Constants.RAVEN_ENDPOINT);
+			artifacts.getRepositoryUrl().set(Constants.MAVEN_URL);
+		});
+		this.metaSourcedSignaturesArtifacts(artifacts -> {
+			artifacts.getMetaUrl().set(Constants.META_URL);
+			artifacts.getMetaEndpoint().set(Constants.SPARROW_ENDPOINT);
+			artifacts.getRepositoryUrl().set(Constants.MAVEN_URL);
+		});
+		this.metaSourcedNestsArtifacts(artifacts -> {
+			artifacts.getMetaUrl().set(Constants.META_URL);
+			artifacts.getMetaEndpoint().set(Constants.NESTS_ENDPOINT);
+			artifacts.getRepositoryUrl().set(Constants.MAVEN_URL);
 		});
 	}
 
@@ -914,59 +919,121 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		action.execute(publications);
 	}
 
-	@Override
-	public MetaSourcedSingleBuildMavenArtifacts getIntermediaryArtifacts() {
+	public SingleBuildMavenArtifacts getIntermediaryArtifacts() {
 		checkAccess("intermediary artifacts");
 		return intermediaryArtifacts;
 	}
 
 	@Override
-	public void intermediaryArtifacts(Action<MetaSourcedMavenArtifactsAPI> action) {
-		action.execute(intermediaryArtifacts);
+	public void mavenSourcedIntermediaryArtifacts(Action<MavenSourcedMavenArtifacts> action) {
+		intermediaryArtifacts(MavenSourcedSingleBuildMavenArtifacts.class, artifacts -> configureSourceMaven(artifacts, action));
 	}
 
 	@Override
-	public MetaSourcedMultipleBuildsMavenArtifacts getNamedMappingsArtifacts() {
+	public void metaSourcedIntermediaryArtifacts(Action<MetaSourcedMavenArtifacts> action) {
+		intermediaryArtifacts(MetaSourcedSingleBuildMavenArtifacts.class, action::execute);
+	}
+
+	@Override
+	public <T extends SingleBuildMavenArtifacts> void intermediaryArtifacts(Class<T> type, Action<T> action) {
+		T artifacts = project.getObjects().newInstance(type, this);
+		intermediaryArtifacts = artifacts;
+		action.execute(artifacts);
+	}
+
+	public MultipleBuildsMavenArtifacts getNamedMappingsArtifacts() {
 		checkAccess("named mappings artifacts");
 		return namedMappingsArtifacts;
 	}
 
 	@Override
-	public void namedMappingsArtifacts(Action<MetaSourcedMavenArtifactsAPI> action) {
-		action.execute(namedMappingsArtifacts);
+	public void mavenSourcedNamedMappingsArtifacts(Action<MavenSourcedMavenArtifacts> action) {
+		namedMappingsArtifacts(MavenSourcedMultipleBuildsMavenArtifacts.class, artifacts -> configureSourceMaven(artifacts, action));
 	}
 
 	@Override
-	public MetaSourcedMultipleBuildsMavenArtifacts getExceptionsArtifacts() {
+	public void metaSourcedNamedMappingsArtifacts(Action<MetaSourcedMavenArtifacts> action) {
+		namedMappingsArtifacts(MetaSourcedMultipleBuildsMavenArtifacts.class, action::execute);
+	}
+
+	@Override
+	public <T extends MultipleBuildsMavenArtifacts> void namedMappingsArtifacts(Class<T> type, Action<T> action) {
+		T artifacts = project.getObjects().newInstance(type, this);
+		namedMappingsArtifacts = artifacts;
+		action.execute(artifacts);
+	}
+
+	public MultipleBuildsMavenArtifacts getExceptionsArtifacts() {
 		checkAccess("exceptions artifacts");
 		return exceptionsArtifacts;
 	}
 
 	@Override
-	public void exceptionsArtifacts(Action<MetaSourcedMavenArtifactsAPI> action) {
-		action.execute(exceptionsArtifacts);
+	public void mavenSourcedExceptionsArtifacts(Action<MavenSourcedMavenArtifacts> action) {
+		exceptionsArtifacts(MavenSourcedMultipleBuildsMavenArtifacts.class, artifacts -> configureSourceMaven(artifacts, action));
 	}
 
 	@Override
-	public MetaSourcedMultipleBuildsMavenArtifacts getSignaturesArtifacts() {
+	public void metaSourcedExceptionsArtifacts(Action<MetaSourcedMavenArtifacts> action) {
+		exceptionsArtifacts(MetaSourcedMultipleBuildsMavenArtifacts.class, action::execute);
+	}
+
+	@Override
+	public <T extends MultipleBuildsMavenArtifacts> void exceptionsArtifacts(Class<T> type, Action<T> action) {
+		T artifacts = project.getObjects().newInstance(type, this);
+		exceptionsArtifacts = artifacts;
+		action.execute(artifacts);
+	}
+
+	public MultipleBuildsMavenArtifacts getSignaturesArtifacts() {
 		checkAccess("signatures artifacts");
 		return signaturesArtifacts;
 	}
 
 	@Override
-	public void signaturesArtifacts(Action<MetaSourcedMavenArtifactsAPI> action) {
-		action.execute(signaturesArtifacts);
+	public void mavenSourcedSignaturesArtifacts(Action<MavenSourcedMavenArtifacts> action) {
+		signaturesArtifacts(MavenSourcedMultipleBuildsMavenArtifacts.class, artifacts -> configureSourceMaven(artifacts, action));
 	}
 
 	@Override
-	public MetaSourcedMultipleBuildsMavenArtifacts getNestsArtifacts() {
+	public void metaSourcedSignaturesArtifacts(Action<MetaSourcedMavenArtifacts> action) {
+		signaturesArtifacts(MetaSourcedMultipleBuildsMavenArtifacts.class, action::execute);
+	}
+
+	@Override
+	public <T extends MultipleBuildsMavenArtifacts> void signaturesArtifacts(Class<T> type, Action<T> action) {
+		T artifacts = project.getObjects().newInstance(type, this);
+		signaturesArtifacts = artifacts;
+		action.execute(artifacts);
+	}
+
+	public MultipleBuildsMavenArtifacts getNestsArtifacts() {
 		checkAccess("nests artifacts");
 		return nestsArtifacts;
 	}
 
 	@Override
-	public void nestsArtifacts(Action<MetaSourcedMavenArtifactsAPI> action) {
-		action.execute(nestsArtifacts);
+	public void mavenSourcedNestsArtifacts(Action<MavenSourcedMavenArtifacts> action) {
+		nestsArtifacts(MavenSourcedMultipleBuildsMavenArtifacts.class, artifacts -> configureSourceMaven(artifacts, action));
+	}
+
+	@Override
+	public void metaSourcedNestsArtifacts(Action<MetaSourcedMavenArtifacts> action) {
+		nestsArtifacts(MetaSourcedMultipleBuildsMavenArtifacts.class, action::execute);
+	}
+
+	@Override
+	public <T extends MultipleBuildsMavenArtifacts> void nestsArtifacts(Class<T> type, Action<T> action) {
+		T artifacts = project.getObjects().newInstance(type, this);
+		nestsArtifacts = artifacts;
+		action.execute(artifacts);
+	}
+
+	private void configureSourceMaven(MavenSourcedMavenArtifacts artifacts, Action<MavenSourcedMavenArtifacts> action) {
+		artifacts.getGroupId().convention(publications.getGroupId());
+		artifacts.getArtifactId().convention(publications.getArtifactId());
+
+		action.execute(artifacts);
 	}
 
 	@Override

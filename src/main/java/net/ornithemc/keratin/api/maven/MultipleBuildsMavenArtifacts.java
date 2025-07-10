@@ -2,7 +2,7 @@ package net.ornithemc.keratin.api.maven;
 
 import java.util.Map;
 
-public interface MultipleBuildsMavenArtifacts {
+public interface MultipleBuildsMavenArtifacts extends MavenArtifacts {
 
 	boolean contains(String minecraftVersion);
 

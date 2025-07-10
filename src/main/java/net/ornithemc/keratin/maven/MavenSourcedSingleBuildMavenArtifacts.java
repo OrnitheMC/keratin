@@ -1,31 +1,34 @@
 package net.ornithemc.keratin.maven;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import groovy.util.Node;
+import groovy.util.NodeList;
+import groovy.xml.XmlParser;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.maven.MavenArtifact;
-import net.ornithemc.keratin.api.maven.MetaSourcedMavenArtifacts;
+import net.ornithemc.keratin.api.maven.MavenSourcedMavenArtifacts;
 import net.ornithemc.keratin.api.maven.SingleBuildMavenArtifacts;
 
-public abstract class MetaSourcedSingleBuildMavenArtifacts implements MetaSourcedMavenArtifacts, SingleBuildMavenArtifacts {
+public abstract class MavenSourcedSingleBuildMavenArtifacts implements MavenSourcedMavenArtifacts, SingleBuildMavenArtifacts {
 
 	private final KeratinGradleExtension keratin;
-	private Map<String, String> versions;
+	private Set<String> versions;
 	private Map<String, MavenArtifact> artifacts;
 
 	@Inject
-	public MetaSourcedSingleBuildMavenArtifacts(KeratinGradleExtension keratin) {
+	public MavenSourcedSingleBuildMavenArtifacts(KeratinGradleExtension keratin) {
 		this.keratin = keratin;
 	}
 
@@ -35,7 +38,7 @@ public abstract class MetaSourcedSingleBuildMavenArtifacts implements MetaSource
 			findVersions();
 		}
 
-		return versions.containsKey(minecraftVersion);
+		return versions.contains(minecraftVersion);
 	}
 
 	@Override
@@ -51,39 +54,46 @@ public abstract class MetaSourcedSingleBuildMavenArtifacts implements MetaSource
 	}
 
 	private void findVersions() {
-		versions = new HashMap<>();
+		versions = new HashSet<>();
 		artifacts = new HashMap<>();
 
-		String metaEndpointUrl = String.format("%s%s",
-			getMetaUrl().get(),
-			getMetaEndpoint().get().formatted(keratin.getIntermediaryGen().get())
+		String mavenPomUrl = String.format("%s%s/%s/maven-metadata.xml",
+			getRepositoryUrl().get(),
+			getGroupId().get().replace('.', '/'),
+			getArtifactId().get().formatted(keratin.getIntermediaryGen().get())
 		);
 
 		try {
-			try (InputStreamReader ir = new InputStreamReader(new URI(metaEndpointUrl).toURL().openStream())) {
-				JsonArray jsonArray = KeratinGradleExtension.GSON.fromJson(ir, JsonArray.class);
+			try (InputStream is = new URI(mavenPomUrl).toURL().openStream()) {
+				XmlParser parser = new XmlParser();
 
-				for (JsonElement jsonEntry : jsonArray) {
-					if (jsonEntry.isJsonObject()) {
-						JsonObject json = jsonEntry.getAsJsonObject();
-						String version = json.get("version").getAsString();
-						String maven = json.get("maven").getAsString();
+				Node root = parser.parse(is);
+				Node versioning = (Node) ((NodeList) root.get("versioning")).getFirst();
+				Node versionsNode = (Node) ((NodeList) versioning.get("versions")).getFirst();
 
-						versions.put(version, maven);
-					}
+				NodeList versionNode = (NodeList) versionsNode.get("version");
+
+				for (Object o : versionNode) {
+					Node node = (Node) o;
+					String version = node.text();
+
+					versions.add(version);
 				}
 			}
 		} catch (Exception e) {
-			keratin.getProject().getLogger().warn("unable to parse maven artifact versions from " + metaEndpointUrl + "!", e);
+			keratin.getProject().getLogger().warn("unable to parse maven artifact versions from " + mavenPomUrl + "!", e);
 		}
 	}
 
 	private void findArtifact(String minecraftVersion) {
-		String maven = versions.get(minecraftVersion);
 		MavenArtifact artifact = null;
 
-		if (maven != null) {
-			artifact = MavenArtifact.of(maven)
+		if (versions.contains(minecraftVersion)) {
+			artifact = MavenArtifact.of(
+					getGroupId().get(),
+					getArtifactId().get().formatted(keratin.getIntermediaryGen().get()),
+					minecraftVersion
+				)
 				.withRepositoryUrl(getRepositoryUrl().get())
 				.withClassifier(getClassifier().getOrNull());
 

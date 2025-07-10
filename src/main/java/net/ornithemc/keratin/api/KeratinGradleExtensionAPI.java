@@ -5,9 +5,10 @@ import org.gradle.api.provider.Property;
 
 import net.ornithemc.keratin.api.files.KeratinFilesAccess;
 import net.ornithemc.keratin.api.manifest.VersionsManifest;
-import net.ornithemc.keratin.api.maven.SingleBuildMavenArtifacts;
-import net.ornithemc.keratin.api.maven.MetaSourcedMavenArtifactsAPI;
+import net.ornithemc.keratin.api.maven.MavenSourcedMavenArtifacts;
+import net.ornithemc.keratin.api.maven.MetaSourcedMavenArtifacts;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
+import net.ornithemc.keratin.api.maven.SingleBuildMavenArtifacts;
 
 public interface KeratinGradleExtensionAPI {
 
@@ -31,25 +32,35 @@ public interface KeratinGradleExtensionAPI {
 
 	void publications(Action<PublicationsAPI> action);
 
-	SingleBuildMavenArtifacts getIntermediaryArtifacts();
+	void mavenSourcedIntermediaryArtifacts(Action<MavenSourcedMavenArtifacts> action);
 
-	void intermediaryArtifacts(Action<MetaSourcedMavenArtifactsAPI> action);
+	void metaSourcedIntermediaryArtifacts(Action<MetaSourcedMavenArtifacts> action);
 
-	MultipleBuildsMavenArtifacts getNamedMappingsArtifacts();
+	<T extends SingleBuildMavenArtifacts> void intermediaryArtifacts(Class<T> type, Action<T> action);
 
-	void namedMappingsArtifacts(Action<MetaSourcedMavenArtifactsAPI> action);
+	void mavenSourcedNamedMappingsArtifacts(Action<MavenSourcedMavenArtifacts> action);
 
-	MultipleBuildsMavenArtifacts getExceptionsArtifacts();
+	void metaSourcedNamedMappingsArtifacts(Action<MetaSourcedMavenArtifacts> action);
 
-	void exceptionsArtifacts(Action<MetaSourcedMavenArtifactsAPI> action);
+	<T extends MultipleBuildsMavenArtifacts> void namedMappingsArtifacts(Class<T> type, Action<T> action);
 
-	MultipleBuildsMavenArtifacts getSignaturesArtifacts();
+	void mavenSourcedExceptionsArtifacts(Action<MavenSourcedMavenArtifacts> action);
 
-	void signaturesArtifacts(Action<MetaSourcedMavenArtifactsAPI> action);
+	void metaSourcedExceptionsArtifacts(Action<MetaSourcedMavenArtifacts> action);
 
-	MultipleBuildsMavenArtifacts getNestsArtifacts();
+	<T extends MultipleBuildsMavenArtifacts> void exceptionsArtifacts(Class<T> type, Action<T> action);
 
-	void nestsArtifacts(Action<MetaSourcedMavenArtifactsAPI> action);
+	void mavenSourcedSignaturesArtifacts(Action<MavenSourcedMavenArtifacts> action);
+
+	void metaSourcedSignaturesArtifacts(Action<MetaSourcedMavenArtifacts> action);
+
+	<T extends MultipleBuildsMavenArtifacts> void signaturesArtifacts(Class<T> type, Action<T> action);
+
+	void mavenSourcedNestsArtifacts(Action<MavenSourcedMavenArtifacts> action);
+
+	void metaSourcedNestsArtifacts(Action<MetaSourcedMavenArtifacts> action);
+
+	<T extends MultipleBuildsMavenArtifacts> void nestsArtifacts(Class<T> type, Action<T> action);
 
 	void invalidateCache();
 

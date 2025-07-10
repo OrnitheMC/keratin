@@ -4,7 +4,11 @@ public record MavenArtifact(String repositoryUrl, String groupId, String artifac
 
 	public static MavenArtifact of(String maven) {
 		String[] s = maven.split("[:]");
-		return new MavenArtifact(null, s[0], s[1], s[2], null, null);
+		return of(s[0], s[1], s[2]);
+	}
+
+	public static MavenArtifact of(String groupId, String artifactId, String version) {
+		return new MavenArtifact(null, groupId, artifactId, version, null, null);
 	}
 
 	public MavenArtifact withRepositoryUrl(String repositoryUrl) {
