@@ -113,9 +113,13 @@ public interface UnpickDefinitions {
 										acceptsLines[i] = false;
 									}
 								}
-								if ((minecraftVersionA != null && minecraftVersion.compareTo(minecraftVersionA) < 0)
-									|| (minecraftVersionB != null && minecraftVersion.compareTo(minecraftVersionB) > 0)) {
-									acceptsLines[i] = false; // mc version is not contained in the version range
+		
+								if (acceptsLines[i]) {
+									// skip this check if one of the above already failed
+									if ((minecraftVersionA != null && minecraftVersion.compareTo(minecraftVersionA) < 0)
+										|| (minecraftVersionB != null && minecraftVersion.compareTo(minecraftVersionB) > 0)) {
+										acceptsLines[i] = false; // mc version is not contained in the version range
+									}
 								}
 							}
 						} else {
