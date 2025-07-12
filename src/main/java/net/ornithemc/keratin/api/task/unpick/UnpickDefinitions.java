@@ -106,10 +106,10 @@ public interface UnpickDefinitions {
 								// if neither of two versions has shared versioning
 								// a common side must exist for comparison to be possible
 								if (!minecraftVersion.hasSharedVersioning()) {
-									if (!minecraftVersionA.hasSharedVersioning() && !minecraftVersion.hasCommonSide(minecraftVersionA)) {
+									if (minecraftVersionA != null && !minecraftVersionA.hasSharedVersioning() && !minecraftVersion.hasCommonSide(minecraftVersionA)) {
 										acceptsLines[i] = false;
 									}
-									if (!minecraftVersionB.hasSharedVersioning() && !minecraftVersion.hasCommonSide(minecraftVersionB)) {
+									if (minecraftVersionB != null && !minecraftVersionB.hasSharedVersioning() && !minecraftVersion.hasCommonSide(minecraftVersionB)) {
 										acceptsLines[i] = false;
 									}
 								}
