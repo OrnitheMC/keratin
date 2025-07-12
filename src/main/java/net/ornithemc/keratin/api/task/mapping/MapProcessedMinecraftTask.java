@@ -38,7 +38,9 @@ public abstract class MapProcessedMinecraftTask extends MappingTask implements M
 
 		workQueue.submit(MapJar.class, parameters -> {
 			parameters.getOverwrite().set(keratin.isCacheInvalid());
-			parameters.getInput().set(processedJars.getProcessedIntermediaryJar(minecraftVersion, processorSettings));
+			parameters.getInput().set(getForDecompile().get()
+				? buildFiles.getUnpickedProcessedIntermediaryJar(minecraftVersion)
+				: processedJars.getProcessedIntermediaryJar(minecraftVersion, processorSettings));
 			parameters.getOutput().set(buildFiles.getProcessedNamedJar(minecraftVersion.id()));
 			parameters.getMappings().set(buildFiles.getProcessedMappingsFile(minecraftVersion));
 			parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
