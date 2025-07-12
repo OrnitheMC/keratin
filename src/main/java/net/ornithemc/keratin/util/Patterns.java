@@ -4,6 +4,6 @@ import java.util.regex.Pattern;
 
 public class Patterns {
 
-	public static final Pattern MC_VERSION_RANGE = Pattern.compile("^mc(.+)-mc(.+)*");
+	public static final Pattern OPTIONAL_MC_VERSION_RANGE = Pattern.compile("(?:(.+)\\s)?\\.\\.(?:\\s?(.+))?");
 
 }
