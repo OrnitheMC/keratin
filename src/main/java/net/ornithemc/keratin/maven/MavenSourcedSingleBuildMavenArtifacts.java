@@ -68,8 +68,8 @@ public abstract class MavenSourcedSingleBuildMavenArtifacts implements MavenSour
 				XmlParser parser = new XmlParser();
 
 				Node root = parser.parse(is);
-				Node versioning = (Node) ((NodeList) root.get("versioning")).getFirst();
-				Node versionsNode = (Node) ((NodeList) versioning.get("versions")).getFirst();
+				Node versioning = (Node) ((NodeList) root.get("versioning")).get(0);
+				Node versionsNode = (Node) ((NodeList) versioning.get("versions")).get(0);
 
 				NodeList versionNode = (NodeList) versionsNode.get("version");
 
