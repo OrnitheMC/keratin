@@ -6,7 +6,7 @@ public record ProcessorSettings(int processorVersion, // include in case process
                                 BuildNumbers signaturesBuilds,
                                 BuildNumbers nestsBuilds) {
 
-	public static final int PROCESSOR_VERSION = 1;
+	public static final int PROCESSOR_VERSION = 2;
 
 	public static ProcessorSettings init(int processorVersion) {
 		return new ProcessorSettings(processorVersion, false, BuildNumbers.none(), BuildNumbers.none(), BuildNumbers.none());
