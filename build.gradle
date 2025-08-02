@@ -44,6 +44,12 @@ dependencies {
 	implementation 'com.google.code.gson:gson:2.10.1'
 	implementation 'com.google.guava:guava:33.1.0-jre'
 	implementation 'com.vdurmont:semver4j:3.1.0'
+
+	implementation 'org.ow2.asm:asm:9.8'
+	implementation 'org.ow2.asm:asm-commons:9.8'
+	implementation 'org.ow2.asm:asm-tree:9.8'
+	implementation 'org.ow2.asm:asm-util:9.8'
+
 	implementation 'net.ornithemc:enigma-cli:1.2.7'
 	implementation 'net.ornithemc:stitch:0.21.0'
 	implementation 'net.ornithemc:mapping-utils:0.17.0'
@@ -51,6 +57,7 @@ dependencies {
 	implementation 'net.ornithemc:exceptor:1.1.0'
 	implementation 'net.ornithemc:preen:1.1.0'
 	implementation 'net.ornithemc:nester:1.4.0'
+
 	implementation "net.fabricmc.unpick:unpick:2.3.0"
 	implementation "net.fabricmc.unpick:unpick-format-utils:2.3.0"
 	implementation "net.fabricmc.unpick:unpick-cli:2.3.0"
@@ -58,6 +65,7 @@ dependencies {
 	implementation 'net.fabricmc:name-proposal:0.2.0'
 	implementation 'net.fabricmc:mapping-io:0.5.1'
 	implementation 'net.fabricmc.filament:net.fabricmc.filament.gradle.plugin:0.10.1'
+
 	implementation 'io.github.gaming32:signature-changer:1.0.0'
 }
 
