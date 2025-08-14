@@ -2,8 +2,6 @@ package net.ornithemc.keratin.api;
 
 import java.util.Objects;
 
-import com.vdurmont.semver4j.Semver;
-
 import net.ornithemc.keratin.Constants;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
@@ -109,7 +107,7 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 	public boolean usesSerializableForLevelSaving() {
 		return client != null &&
 			// only some classic versions uses Java Serializable for level saving
-			((client.normalizedVersion().compareTo("0.14") >= 0 && client.normalizedVersion().compareTo("0.31") < 0)
+			((client.compareTo("0.14.0") >= 0 && client.compareTo("0.31.0") < 0)
 				// c0.0.13a-launcher is the odd one out, dunno what's up with that
 				|| client.id().equals("c0.0.13a-launcher"));
 	}
@@ -169,9 +167,6 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 	}
 
 	private static int compare(VersionDetails v, VersionDetails ov) {
-		Semver sv = new Semver(v.normalizedVersion());
-		Semver osv = new Semver(ov.normalizedVersion());
-
-		return sv.compareTo(osv);
+		return v.compareTo(ov);
 	}
 }
