@@ -35,15 +35,19 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 public interface MappingsFiller {
 
-	default void fillMappings(File input, File output, File jar, Collection<File> libraries, String namespace) throws IOException {
-		_fillMappings(input, output, jar, libraries, namespace);
+	default void fillMethodMappings(File input, File output, File jar, Collection<File> libraries, String namespace) throws IOException {
+		_propagateMethodMappings(input, output, jar, libraries, namespace, true);
 	}
 
-	static void _fillMappings(File input, File output, File jar, Collection<File> libraries, String namespace) throws IOException {
+	default void fillSpecializedMethodMappings(File input, File output, File jar, Collection<File> libraries, String namespace) throws IOException {
+		_propagateMethodMappings(input, output, jar, libraries, namespace, false);
+	}
+
+	static void _propagateMethodMappings(File input, File output, File jar, Collection<File> libraries, String namespace, boolean fillAll) throws IOException {
 		MemoryMappingTree mappings = new MemoryMappingTree();
 		MappingReader.read(input.toPath(), mappings);
 
-		new MethodMappingPropagator(mappings, namespace).run(jar, libraries);
+		new MethodMappingPropagator(mappings, namespace, fillAll).run(jar, libraries);
 
 		try (MappingWriter writer = MappingWriter.create(output.toPath(), MappingFormat.TINY_2_FILE)) {
 			mappings.accept(writer);
@@ -55,6 +59,7 @@ public interface MappingsFiller {
 		private final MemoryMappingTree mappings;
 		private final int namespace;
 		private final boolean named;
+		private boolean fillAll;
 
 		private final Set<String> jarClasses;
 		private final Map<String, Set<String>> superClasses;
@@ -62,10 +67,11 @@ public interface MappingsFiller {
 		private final Map<String, Set<String>> methodsByClass;
 		private final Map<String, Map<String, String>> bridgeMethodsByClass;
 
-		public MethodMappingPropagator(MemoryMappingTree mappings, String dstNs) throws IOException {
+		public MethodMappingPropagator(MemoryMappingTree mappings, String dstNs, boolean fillAll) throws IOException {
 			this.mappings = mappings;
 			this.namespace = this.mappings.getNamespaceId(dstNs);
 			this.named = "named".equals(dstNs);
+			this.fillAll = fillAll;
 
 			this.jarClasses = new HashSet<>();
 			this.superClasses = new HashMap<>();
@@ -251,25 +257,29 @@ public interface MappingsFiller {
 						}
 					}
 
-					if (methodDstName == null && bridgeMethods.containsKey(methodName + methodDescriptor)) {
+					if (methodDstName == null && fillAll && bridgeMethods.containsKey(methodName + methodDescriptor)) {
 						methodDstName = methodName;
 					}
 
 					if (methodDstName != null) {
-						propagate(className, methodName, methodDescriptor, methodDstName, methodArgDstNames);
+						propagate(className, methodName, methodDescriptor, methodDstName, methodArgDstNames, false);
 					}
 				}
 			}
 		}
 
-		private void propagate(String className, String methodName, String methodDescriptor, String methodDstName, List<String> methodArgDstNames) {
+		private void propagate(String className, String methodName, String methodDescriptor, String methodDstName, List<String> methodArgDstNames, boolean specialized) {
 			if (!jarClasses.contains(className)) {
 				return; // this class does not appear in the jar, but on of the libraries (thanks realms...)
 			}
 
 			Set<String> methods = methodsByClass.get(className);
+			Map<String, String> bridgeMethods = bridgeMethodsByClass.getOrDefault(className, Collections.emptyMap());
 
-			if (methods.contains(methodName + methodDescriptor)) {
+			String method = methodName + methodDescriptor;
+			String specializedMethod = bridgeMethods.get(method);
+
+			if (methods.contains(method) && (fillAll || specialized)) {
 				ClassMapping classMapping = mappings.getClass(className);
 				MethodMapping methodMapping = mappings.getMethod(className, methodName, methodDescriptor);
 
@@ -298,19 +308,16 @@ public interface MappingsFiller {
 				MethodMapping methodMapping = mappings.getMethod(implementer, methodName, methodDescriptor);
 
 				if (methodMapping == null || !Objects.equals(methodDstName, methodMapping.getDstName(namespace))) {
-					propagate(implementer, methodName, methodDescriptor, methodDstName, methodArgDstNames);
+					propagate(implementer, methodName, methodDescriptor, methodDstName, methodArgDstNames, false);
 				}
 			}
-
-			Map<String, String> bridgeMethods = bridgeMethodsByClass.getOrDefault(className, Collections.emptyMap());
-			String specializedMethod = bridgeMethods.get(methodName + methodDescriptor);
 
 			if (specializedMethod != null) {
 				int i = specializedMethod.indexOf('(');
 				String specializedName = specializedMethod.substring(0, i);
 				String specializedDescriptor = specializedMethod.substring(i);
 
-				propagate(className, specializedName, specializedDescriptor, methodDstName, methodArgDstNames);
+				propagate(className, specializedName, specializedDescriptor, methodDstName, methodArgDstNames, true);
 			}
 		}
 

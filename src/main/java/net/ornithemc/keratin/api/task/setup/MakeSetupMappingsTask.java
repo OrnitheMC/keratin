@@ -133,7 +133,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 			File nests = getParameters().getNestsFile().getOrNull();
 
 			try {
-				fillMappings(
+				fillMethodMappings(
 					input,
 					output,
 					jar,

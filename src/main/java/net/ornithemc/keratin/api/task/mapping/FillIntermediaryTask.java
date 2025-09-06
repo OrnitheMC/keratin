@@ -91,7 +91,7 @@ public abstract class FillIntermediaryTask extends MinecraftTask {
 					return;
 				}
 
-				fillMappings(
+				fillMethodMappings(
 					input,
 					output,
 					jar,

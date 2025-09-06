@@ -3,7 +3,9 @@ package net.ornithemc.keratin.api.task.build;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.List;
 
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.workers.WorkAction;
 import org.gradle.workers.WorkParameters;
@@ -14,6 +16,10 @@ import net.fabricmc.nameproposal.MappingNameCompleter;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.api.task.mapping.Mapper;
+import net.ornithemc.keratin.api.task.setup.MappingsFiller;
+import net.ornithemc.keratin.files.GlobalCache;
+import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
 import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
 import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
 import net.ornithemc.keratin.files.KeratinFiles;
@@ -28,12 +34,15 @@ public abstract class CompleteMappingsTask extends MinecraftTask {
 		KeratinGradleExtension keratin = getExtension();
 		KeratinFiles files = keratin.getFiles();
 
-		MappedJarsCache mappedJars = files.getGlobalCache().getMappedJarsCache();
-		MappingsCache mappings = files.getGlobalCache().getMappingsCache();
+		GlobalCache globalCache = files.getGlobalCache();
+		LibrariesCache libraries = globalCache.getLibrariesCache();
+		MappedJarsCache mappedJars = globalCache.getMappedJarsCache();
+		MappingsCache mappings = globalCache.getMappingsCache();
 		BuildFiles buildFiles = files.getMappingsDevelopmentFiles().getBuildFiles();
 
 		workQueue.submit(CompleteMappings.class, parameters -> {
 			parameters.getJar().set(mappedJars.getMainIntermediaryJar(minecraftVersion));
+			parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 			parameters.getMappings().set(buildFiles.getMappingsFile(minecraftVersion));
 			parameters.getIntermediary().set(mappings.getMainIntermediaryMappingsFile(minecraftVersion));
 			parameters.getCompletedMappings().set(buildFiles.getCompletedMappingsFile(minecraftVersion));
@@ -44,6 +53,8 @@ public abstract class CompleteMappingsTask extends MinecraftTask {
 
 		Property<File> getJar();
 
+		ListProperty<File> getLibraries();
+
 		Property<File> getMappings();
 
 		Property<File> getIntermediary();
@@ -52,11 +63,12 @@ public abstract class CompleteMappingsTask extends MinecraftTask {
 
 	}
 
-	public static abstract class CompleteMappings implements WorkAction<BuildParameters> {
+	public static abstract class CompleteMappings implements WorkAction<BuildParameters>, MappingsFiller {
 
 		@Override
 		public void execute() {
 			File jar = getParameters().getJar().get();
+			List<File> libraries = getParameters().getLibraries().get();
 			File mappings = getParameters().getMappings().get();
 			File intermediary = getParameters().getIntermediary().get();
 			File completedMappings = getParameters().getCompletedMappings().get();
@@ -69,7 +81,19 @@ public abstract class CompleteMappingsTask extends MinecraftTask {
 					completedMappings.toPath()
 				);
 			} catch (IOException e) {
-				throw new UncheckedIOException("error while completing mappings", e);
+				throw new UncheckedIOException("error while running mappings completer", e);
+			}
+
+			try {
+				fillSpecializedMethodMappings(
+					completedMappings,
+					completedMappings,
+					jar,
+					libraries,
+					Mapper.NAMED
+				);
+			} catch (IOException e) {
+				throw new UncheckedIOException("error while running mappings filler", e);
 			}
 		}
 	}
