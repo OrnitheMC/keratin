@@ -361,8 +361,8 @@ public interface MappingsFiller {
 
 			@Override
 			public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-				// we only care for methods that can be inherited, so no private or static methods
-				if ((access & Opcodes.ACC_PRIVATE) == 0 && (access & Opcodes.ACC_STATIC) == 0) {
+				// we only care for methods that can be inherited, so no private or static methods, nor constructors
+				if ((access & Opcodes.ACC_PRIVATE) == 0 && (access & Opcodes.ACC_STATIC) == 0 && name.charAt(0) != '<') {
 					// bridge methods are compiler generated, but the obfuscator might have removed
 					// the bridge access flag, in which case it must still not be final
 					if (methods.add(name + descriptor) && main && named && ((access & Opcodes.ACC_BRIDGE) != 0 || (access & Opcodes.ACC_FINAL) == 0)) {
