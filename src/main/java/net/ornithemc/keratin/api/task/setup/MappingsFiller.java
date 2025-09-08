@@ -104,21 +104,19 @@ public interface MappingsFiller {
 			}
 		}
 
-		private void readJavaClass(String className) {
-			if (className.startsWith("java/")) {
-				try {
-					ClassReader reader = new ClassReader(className);
-					ClassVisitor visitor = new ClassParser(Opcodes.ASM9, false);
+		private void readJdkClass(String className) {
+			try {
+				ClassReader reader = new ClassReader(className);
+				ClassVisitor visitor = new ClassParser(Opcodes.ASM9, false);
 
-					reader.accept(visitor, ClassReader.SKIP_DEBUG);
-				} catch (IOException ignored) {
-				}
+				reader.accept(visitor, ClassReader.SKIP_DEBUG);
+			} catch (IOException ignored) {
 			}
 		}
 
 		private Set<String> getSuperClasses(String className) {
 			if (!superClasses.containsKey(className)) {
-				readJavaClass(className);
+				readJdkClass(className);
 			}
 
 			return superClasses.getOrDefault(className, Collections.emptySet());
