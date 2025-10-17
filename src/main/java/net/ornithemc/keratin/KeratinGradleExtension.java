@@ -2,7 +2,6 @@ package net.ornithemc.keratin;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,6 +49,7 @@ import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.api.maven.SingleBuildMavenArtifacts;
 import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.api.settings.ProcessorSettings;
+import net.ornithemc.keratin.api.task.Downloader;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.build.BuildMappingsJarTask;
 import net.ornithemc.keratin.api.task.build.BuildMappingsTask;
@@ -197,18 +197,16 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.versionInfos = new Versioned<>(minecraftVersion -> {
 			File file = this.files.getGlobalCache().getMetadataCache().getVersionInfoJson(minecraftVersion);
 
-			if (project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
-				VersionsManifest manifest = versionsManifest;
-				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
+			VersionsManifest manifest = versionsManifest;
+			VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
-				try {
-					FileUtils.copyURLToFile(new URI(entry.url()).toURL(), file);
-				} catch (IOException e) {
-					// if the file already exits, just use it despite the download failing
-					// it is likely still valid anyway
-					if (!file.exists()) {
-						throw new Exception("failed to download version info for " + minecraftVersion, e);
-					}
+			try {
+				Downloader.download(project, entry.url(), entry.sha1(), file);
+			} catch (Exception e) {
+				// if the file already exits, just use it despite the download failing
+				// it is likely still valid anyway
+				if (!file.exists()) {
+					throw new Exception("failed to download version info for " + minecraftVersion, e);
 				}
 			}
 
@@ -220,18 +218,16 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.versionDetails = new Versioned<>(minecraftVersion -> {
 			File file = this.files.getGlobalCache().getMetadataCache().getVersionDetailJson(minecraftVersion);
 
-			if (project.getGradle().getStartParameter().isRefreshDependencies() || !file.exists()) {
-				VersionsManifest manifest = versionsManifest;
-				VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
+			VersionsManifest manifest = versionsManifest;
+			VersionsManifest.Entry entry = manifest.findOrThrow(minecraftVersion);
 
-				try {
-					FileUtils.copyURLToFile(new URI(entry.details()).toURL(), file);
-				} catch (IOException e) {
-					// if the file already exits, just use it despite the download failing
-					// it is likely still valid anyway
-					if (!file.exists()) {
-						throw new Exception("failed to download version details for " + minecraftVersion, e);
-					}
+			try {
+				Downloader.download(project, entry.details(), entry.detailsSha1(), file);
+			} catch (Exception e) {
+				// if the file already exits, just use it despite the download failing
+				// it is likely still valid anyway
+				if (!file.exists()) {
+					throw new Exception("failed to download version details for " + minecraftVersion, e);
 				}
 			}
 
@@ -355,15 +351,13 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 		File manifestFile = files.getGlobalCache().getVersionsManifestJson();
 
-		if (project.getGradle().getStartParameter().isRefreshDependencies() || !manifestFile.exists()) {
-			try {
-				FileUtils.copyURLToFile(new URI(versionsManifestUrl.get()).toURL(), manifestFile);
-			} catch (IOException e) {
-				// if the file already exits, just use it despite the download failing
-				// it is likely still valid anyway
-				if (!manifestFile.exists()) {
-					throw new Exception("failed to download versions manifest!", e);
-				}
+		try {
+			Downloader.download(project, String.format(versionsManifestUrl.get(), intermediaryGen.get()), null, manifestFile, true);
+		} catch (Exception e) {
+			// if the file already exits, just use it despite the download failing
+			// it is likely still valid anyway
+			if (!manifestFile.exists()) {
+				throw new Exception("failed to download versions manifest!", e);
 			}
 		}
 
