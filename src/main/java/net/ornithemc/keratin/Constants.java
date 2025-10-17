@@ -29,8 +29,14 @@ public class Constants {
 	public static final String SPARROW_ENDPOINT = "/v3/versions/sparrow";
 	public static final String NESTS_ENDPOINT = "/v3/versions/nests";
 
-	public static final String RELEASE_TIME_A1_0_15 = "2010-08-04T00:00:00+00:00";
-	public static final String RELEASE_TIME_B1_0    = "2010-12-20T17:28:00+00:00";
-	public static final String RELEASE_TIME_1_3     = "2012-07-26T12:49:00+00:00";
+	public static final String VERSION_c0_0_13a_launcher = "c0.0.13a-launcher";
+	public static final String VERSION_13w07a = "13w07a";
+
+	public static final String SEMVER_c0_0_14a = "0.14.0";
+	public static final String SEMVER_INDEV = "0.31.0";
+	public static final String SEMVER_a0_1_0 = "1.0.0-alpha.0.1.0";
+	public static final String SEMVER_a1_0_15 = "1.0.0-alpha.1.0.15";
+	public static final String SEMVER_b1_0 = "1.0.0-beta.1.0.0";
+	public static final String SEMVER_1_3 = "1.3.0";
 
 }

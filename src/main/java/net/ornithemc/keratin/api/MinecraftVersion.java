@@ -22,10 +22,10 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 		if (clientDetails.client() && serverDetails.server() && !Objects.equals(clientDetails.id(), serverDetails.id())) {
 			// client id != server id, thus different client and server versions
 			// this is only allowed for certain alpha versions
-			if (clientDetails.releaseTime().compareTo(Constants.RELEASE_TIME_A1_0_15) < 0 || serverDetails.releaseTime().compareTo(Constants.RELEASE_TIME_A1_0_15) < 0) {
+			if (clientDetails.compareTo(Constants.SEMVER_a1_0_15) < 0 || serverDetails.compareTo(Constants.SEMVER_a0_1_0) < 0) {
 				throw new RuntimeException("Cannot combine different client and server versions older than a1.0.15/server-a0.1.0!");
 			}
-			if (clientDetails.releaseTime().compareTo(Constants.RELEASE_TIME_B1_0) >= 0 || serverDetails.releaseTime().compareTo(Constants.RELEASE_TIME_B1_0) >= 0) {
+			if (clientDetails.compareTo(Constants.SEMVER_b1_0) >= 0 || serverDetails.compareTo(Constants.SEMVER_b1_0) >= 0) {
 				throw new RuntimeException("Cannot combine different client and server versions since b1.0!");
 			}
 
@@ -77,7 +77,7 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 
 	public boolean hasSharedVersioning() {
 		// since beta the client and server jars use the same versioning
-		return (client != null ? client : server).releaseTime().compareTo(Constants.RELEASE_TIME_B1_0) >= 0;
+		return (client != null ? client : server).compareTo(Constants.SEMVER_b1_0) >= 0;
 	}
 
 	public boolean canBeMerged() {
@@ -89,27 +89,27 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 	}
 
 	public boolean canBeMergedLikeAlpha() {
-		return client != null && server != null && client.releaseTime().compareTo(Constants.RELEASE_TIME_A1_0_15) >= 0 && client.releaseTime().compareTo(Constants.RELEASE_TIME_B1_0) < 0;
+		return client != null && server != null && client.compareTo(Constants.SEMVER_a1_0_15) >= 0 && client.compareTo(Constants.SEMVER_b1_0) < 0;
 	}
 
 	public boolean canBeMergedLikeBeta() {
-		return client != null && server != null && client.releaseTime().compareTo(Constants.RELEASE_TIME_B1_0) >= 0 && client.releaseTime().compareTo(Constants.RELEASE_TIME_1_3) < 0;
+		return client != null && server != null && client.compareTo(Constants.SEMVER_b1_0) >= 0 && client.compareTo(Constants.SEMVER_1_3) < 0;
 	}
 
 	public boolean canBeMergedLikeRelease() {
-		return client != null && server != null && client.releaseTime().compareTo(Constants.RELEASE_TIME_1_3) >= 0;
+		return client != null && server != null && client.compareTo(Constants.SEMVER_1_3) >= 0;
 	}
 
 	public boolean hasBrokenInnerClasses() {
-		return !hasSharedVersioning() || "13w07a".equals(id);
+		return !hasSharedVersioning() || id.equals(Constants.VERSION_13w07a);
 	}
 
 	public boolean usesSerializableForLevelSaving() {
 		return client != null &&
 			// only some classic versions uses Java Serializable for level saving
-			((client.compareTo("0.14.0") >= 0 && client.compareTo("0.31.0") < 0)
+			((client.compareTo(Constants.SEMVER_c0_0_14a) >= 0 && client.compareTo(Constants.SEMVER_INDEV) < 0)
 				// c0.0.13a-launcher is the odd one out, dunno what's up with that
-				|| client.id().equals("c0.0.13a-launcher"));
+				|| client.id().equals(Constants.VERSION_c0_0_13a_launcher));
 	}
 
 	public boolean hasCommonSide(MinecraftVersion o) {
