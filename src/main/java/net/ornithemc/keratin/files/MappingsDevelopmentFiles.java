@@ -103,12 +103,12 @@ public class MappingsDevelopmentFiles extends FileContainer implements MappingsD
 
 		@Override
 		public File getProcessedIntermediaryUnpickDefinitionsFile(MinecraftVersion minecraftVersion) {
-			return file("%s-processed-intermediary-gen%d%s".formatted(minecraftVersion.id(), getIntermediaryGen(), UnpickDefinitions.FILE_EXTENSION));
+			return file("%s-processed-intermediary%s".formatted(minecraftVersion.id(), UnpickDefinitions.FILE_EXTENSION));
 		}
 
 		@Override
 		public File getUnpickedProcessedIntermediaryJar(MinecraftVersion minecraftVersion) {
-			return file("%s-unpicked-processed-intermediary-gen%d.jar".formatted(minecraftVersion.id(), getIntermediaryGen()));
+			return file("%s-unpicked-processed-intermediary.jar".formatted(minecraftVersion.id()));
 		}
 
 		@Override

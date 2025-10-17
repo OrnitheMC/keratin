@@ -58,7 +58,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 	@Override
 	public File getDirectory() {
-		return new File(project.getGradle().getGradleUserHomeDir(), "caches/%s".formatted(keratin.getGlobalCacheDirectory().get()));
+		return new File(project.getGradle().getGradleUserHomeDir(), "caches/%s".formatted(keratin.getGlobalCacheDirectory().get().formatted(keratin.getIntermediaryGen().get())));
 	}
 
 	@Override
@@ -207,7 +207,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
 				throw new IllegalArgumentException("intermediray client jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return file("%s-intermediary-gen%d-client.jar".formatted(minecraftVersion.client().id(), getIntermediaryGen()));
+				return file("%s-intermediary-client.jar".formatted(minecraftVersion.client().id()));
 			}
 		}
 
@@ -218,7 +218,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
 				throw new IllegalArgumentException("intermediray server jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
-				return file("%s-intermediary-gen%d-server.jar".formatted(minecraftVersion.server().id(), getIntermediaryGen()));
+				return file("%s-intermediary-server.jar".formatted(minecraftVersion.server().id()));
 			}
 		}
 
@@ -227,7 +227,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("intermediary jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
 			} else {
-				return file("%s-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), getIntermediaryGen()));
+				return file("%s-intermediary-merged.jar".formatted(minecraftVersion.id()));
 			}
 		}
 
@@ -250,7 +250,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 		@Override
 		public File getProcessedIntermediaryJar(MinecraftVersion minecraftVersion, ProcessorSettings processorSettings) {
-			return file("%s-processed-intermediary-gen%d-%s.jar".formatted(minecraftVersion.id(), getIntermediaryGen(), Integer.toHexString(processorSettings.hashCode())));
+			return file("%s-processed-intermediary-%s.jar".formatted(minecraftVersion.id(), Integer.toHexString(processorSettings.hashCode())));
 		}
 	}
 
@@ -267,17 +267,17 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 		@Override
 		public File getClientIntermediaryMappingsJar(MinecraftVersion minecraftVersion) {
-			return file("%s-intermediary-gen%d-client.jar".formatted(minecraftVersion.client().id(), getIntermediaryGen()));
+			return file("%s-intermediary-client.jar".formatted(minecraftVersion.client().id()));
 		}
 
 		@Override
 		public File getServerIntermediaryMappingsJar(MinecraftVersion minecraftVersion) {
-			return file("%s-intermediary-gen%d-server.jar".formatted(minecraftVersion.server().id(), getIntermediaryGen()));
+			return file("%s-intermediary-server.jar".formatted(minecraftVersion.server().id()));
 		}
 
 		@Override
 		public File getMergedIntermediaryMappingsJar(MinecraftVersion minecraftVersion) {
-			return file("%s-intermediary-gen%d-merged.jar".formatted(minecraftVersion.id(), getIntermediaryGen()));
+			return file("%s-intermediary-merged.jar".formatted(minecraftVersion.id()));
 		}
 
 		@Override
@@ -287,7 +287,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
 				throw new IllegalArgumentException("client intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return file("%s-intermediary-gen%d-client.tiny".formatted(minecraftVersion.client().id(), getIntermediaryGen()));
+				return file("%s-intermediary-client.tiny".formatted(minecraftVersion.client().id()));
 			}
 		}
 
@@ -298,13 +298,13 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
 				throw new IllegalArgumentException("server intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return file("%s-intermediary-gen%d-server.tiny".formatted(minecraftVersion.server().id(), getIntermediaryGen()));
+				return file("%s-intermediary-server.tiny".formatted(minecraftVersion.server().id()));
 			}
 		}
 
 		@Override
 		public File getMergedIntermediaryMappingsFile(MinecraftVersion minecraftVersion) {
-			return file("%s-intermediary-gen%d-merged.tiny".formatted(minecraftVersion.id(), getIntermediaryGen()));
+			return file("%s-intermediary-merged.tiny".formatted(minecraftVersion.id()));
 		}
 
 		@Override
@@ -319,7 +319,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
 				throw new IllegalArgumentException("client intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return file("%s-filled-intermediary-gen%d-client.tiny".formatted(minecraftVersion.client().id(), getIntermediaryGen()));
+				return file("%s-filled-intermediary-client.tiny".formatted(minecraftVersion.client().id()));
 			}
 		}
 
@@ -330,13 +330,13 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
 				throw new IllegalArgumentException("server intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return file("%s-filled-intermediary-gen%d-server.tiny".formatted(minecraftVersion.server().id(), getIntermediaryGen()));
+				return file("%s-filled-intermediary-server.tiny".formatted(minecraftVersion.server().id()));
 			}
 		}
 
 		@Override
 		public File getFilledMergedIntermediaryMappingsFile(MinecraftVersion minecraftVersion) {
-			return file("%s-filled-intermediary-gen%d-merged.tiny".formatted(minecraftVersion.id(), getIntermediaryGen()));
+			return file("%s-filled-intermediary-merged.tiny".formatted(minecraftVersion.id()));
 		}
 
 		@Override
@@ -346,12 +346,12 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 		@Override
 		public File getNamedMappingsJar(String minecraftVersion, int build) {
-			return file("%s-named-gen%d+build.%d.jar".formatted(minecraftVersion, getIntermediaryGen(), build));
+			return file("%s-named+build.%d.jar".formatted(minecraftVersion, build));
 		}
 
 		@Override
 		public File getNamedMappingsFile(String minecraftVersion, int build) {
-			return file("%s-named-gen%d+build.%d.tiny".formatted(minecraftVersion, getIntermediaryGen(), build));
+			return file("%s-named+build.%d.tiny".formatted(minecraftVersion, build));
 		}
 	}
 
@@ -434,7 +434,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 				if (builds.client() < 1) {
 					return null;
 				} else {
-					return file("%s-intermediary-gen%d-exceptions+build.%d-client.excs".formatted(minecraftVersion.client().id(), getIntermediaryGen(), builds.client()));
+					return file("%s-intermediary-exceptions+build.%d-client.excs".formatted(minecraftVersion.client().id(), builds.client()));
 				}
 			}
 		}
@@ -449,7 +449,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 				if (builds.server() < 1) {
 					return null;
 				} else {
-					return file("%s-intermediary-gen%d-exceptions+build.%d-server.excs".formatted(minecraftVersion.server().id(), getIntermediaryGen(), builds.server()));
+					return file("%s-intermediary-exceptions+build.%d-server.excs".formatted(minecraftVersion.server().id(), builds.server()));
 				}
 			}
 		}
@@ -463,10 +463,10 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 					if (builds.client() < 1 || builds.server() < 1) {
 						return null;
 					} else {
-						return file("%s-intermediary-gen%d-exceptions+build.(%d-%d)-merged.excs".formatted(minecraftVersion.id(), getIntermediaryGen(), builds.client(), builds.server()));
+						return file("%s-intermediary-exceptions+build.(%d-%d)-merged.excs".formatted(minecraftVersion.id(), builds.client(), builds.server()));
 					}
 				} else {
-					return file("%s-intermediary-gen%d-exceptions+build.%d-merged.excs".formatted(minecraftVersion.id(), getIntermediaryGen(), builds.merged()));
+					return file("%s-intermediary-exceptions+build.%d-merged.excs".formatted(minecraftVersion.id(), builds.merged()));
 				}
 			}
 		}
@@ -556,7 +556,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 				if (builds.client() < 1) {
 					return null;
 				} else {
-					return file("%s-intermediary-gen%d-signatures+build.%d-client.sigs".formatted(minecraftVersion.client().id(), getIntermediaryGen(), builds.client()));
+					return file("%s-intermediary-signatures+build.%d-client.sigs".formatted(minecraftVersion.client().id(), builds.client()));
 				}
 			}
 		}
@@ -571,7 +571,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 				if (builds.server() < 1) {
 					return null;
 				} else {
-					return file("%s-intermediary-gen%d-signatures+build.%d-server.sigs".formatted(minecraftVersion.server().id(), getIntermediaryGen(), builds.server()));
+					return file("%s-intermediary-signatures+build.%d-server.sigs".formatted(minecraftVersion.server().id(), builds.server()));
 				}
 			}
 		}
@@ -585,10 +585,10 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 					if (builds.client() < 1 || builds.server() < 1) {
 						return null;
 					} else {
-						return file("%s-intermediary-gen%d-signatures+build.(%d-%d)-merged.sigs".formatted(minecraftVersion.id(), getIntermediaryGen(), builds.client(), builds.server()));
+						return file("%s-intermediary-signatures+build.(%d-%d)-merged.sigs".formatted(minecraftVersion.id(), builds.client(), builds.server()));
 					}
 				} else {
-					return file("%s-intermediary-gen%d-signatures+build.%d-merged.sigs".formatted(minecraftVersion.id(), getIntermediaryGen(), builds.merged()));
+					return file("%s-intermediary-signatures+build.%d-merged.sigs".formatted(minecraftVersion.id(), builds.merged()));
 				}
 			}
 		}
@@ -678,7 +678,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 				if (builds.client() < 1) {
 					return null;
 				} else {
-					return file("%s-intermediary-gen%d-nests+build.%d-client.nests".formatted(minecraftVersion.client().id(), getIntermediaryGen(), builds.client()));
+					return file("%s-intermediary-nests+build.%d-client.nests".formatted(minecraftVersion.client().id(), builds.client()));
 				}
 			}
 		}
@@ -693,7 +693,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 				if (builds.server() < 1) {
 					return null;
 				} else {
-					return file("%s-intermediary-gen%d-nests+build.%d-server.nests".formatted(minecraftVersion.server().id(), getIntermediaryGen(), builds.server()));
+					return file("%s-intermediary-nests+build.%d-server.nests".formatted(minecraftVersion.server().id(), builds.server()));
 				}
 			}
 		}
@@ -707,10 +707,10 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 					if (builds.client() < 1 || builds.server() < 1) {
 						return null;
 					} else {
-						return file("%s-intermediary-gen%d-nests+build.(%d-%d)-merged.nests".formatted(minecraftVersion.id(), getIntermediaryGen(), builds.client(), builds.server()));
+						return file("%s-intermediary-nests+build.(%d-%d)-merged.nests".formatted(minecraftVersion.id(), builds.client(), builds.server()));
 					}
 				} else {
-					return file("%s-intermediary-gen%d-nests+build.%d-merged.nests".formatted(minecraftVersion.id(), getIntermediaryGen(), builds.merged()));
+					return file("%s-intermediary-nests+build.%d-merged.nests".formatted(minecraftVersion.id(), builds.merged()));
 				}
 			}
 		}

@@ -226,7 +226,7 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
 				throw new IllegalArgumentException("client intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return file("%s-setup-intermediary-gen%d-client.tiny".formatted(minecraftVersion.client().id(), getIntermediaryGen()));
+				return file("%s-setup-intermediary-client.tiny".formatted(minecraftVersion.client().id()));
 			}
 		}
 
@@ -237,13 +237,13 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
 				throw new IllegalArgumentException("server intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
-				return file("%s-setup-intermediary-gen%d-server.tiny".formatted(minecraftVersion.server().id(), getIntermediaryGen()));
+				return file("%s-setup-intermediary-server.tiny".formatted(minecraftVersion.server().id()));
 			}
 		}
 
 		@Override
 		public File getMergedIntermediaryMappingsFile(MinecraftVersion minecraftVersion) {
-			return file("%s-setup-intermediary-gen%d-merged.tiny".formatted(minecraftVersion.id(), getIntermediaryGen()));
+			return file("%s-setup-intermediary-merged.tiny".formatted(minecraftVersion.id()));
 		}
 
 		@Override

@@ -29,10 +29,6 @@ public class FileContainer {
 		Files.createDirectories(dir.toPath());
 	}
 
-	protected int getIntermediaryGen() {
-		return keratin.getIntermediaryGen().get();
-	}
-
 	protected File pickFileForPresentSides(MinecraftVersion minecraftVersion, Function<MinecraftVersion, File> client, Function<MinecraftVersion, File> server, Function<MinecraftVersion, File> merged) {
 		if (minecraftVersion.hasClient() && minecraftVersion.hasServer()) {
 			return merged.apply(minecraftVersion);

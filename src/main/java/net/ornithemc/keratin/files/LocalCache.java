@@ -19,6 +19,6 @@ public class LocalCache extends FileContainer implements FileCache, LocalCacheAc
 
 	@Override
 	public File getDirectory() {
-		return project.getLayout().getBuildDirectory().dir(keratin.getLocalCacheDirectory().get()).get().getAsFile();
+		return project.getLayout().getBuildDirectory().dir(keratin.getLocalCacheDirectory().get().formatted(keratin.getIntermediaryGen().get())).get().getAsFile();
 	}
 }
