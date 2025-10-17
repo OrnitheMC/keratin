@@ -5,7 +5,7 @@ public class Constants {
 	public static final String ORNITHE_GLOBAL_CACHE_DIR = "ornithe-keratin";
 	public static final String ORNITHE_LOCAL_CACHE_DIR = "ornithe-keratin";
 
-	public static final String VERSIONS_MANIFEST_URL = "https://ornithemc.net/mc-versions/version_manifest.json";
+	public static final String VERSIONS_MANIFEST_URL = "https://ornithemc.net/mc-versions/gen%d/version_manifest.json";
 
 	public static final String MAVEN_NAME = "Ornithe";
 	public static final String MAVEN_URL = "https://maven.ornithemc.net/releases";

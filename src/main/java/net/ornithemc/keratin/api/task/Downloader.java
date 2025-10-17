@@ -75,4 +75,20 @@ public interface Downloader extends TaskAware {
 
 		return sb.toString().equals(sha1);
 	}
+
+	public static void download(Project project, String url, String sha1, File output) throws Exception {
+		download(project, url, sha1, output, false);
+	}
+
+	public static void download(Project project, String url, String sha1, File output, boolean overwrite) throws Exception {
+		if (overwrite || !output.exists() || project.getGradle().getStartParameter().isRefreshDependencies() || !validateChecksum(output, sha1)) {
+			DownloadAction downloader = new DownloadAction(project);
+
+			downloader.src(new URI(url));
+			downloader.dest(output);
+			downloader.overwrite(true);
+
+			downloader.execute().join();
+		}
+	}
 }
