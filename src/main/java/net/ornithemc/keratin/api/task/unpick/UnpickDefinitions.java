@@ -43,6 +43,11 @@ public interface UnpickDefinitions {
 		try {
 			for (int i = 0; i < minecraftVersions.length; i++) {
 				writers[i] = new BufferedWriter(new FileWriter(files[i]));
+
+				// headers from src files are skipped
+				// (we don't want headers in the middle of the file)
+				writers[i].write("v2");
+				writers[i].newLine();
 			}
 
 			collectUnpickDefinitions(keratin, minecraftVersions, dir, writers);
