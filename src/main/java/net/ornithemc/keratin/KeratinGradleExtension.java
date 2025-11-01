@@ -430,8 +430,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 			dependencies.add(decompileClasspath.getName(), "org.vineflower:vineflower:1.11.1");
 			dependencies.add(decompileClasspath.getName(), "net.fabricmc:cfr:0.0.9");
-			dependencies.add(enigmaRuntime.getName(), "net.ornithemc:enigma-swing:2.5.1");
-			dependencies.add(enigmaRuntime.getName(), "org.quiltmc:quilt-enigma-plugin:2.3.1");
+			dependencies.add(enigmaRuntime.getName(), "net.ornithemc:enigma-swing:2.6.1");
+			dependencies.add(enigmaRuntime.getName(), "org.quiltmc:quilt-enigma-plugin:2.4.0");
 
 			// exclude the Quilt Enigma dependency from the Quilt Enigma Plugin
 			enigmaRuntime.exclude(Map.of(
