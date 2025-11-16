@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -431,6 +432,12 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			dependencies.add(decompileClasspath.getName(), "net.fabricmc:cfr:0.0.9");
 			dependencies.add(enigmaRuntime.getName(), "net.ornithemc:enigma-swing:2.5.1");
 			dependencies.add(enigmaRuntime.getName(), "org.quiltmc:quilt-enigma-plugin:2.3.1");
+
+			// exclude the Quilt Enigma dependency from the Quilt Enigma Plugin
+			enigmaRuntime.exclude(Map.of(
+				"group", "org.quiltmc",
+				"module", "enigma"
+			));
 
 			SourceSet constants = sourceSets.register(SourceSets.CONSTANTS).get();
 		}
