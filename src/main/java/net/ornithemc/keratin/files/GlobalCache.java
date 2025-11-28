@@ -7,7 +7,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import net.ornithemc.keratin.Configurations;
-import net.ornithemc.keratin.Constants;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.files.GlobalCacheAccess;
@@ -58,18 +57,12 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 	@Override
 	public File getDirectory() {
-		return new File(project.getGradle().getGradleUserHomeDir(), "caches/%s".formatted(keratin.getGlobalCacheDirectory().get().formatted(keratin.getIntermediaryGen().get())));
+		return new File(project.getGradle().getGradleUserHomeDir(), "caches/%s/gen%d/".formatted(keratin.getGlobalCacheDirectory().get(), keratin.getIntermediaryGen().get()));
 	}
 
 	@Override
 	public File getVersionsManifestJson() {
-		String url = keratin.getVersionsManifestUrl().get();
-
-		if (Constants.VERSIONS_MANIFEST_URL.equals(url)) {
-			return file("versions-manifest.json");
-		} else {
-			return file("versions-manifest-" + Integer.toHexString(url.hashCode()) + ".json");
-		}
+		return file("versions-manifest.json");
 	}
 
 	@Override
