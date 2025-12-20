@@ -23,17 +23,15 @@ public abstract class MergeMinecraftJarsTask extends MergeTask {
 		GameJarsCache gameJars = files.getGlobalCache().getGameJarsCache();
 		MappedJarsCache mappedJars = files.getGlobalCache().getMappedJarsCache();
 
-		if (minecraftVersion.canBeMerged()) {
-			boolean official = Mapper.OFFICIAL.equals(namespace);
+		boolean official = Mapper.OFFICIAL.equals(namespace);
 
-			if (official == minecraftVersion.hasSharedObfuscation()) {
-				workQueue.submit(MergeJars.class, parameters -> {
-					parameters.getOverwrite().set(keratin.isCacheInvalid());
-					parameters.getClient().set(official ? gameJars.getClientJar(minecraftVersion) : mappedJars.getIntermediaryClientJar(minecraftVersion));
-					parameters.getServer().set(official ? gameJars.getServerJar(minecraftVersion) : mappedJars.getIntermediaryServerJar(minecraftVersion));
-					parameters.getMerged().set(official ? gameJars.getMergedJar(minecraftVersion) : mappedJars.getIntermediaryMergedJar(minecraftVersion));
-				});
-			}
+		if (official ? minecraftVersion.canBeMergedAsObfuscated() : minecraftVersion.canBeMergedAsMapped()) {
+			workQueue.submit(MergeJars.class, parameters -> {
+				parameters.getOverwrite().set(keratin.isCacheInvalid());
+				parameters.getClient().set(official ? gameJars.getClientJar(minecraftVersion) : mappedJars.getIntermediaryClientJar(minecraftVersion));
+				parameters.getServer().set(official ? gameJars.getServerJar(minecraftVersion) : mappedJars.getIntermediaryServerJar(minecraftVersion));
+				parameters.getMerged().set(official ? gameJars.getMergedJar(minecraftVersion) : mappedJars.getIntermediaryMergedJar(minecraftVersion));
+			});
 		}
 	}
 

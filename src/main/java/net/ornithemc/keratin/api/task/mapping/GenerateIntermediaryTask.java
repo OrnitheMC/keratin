@@ -25,7 +25,7 @@ public abstract class GenerateIntermediaryTask extends MinecraftTask {
 
 	@Override
 	public void run() throws Exception {
-		if (getMinecraftVersions().get().size() > 1) {
+		if (getMinecraftVersions().get().size() != 1) {
 			throw new RuntimeException("intermediary generation tasks can only be run for single versions at a time!");
 		}
 

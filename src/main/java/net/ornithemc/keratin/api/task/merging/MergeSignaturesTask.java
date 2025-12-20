@@ -22,7 +22,7 @@ public abstract class MergeSignaturesTask extends MergeTask {
 
 		SignaturesCache signatures = files.getGlobalCache().getSignaturesCache();
 
-		if (!minecraftVersion.canBeMergedAsObfuscated()) {
+		if (minecraftVersion.canBeMergedAsMapped()) {
 			BuildNumbers builds = keratin.getSignaturesBuilds(minecraftVersion);
 
 			if (builds.client() > 0 && builds.server() > 0) {

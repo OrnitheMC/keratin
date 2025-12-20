@@ -39,7 +39,7 @@ public abstract class DownloadMinecraftJarsTask extends MinecraftTask implements
 			minecraftJarsChanged |= download(
 				download.url(),
 				download.sha1(),
-				gameJars.getServerJar(minecraftVersion),
+				gameJars.getServerJarWithLibraries(minecraftVersion),
 				false
 			);
 		}
@@ -50,8 +50,8 @@ public abstract class DownloadMinecraftJarsTask extends MinecraftTask implements
 				download.url(),
 				download.sha1(),
 				SERVER_PATH_IN_ZIP,
-				gameJars.getServerZip(minecraftVersion),
-				gameJars.getServerJar(minecraftVersion),
+				gameJars.getServerZipWithLibraries(minecraftVersion),
+				gameJars.getServerJarWithLibraries(minecraftVersion),
 				false
 			);
 		}

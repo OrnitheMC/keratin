@@ -35,7 +35,13 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 		clientDetails = clientDetails.client() ? clientDetails : null;
 		serverDetails = serverDetails.server() ? serverDetails : null;
 
-		return new MinecraftVersion(s, clientDetails, serverDetails);
+		MinecraftVersion minecraftVersion = new MinecraftVersion(s, clientDetails, serverDetails);
+
+		if (minecraftVersion.hasSharedObfuscation() && !minecraftVersion.hasSharedVersioning()) {
+			throw new RuntimeException("Minecraft version " + minecraftVersion.id + " has shared obfuscation but not shared versioning - how?");
+		}
+
+		return minecraftVersion;
 	}
 
 	public String clientKey() {
@@ -71,12 +77,14 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 	}
 
 	public boolean hasSharedObfuscation() {
-		// either side could be missing but for versions >=1.3 we still consider them to have shared obfuscation
-		return (client != null && client.sharedMappings()) || (server != null && server.sharedMappings());
+		// either side could be missing but for versions >=1.3 we still
+		// consider them to have shared obfuscation if the value is true
+		return (client != null ? client : server).sharedMappings();
 	}
 
 	public boolean hasSharedVersioning() {
 		// since beta the client and server jars use the same versioning
+		// alpha: 1.x.x vs 0.x.x - classic 0.x vs 1.x
 		return (client != null ? client : server).compareTo(Constants.SEMVER_b1_0) >= 0;
 	}
 
@@ -88,25 +96,34 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 		return canBeMergedLikeRelease();
 	}
 
+	public boolean canBeMergedAsMapped() {
+		return canBeMergedLikeAlpha() || canBeMergedLikeBeta();
+	}
+
 	public boolean canBeMergedLikeAlpha() {
-		return client != null && server != null && client.compareTo(Constants.SEMVER_a1_0_15) >= 0 && client.compareTo(Constants.SEMVER_b1_0) < 0;
+		return client != null && server != null && !hasSharedObfuscation() && !hasSharedVersioning();
 	}
 
 	public boolean canBeMergedLikeBeta() {
-		return client != null && server != null && client.compareTo(Constants.SEMVER_b1_0) >= 0 && client.compareTo(Constants.SEMVER_1_3) < 0;
+		return client != null && server != null && !hasSharedObfuscation() && hasSharedVersioning();
 	}
 
 	public boolean canBeMergedLikeRelease() {
-		return client != null && server != null && client.compareTo(Constants.SEMVER_1_3) >= 0;
+		return client != null && server != null && hasSharedObfuscation();
 	}
 
 	public boolean hasBrokenInnerClasses() {
+		// some versions are obfuscated in such a way that class names will
+		// reveal some inner classes but either not all of them, or the actual
+		// inner class attributes are missing from the class files
 		return !hasSharedVersioning() || id.equals(Constants.VERSION_13w07a);
 	}
 
 	public boolean usesSerializableForLevelSaving() {
+		// only some classic versions uses Java Serializable for level saving
+		// we just hard-code these checks because the alternative is to download
+		// the all the jars and check them manually, and just... no
 		return client != null &&
-			// only some classic versions uses Java Serializable for level saving
 			((client.compareTo(Constants.SEMVER_c0_0_14a) >= 0 && client.compareTo(Constants.SEMVER_INDEV) < 0)
 				// c0.0.13a-launcher is the odd one out, dunno what's up with that
 				|| client.id().equals(Constants.VERSION_c0_0_13a_launcher));

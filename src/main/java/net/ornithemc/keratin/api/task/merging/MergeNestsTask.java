@@ -22,7 +22,7 @@ public abstract class MergeNestsTask extends MergeTask {
 
 		NestsCache nests = files.getGlobalCache().getNestsCache();
 
-		if (!minecraftVersion.canBeMergedAsObfuscated()) {
+		if (minecraftVersion.canBeMergedAsMapped()) {
 			BuildNumbers builds = keratin.getNestsBuilds(minecraftVersion);
 
 			if (builds.client() > 0 && builds.server() > 0) {

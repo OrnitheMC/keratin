@@ -153,6 +153,24 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		}
 
 		@Override
+		public File getServerJarWithLibraries(MinecraftVersion minecraftVersion) {
+			if (!minecraftVersion.hasServerJar()) {
+				throw new IllegalArgumentException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else {
+				return file("%s-server-with-libraries.jar".formatted(minecraftVersion.server().id()));
+			}
+		}
+
+		@Override
+		public File getServerZipWithLibraries(MinecraftVersion minecraftVersion) {
+			if (!minecraftVersion.hasServerZip()) {
+				throw new IllegalArgumentException("server zip for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else {
+				return file("%s-server-with-libraries.zip".formatted(minecraftVersion.server().id()));
+			}
+		}
+
+		@Override
 		public File getServerJar(MinecraftVersion minecraftVersion) {
 			if (!minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
@@ -162,19 +180,10 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		}
 
 		@Override
-		public File getServerZip(MinecraftVersion minecraftVersion) {
-			if (!minecraftVersion.hasServerZip()) {
-				throw new IllegalArgumentException("server zip for Minecraft version " + minecraftVersion.id() + " does not exist!");
-			} else {
-				return file("%s-server.zip".formatted(minecraftVersion.server().id()));
-			}
-		}
-
-		@Override
 		public File getMergedJar(MinecraftVersion minecraftVersion) {
 			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("game jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
-			} else if (!minecraftVersion.hasSharedObfuscation()) {
+			} else if (!minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("game jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: the client and server jars do not have shared mappings!");
 			} else {
 				return file("%s-merged.jar".formatted(minecraftVersion.id()));
@@ -197,7 +206,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getIntermediaryClientJar(MinecraftVersion minecraftVersion) {
 			if (!minecraftVersion.hasClient()) {
 				throw new IllegalArgumentException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
-			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("intermediray client jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
 				return file("%s-intermediary-client.jar".formatted(minecraftVersion.client().id()));
@@ -208,7 +217,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getIntermediaryServerJar(MinecraftVersion minecraftVersion) {
 			if (!minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
-			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("intermediray server jar for Minecraft version " + minecraftVersion.id() + " does not exist: please use the merged jar!");
 			} else {
 				return file("%s-intermediary-server.jar".formatted(minecraftVersion.server().id()));
@@ -219,6 +228,8 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getIntermediaryMergedJar(MinecraftVersion minecraftVersion) {
 			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("intermediary jars for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server jar does not exist!");
+			} else if (!minecraftVersion.canBeMerged()) {
+				throw new IllegalArgumentException("intermediary jars for Minecraft version " + minecraftVersion.id() + " cannot be merged!");
 			} else {
 				return file("%s-intermediary-merged.jar".formatted(minecraftVersion.id()));
 			}
@@ -277,7 +288,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getClientIntermediaryMappingsFile(MinecraftVersion minecraftVersion) {
 			if (!minecraftVersion.hasClient()) {
 				throw new IllegalArgumentException("client intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("client intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
 				return file("%s-intermediary-client.tiny".formatted(minecraftVersion.client().id()));
@@ -288,7 +299,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getServerIntermediaryMappingsFile(MinecraftVersion minecraftVersion) {
 			if (!minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("server intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("server intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
 				return file("%s-intermediary-server.tiny".formatted(minecraftVersion.server().id()));
@@ -297,6 +308,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 		@Override
 		public File getMergedIntermediaryMappingsFile(MinecraftVersion minecraftVersion) {
+			// even for single-side versions the mappings will be packaged as if for merged versions
 			return file("%s-intermediary-merged.tiny".formatted(minecraftVersion.id()));
 		}
 
@@ -309,7 +321,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getFilledClientIntermediaryMappingsFile(MinecraftVersion minecraftVersion) {
 			if (!minecraftVersion.hasClient()) {
 				throw new IllegalArgumentException("client intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("client intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
 				return file("%s-filled-intermediary-client.tiny".formatted(minecraftVersion.client().id()));
@@ -320,7 +332,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getFilledServerIntermediaryMappingsFile(MinecraftVersion minecraftVersion) {
 			if (!minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("server intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("server intermediary mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
 			} else {
 				return file("%s-filled-intermediary-server.tiny".formatted(minecraftVersion.server().id()));
@@ -329,6 +341,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 		@Override
 		public File getFilledMergedIntermediaryMappingsFile(MinecraftVersion minecraftVersion) {
+			// even for single-side versions the mappings will be packaged as if for merged versions
 			return file("%s-filled-intermediary-merged.tiny".formatted(minecraftVersion.id()));
 		}
 
@@ -378,13 +391,15 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getClientExceptionsFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
 			if (!minecraftVersion.hasClient()) {
 				throw new IllegalArgumentException("client exceptions for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("client exceptions for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged exceptions!");
 			} else {
-				if (builds.client() < 1) {
+				int build = minecraftVersion.hasSharedObfuscation() ? builds.merged() : builds.client();
+
+				if (build < 1) {
 					return null;
 				} else {
-					return file("%s-exceptions+build.%d-client.excs".formatted(minecraftVersion.client().id(), builds.client()));
+					return file("%s-exceptions+build.%d-client.excs".formatted(minecraftVersion.client().id(), build));
 				}
 			}
 		}
@@ -393,13 +408,15 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getServerExceptionsFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
 			if (!minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("server exceptions for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("server exceptions for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged exceptions!");
 			} else {
-				if (builds.server() < 1) {
+				int build = minecraftVersion.hasSharedObfuscation() ? builds.merged() : builds.server();
+
+				if (build < 1) {
 					return null;
 				} else {
-					return file("%s-exceptions+build.%d-server.excs".formatted(minecraftVersion.server().id(), builds.server()));
+					return file("%s-exceptions+build.%d-server.excs".formatted(minecraftVersion.server().id(), build));
 				}
 			}
 		}
@@ -421,13 +438,15 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getIntermediaryClientExceptionsFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
 			if (!minecraftVersion.hasClient()) {
 				throw new IllegalArgumentException("client exceptions for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("intermediary client exceptions for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged exceptions!");
 			} else {
-				if (builds.client() < 1) {
+				int build = minecraftVersion.hasSharedObfuscation() ? builds.merged() : builds.client();
+
+				if (build < 1) {
 					return null;
 				} else {
-					return file("%s-intermediary-exceptions+build.%d-client.excs".formatted(minecraftVersion.client().id(), builds.client()));
+					return file("%s-intermediary-exceptions+build.%d-client.excs".formatted(minecraftVersion.client().id(), build));
 				}
 			}
 		}
@@ -436,20 +455,22 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getIntermediaryServerExceptionsFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
 			if (!minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("server exceptions for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("intermediary server exceptions for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged exceptions!");
 			} else {
-				if (builds.server() < 1) {
+				int build = minecraftVersion.hasSharedObfuscation() ? builds.merged() : builds.server();
+
+				if (build < 1) {
 					return null;
 				} else {
-					return file("%s-intermediary-exceptions+build.%d-server.excs".formatted(minecraftVersion.server().id(), builds.server()));
+					return file("%s-intermediary-exceptions+build.%d-server.excs".formatted(minecraftVersion.server().id(), build));
 				}
 			}
 		}
 
 		@Override
 		public File getIntermediaryMergedExceptionsFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
-			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+			if (!minecraftVersion.canBeMerged()) {
 				throw new IllegalArgumentException("intermediary exceptions for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server exceptions do not exist!");
 			} else {
 				if (builds.merged() < 1) {
@@ -500,13 +521,15 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getClientSignaturesFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
 			if (!minecraftVersion.hasClient()) {
 				throw new IllegalArgumentException("client signatures for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("client signatures for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged signatures!");
 			} else {
-				if (builds.client() < 1) {
+				int build = minecraftVersion.hasSharedObfuscation() ? builds.merged() : builds.client();
+
+				if (build < 1) {
 					return null;
 				} else {
-					return file("%s-signatures+build.%d-client.sigs".formatted(minecraftVersion.client().id(), builds.client()));
+					return file("%s-signatures+build.%d-client.sigs".formatted(minecraftVersion.client().id(), build));
 				}
 			}
 		}
@@ -515,13 +538,15 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getServerSignaturesFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
 			if (!minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("server signatures for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("server signatures for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged signatures!");
 			} else {
-				if (builds.server() < 1) {
+				int build = minecraftVersion.hasSharedObfuscation() ? builds.merged() : builds.server();
+
+				if (build < 1) {
 					return null;
 				} else {
-					return file("%s-signatures+build.%d-server.sigs".formatted(minecraftVersion.server().id(), builds.server()));
+					return file("%s-signatures+build.%d-server.sigs".formatted(minecraftVersion.server().id(), build));
 				}
 			}
 		}
@@ -543,13 +568,15 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getIntermediaryClientSignaturesFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
 			if (!minecraftVersion.hasClient()) {
 				throw new IllegalArgumentException("client signatures for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("intermediary client signatures for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged signatures!");
 			} else {
-				if (builds.client() < 1) {
+				int build = minecraftVersion.hasSharedObfuscation() ? builds.merged() : builds.client();
+
+				if (build < 1) {
 					return null;
 				} else {
-					return file("%s-intermediary-signatures+build.%d-client.sigs".formatted(minecraftVersion.client().id(), builds.client()));
+					return file("%s-intermediary-signatures+build.%d-client.sigs".formatted(minecraftVersion.client().id(), build));
 				}
 			}
 		}
@@ -558,20 +585,22 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getIntermediaryServerSignaturesFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
 			if (!minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("server signatures for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("intermediary server signatures for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged signatures!");
 			} else {
-				if (builds.server() < 1) {
+				int build = minecraftVersion.hasSharedObfuscation() ? builds.merged() : builds.server();
+
+				if (build < 1) {
 					return null;
 				} else {
-					return file("%s-intermediary-signatures+build.%d-server.sigs".formatted(minecraftVersion.server().id(), builds.server()));
+					return file("%s-intermediary-signatures+build.%d-server.sigs".formatted(minecraftVersion.server().id(), build));
 				}
 			}
 		}
 
 		@Override
 		public File getIntermediaryMergedSignaturesFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
-			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+			if (!minecraftVersion.canBeMerged()) {
 				throw new IllegalArgumentException("intermediary signatures for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server signatures do not exist!");
 			} else {
 				if (builds.merged() < 1) {
@@ -622,13 +651,15 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getClientNestsFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
 			if (!minecraftVersion.hasClient()) {
 				throw new IllegalArgumentException("client nests for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("client nests for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged nests!");
 			} else {
-				if (builds.client() < 1) {
+				int build = minecraftVersion.hasSharedObfuscation() ? builds.merged() : builds.client();
+
+				if (build < 1) {
 					return null;
 				} else {
-					return file("%s-nests+build.%d-client.nests".formatted(minecraftVersion.client().id(), builds.client()));
+					return file("%s-nests+build.%d-client.nests".formatted(minecraftVersion.client().id(), build));
 				}
 			}
 		}
@@ -637,13 +668,15 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getServerNestsFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
 			if (!minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("server nests for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("server nests for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged nests!");
 			} else {
-				if (builds.server() < 1) {
+				int build = minecraftVersion.hasSharedObfuscation() ? builds.merged() : builds.server();
+
+				if (build < 1) {
 					return null;
 				} else {
-					return file("%s-nests+build.%d-server.nests".formatted(minecraftVersion.server().id(), builds.server()));
+					return file("%s-nests+build.%d-server.nests".formatted(minecraftVersion.server().id(), build));
 				}
 			}
 		}
@@ -665,13 +698,15 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getIntermediaryClientNestsFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
 			if (!minecraftVersion.hasClient()) {
 				throw new IllegalArgumentException("client nests for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("intermediary client nests for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged nests!");
 			} else {
-				if (builds.client() < 1) {
+				int build = minecraftVersion.hasSharedObfuscation() ? builds.merged() : builds.client();
+
+				if (build < 1) {
 					return null;
 				} else {
-					return file("%s-intermediary-nests+build.%d-client.nests".formatted(minecraftVersion.client().id(), builds.client()));
+					return file("%s-intermediary-nests+build.%d-client.nests".formatted(minecraftVersion.client().id(), build));
 				}
 			}
 		}
@@ -680,20 +715,22 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		public File getIntermediaryServerNestsFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
 			if (!minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("server nests for Minecraft version " + minecraftVersion.id() + " do not exist!");
-			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+			} else if (minecraftVersion.canBeMergedAsObfuscated()) {
 				throw new IllegalArgumentException("intermediary server nests for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged nests!");
 			} else {
-				if (builds.server() < 1) {
+				int build = minecraftVersion.hasSharedObfuscation() ? builds.merged() : builds.server();
+
+				if (build < 1) {
 					return null;
 				} else {
-					return file("%s-intermediary-nests+build.%d-server.nests".formatted(minecraftVersion.server().id(), builds.server()));
+					return file("%s-intermediary-nests+build.%d-server.nests".formatted(minecraftVersion.server().id(), build));
 				}
 			}
 		}
 
 		@Override
 		public File getIntermediaryMergedNestsFile(MinecraftVersion minecraftVersion, BuildNumbers builds) {
-			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
+			if (!minecraftVersion.canBeMerged()) {
 				throw new IllegalArgumentException("intermediary nests for Minecraft version " + minecraftVersion.id() + " cannot be merged: either the client or server nests do not exist!");
 			} else {
 				if (builds.merged() < 1) {

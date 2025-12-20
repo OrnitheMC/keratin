@@ -18,6 +18,7 @@ import net.ornithemc.exceptor.io.ExceptorIo;
 import net.ornithemc.exceptor.io.MethodEntry;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.JarType;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles;
@@ -55,9 +56,9 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 
 					updateExceptions(
 						fromMinecraftVersion.id(),
-						"merged",
+						JarType.MERGED,
 						minecraftVersion.id(),
-						"merged",
+						JarType.MERGED,
 						fromExcs,
 						setup
 					);
@@ -82,9 +83,9 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 
 						updateExceptions(
 							fromMinecraftVersion.client().id(),
-							"client",
+							JarType.CLIENT,
 							minecraftVersion.client().id(),
-							"client",
+							JarType.CLIENT,
 							fromExcs,
 							setup
 						);
@@ -109,9 +110,9 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 
 						updateExceptions(
 							fromMinecraftVersion.server().id(),
-							"server",
+							JarType.SERVER,
 							minecraftVersion.server().id(),
-							"server",
+							JarType.SERVER,
 							fromExcs,
 							setup
 						);
@@ -123,14 +124,14 @@ public abstract class MakeSetupExceptionsTask extends MinecraftTask {
 		}
 	}
 
-	private void updateExceptions(String fromMinecraftVersion, String fromSide, String toMinecraftVersion, String toSide, File from, File to) throws IOException {
+	private void updateExceptions(String fromMinecraftVersion, JarType fromType, String toMinecraftVersion, JarType toType, File from, File to) throws IOException {
 		KeratinGradleExtension keratin = getExtension();
 
 		if (!from.exists()) {
 			throw new RuntimeException("exceptions for " + fromMinecraftVersion + " to update from do not exist!");
 		}
 
-		Matches matches = keratin.findMatches(fromSide, fromMinecraftVersion, toSide, toMinecraftVersion);
+		Matches matches = keratin.findMatches(fromType, fromMinecraftVersion, toType, toMinecraftVersion);
 		Remapper mapper = MatchesUtil.makeRemapper(matches.file(), matches.inverted());
 
 		ExceptionsFile fromExcs = ExceptorIo.read(from.toPath());

@@ -7,6 +7,7 @@ import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.maven.SingleBuildMavenArtifacts;
 import net.ornithemc.keratin.api.task.DownloaderAndExtractor;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.files.GlobalCache;
 import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
 import net.ornithemc.keratin.files.KeratinFiles;
 
@@ -20,7 +21,8 @@ public abstract class DownloadIntermediaryTask extends MinecraftTask implements 
 		KeratinFiles files = keratin.getFiles();
 		SingleBuildMavenArtifacts intermediary = keratin.getIntermediaryArtifacts();
 
-		MappingsCache mappings = files.getGlobalCache().getMappingsCache();
+		GlobalCache globalCache = files.getGlobalCache();
+		MappingsCache mappings = globalCache.getMappingsCache();
 
 		boolean intermediaryChanged = false;
 

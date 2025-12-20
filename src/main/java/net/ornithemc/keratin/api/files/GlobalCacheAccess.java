@@ -47,9 +47,11 @@ public interface GlobalCacheAccess {
 
 		File getClientJar(MinecraftVersion minecraftVersion);
 
-		File getServerJar(MinecraftVersion minecraftVersion);
+		File getServerJarWithLibraries(MinecraftVersion minecraftVersion);
 
-		File getServerZip(MinecraftVersion minecraftVersion);
+		File getServerZipWithLibraries(MinecraftVersion minecraftVersion);
+
+		File getServerJar(MinecraftVersion minecraftVersion);
 
 		File getMergedJar(MinecraftVersion minecraftVersion);
 

@@ -13,6 +13,7 @@ import org.gradle.workers.WorkQueue;
 import net.fabricmc.stitch.util.IntermediaryUtil;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.JarType;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.files.GlobalCache;
@@ -62,15 +63,8 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 		getProject().getLogger().lifecycle(":updating intermediary from Minecraft " + String.join("/", fromMinecraftVersionStrings) + " to " + minecraftVersion.id());
 
 		if (minecraftVersion.hasSharedObfuscation()) {
-			if (!minecraftVersion.hasClient() || !minecraftVersion.hasServer()) {
-				throw new IllegalStateException("updating intermediary to shared-mappings client-only/server-only versions is not supported");
-			}
 			for (MinecraftVersion fromMinecraftVersion : fromMinecraftVersions) {
-				if (fromMinecraftVersion.hasSharedObfuscation()) {
-					if (!fromMinecraftVersion.hasClient() || !fromMinecraftVersion.hasServer()) {
-						throw new RuntimeException("updating intermediary from shared-mappings client-only/server-only versions to shared-mappings merged versions is not supported");
-					}
-				} else {
+				if (!fromMinecraftVersion.hasSharedObfuscation()) {
 					throw new RuntimeException("updating intermediary from split-mappings versions to shared-mappings versions is not supported");
 				}
 			}
@@ -80,14 +74,14 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 					MinecraftVersion fromMinecraftVersion = fromMinecraftVersions.get(0);
 
 					if (!fromMinecraftVersion.hasClient() || !fromMinecraftVersion.hasServer()) {
-						throw new RuntimeException("update intermediary to a split-mappings version requires both a client and server to update from!");
+						throw new RuntimeException("updating intermediary to a split-mappings version requires both a client and server to update from!");
 					}
 				} else if (fromMinecraftVersions.size() == 2) {
 					MinecraftVersion fromMinecraftVersion0 = fromMinecraftVersions.get(0);
 					MinecraftVersion fromMinecraftVersion1 = fromMinecraftVersions.get(1);
 
 					if ((fromMinecraftVersion0.hasClient() && !fromMinecraftVersion1.hasServer()) && (fromMinecraftVersion0.hasServer() && !fromMinecraftVersion1.hasClient())) {
-						throw new RuntimeException("update intermediary to a split-mappings version requires both a client and server to update from!");
+						throw new RuntimeException("updating intermediary to a split-mappings version requires both a client and server to update from!");
 					}
 				} else {
 					throw new RuntimeException("updating split intermediary from more than 2 versions to a client-and-server version is not supported");
@@ -97,20 +91,20 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 					MinecraftVersion fromMinecraftVersion = fromMinecraftVersions.get(0);
 
 					if (minecraftVersion.hasClient() && !fromMinecraftVersion.hasClient()) {
-						throw new RuntimeException("update intermediary to a split-mappings client-only version requires a client to update from!");
+						throw new RuntimeException("updating intermediary to a split-mappings client-only version requires a client to update from!");
 					}
 					if (minecraftVersion.hasServer() && !fromMinecraftVersion.hasServer()) {
-						throw new RuntimeException("update intermediary to a split-mappings server-only version requires a server to update from!");
+						throw new RuntimeException("updating intermediary to a split-mappings server-only version requires a server to update from!");
 					}
 				} else if (fromMinecraftVersions.size() == 2) {
 					MinecraftVersion fromMinecraftVersion0 = fromMinecraftVersions.get(0);
 					MinecraftVersion fromMinecraftVersion1 = fromMinecraftVersions.get(1);
 
 					if (minecraftVersion.hasClient() && !fromMinecraftVersion0.hasClient() && !fromMinecraftVersion1.hasClient()) {
-						throw new RuntimeException("update intermediary to a split-mappings client-only version requires a client to update from!");
+						throw new RuntimeException("updating intermediary to a split-mappings client-only version requires a client to update from!");
 					}
 					if (minecraftVersion.hasServer() && !fromMinecraftVersion0.hasServer() && !fromMinecraftVersion1.hasServer()) {
-						throw new RuntimeException("update intermediary to a split-mappings server-only version requires a server to update from!");
+						throw new RuntimeException("updating intermediary to a split-mappings server-only version requires a server to update from!");
 					}
 				} else {
 					throw new RuntimeException("updating split intermediary from more than 2 versions to a client-only or server-only version is not supported");
@@ -121,18 +115,54 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 		BuildNumbers builds = keratin.getNestsBuilds(minecraftVersion);
 
 		if (minecraftVersion.hasSharedObfuscation()) {
-			IntermediaryUtil.MergedArgsBuilder args = mergedArgs(minecraftVersion)
-				.newJarFile(gameJars.getMergedJar(minecraftVersion))
-				.newNests(nests.getMergedNestsFile(minecraftVersion, builds))
+			IntermediaryUtil.MergedArgsBuilder args = mergedArgs(minecraftVersion);
+
+			if (minecraftVersion.canBeMerged()) {
+				args
+					.newJarFile(gameJars.getMergedJar(minecraftVersion))
+					.newNests(nests.getMergedNestsFile(minecraftVersion, builds));
+			} else {
+				if (minecraftVersion.hasClient()) {
+					args
+						.newJarFile(gameJars.getClientJar(minecraftVersion))
+						.newNests(nests.getClientNestsFile(minecraftVersion, builds));
+				}
+				if (minecraftVersion.hasServer()) {
+					args
+						.newJarFile(gameJars.getServerJar(minecraftVersion))
+						.newNests(nests.getServerNestsFile(minecraftVersion, builds));
+				}
+			}
+
+			args
 				.newLibraries(libraries.getLibraries(minecraftVersion))
 				.newCheckSerializable(minecraftVersion.usesSerializableForLevelSaving())
 				.newIntermediaryFile(intermediary.getTinyV1MappingsFile(minecraftVersion.id()));
 
 			for (MinecraftVersion fromMinecraftVersion : fromMinecraftVersions) {
-				Matches m = keratin.findMatches("merged", fromMinecraftVersion.id(), "merged", minecraftVersion.id());
+				Matches m = null;
+
+				if (minecraftVersion.canBeMerged() && fromMinecraftVersion.canBeMerged()) {
+					m = keratin.findMatches(JarType.MERGED, fromMinecraftVersion.id(), JarType.MERGED, minecraftVersion.id());
+					
+					args
+						.addOldJarFile(gameJars.getMergedJar(fromMinecraftVersion));
+				} else {
+					if (minecraftVersion.hasClient() && fromMinecraftVersion.hasClient()) {
+						m = keratin.findMatches(JarType.CLIENT, fromMinecraftVersion.id(), JarType.CLIENT, minecraftVersion.id());
+
+						args
+							.addOldJarFile(gameJars.getClientJar(fromMinecraftVersion));
+					}
+					if (minecraftVersion.hasServer() && fromMinecraftVersion.hasServer()) {
+						m = keratin.findMatches(JarType.SERVER, fromMinecraftVersion.id(), JarType.SERVER, minecraftVersion.id());
+
+						args
+							.addOldJarFile(gameJars.getServerJar(fromMinecraftVersion));
+					}
+				}
 
 				args
-					.addOldJarFile(gameJars.getMergedJar(fromMinecraftVersion))
 					.addOldLibraries(Collections.emptyList())
 					.addOldCheckSerializable(fromMinecraftVersion.usesSerializableForLevelSaving())
 					.addOldIntermediaryFile(intermediary.getTinyV1MappingsFile(fromMinecraftVersion.id()))
@@ -168,7 +198,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 				}
 			}
 			if (minecraftVersion.hasClient() && minecraftVersion.hasServer()) {
-				Matches m = keratin.findMatches("client", minecraftVersion.client().id(), "server", minecraftVersion.server().id());
+				Matches m = keratin.findMatches(JarType.CLIENT, minecraftVersion.client().id(), JarType.SERVER, minecraftVersion.server().id());
 				args.clientServerMatchesFile(m.file(), m.inverted());
 			}
 
@@ -181,11 +211,11 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 					.oldIntermediaryFile(intermediary.getTinyV1MappingsFile(fromMinecraftVersion.id()));
 
 				if (minecraftVersion.hasClient()) {
-					Matches m = keratin.findMatches("merged", fromMinecraftVersion.id(), "client", minecraftVersion.client().id());
+					Matches m = keratin.findMatches(JarType.MERGED, fromMinecraftVersion.id(), JarType.CLIENT, minecraftVersion.client().id());
 					args.clientMatchesFile(m.file(), m.inverted());
 				}
 				if (minecraftVersion.hasServer()) {
-					Matches m = keratin.findMatches("merged", fromMinecraftVersion.id(), "server", minecraftVersion.server().id());
+					Matches m = keratin.findMatches(JarType.MERGED, fromMinecraftVersion.id(), JarType.SERVER, minecraftVersion.server().id());
 					args.serverMatchesFile(m.file(), m.inverted());
 				}
 			} else {
@@ -225,7 +255,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 				}
 
 				if (fromClientVersion != null) {
-					Matches m = keratin.findMatches("client", fromClientVersion.client().id(), "client", minecraftVersion.client().id());
+					Matches m = keratin.findMatches(JarType.CLIENT, fromClientVersion.client().id(), JarType.CLIENT, minecraftVersion.client().id());
 
 					args
 						.oldClientJarFile(gameJars.getClientJar(fromClientVersion))
@@ -234,7 +264,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 						.clientMatchesFile(m.file(), m.inverted());
 				}
 				if (fromServerVersion != null) {
-					Matches m = keratin.findMatches("server", fromServerVersion.server().id(), "server", minecraftVersion.server().id());
+					Matches m = keratin.findMatches(JarType.SERVER, fromServerVersion.server().id(), JarType.SERVER, minecraftVersion.server().id());
 
 					args
 						.oldServerJarFile(gameJars.getServerJar(fromServerVersion))

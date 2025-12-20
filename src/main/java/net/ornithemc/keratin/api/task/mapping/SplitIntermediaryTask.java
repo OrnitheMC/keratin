@@ -6,6 +6,7 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
+import net.ornithemc.keratin.util.FileUtils;
 import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class SplitIntermediaryTask extends MinecraftTask implements MappingSplitter {
@@ -17,7 +18,24 @@ public abstract class SplitIntermediaryTask extends MinecraftTask implements Map
 
 		MappingsCache mappings = files.getGlobalCache().getMappingsCache();
 
-		if (!minecraftVersion.hasSharedObfuscation() && minecraftVersion.hasSharedVersioning()) {
+		if (minecraftVersion.hasSharedObfuscation()) {
+			if (!minecraftVersion.canBeMergedAsObfuscated()) {
+				if (minecraftVersion.hasClient()) {
+					FileUtils.copy(
+						mappings.getMergedIntermediaryMappingsFile(minecraftVersion),
+						mappings.getClientIntermediaryMappingsFile(minecraftVersion),
+						keratin.isCacheInvalid()
+					);
+				}
+				if (minecraftVersion.hasServer()) {
+					FileUtils.copy(
+						mappings.getMergedIntermediaryMappingsFile(minecraftVersion),
+						mappings.getServerIntermediaryMappingsFile(minecraftVersion),
+						keratin.isCacheInvalid()
+					);
+				}
+			}
+		} else if (minecraftVersion.hasSharedVersioning()) {
 			workQueue.submit(SplitMappingsAction.class, parameters -> {
 				parameters.getOverwrite().set(keratin.isCacheInvalid());
 				parameters.getMerged().set(mappings.getMergedIntermediaryMappingsFile(minecraftVersion));

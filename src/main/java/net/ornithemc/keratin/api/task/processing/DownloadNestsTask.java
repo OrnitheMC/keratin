@@ -19,9 +19,9 @@ public abstract class DownloadNestsTask extends MinecraftTask implements Downloa
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
 		KeratinGradleExtension keratin = getExtension();
 		KeratinFiles files = keratin.getFiles();
-		MultipleBuildsMavenArtifacts nestsArtifacts = keratin.getNestsArtifacts();
 
 		NestsCache nests = files.getGlobalCache().getNestsCache();
+		MultipleBuildsMavenArtifacts nestsArtifacts = keratin.getNestsArtifacts();
 
 		BuildNumbers builds = keratin.getNestsBuilds(minecraftVersion);
 

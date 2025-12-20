@@ -33,7 +33,7 @@ public abstract class MapMinecraftTask extends MappingTask {
 
 		boolean fromOfficial = OFFICIAL.equals(srcNs);
 
-		if (minecraftVersion.canBeMerged() && (!fromOfficial || minecraftVersion.canBeMergedAsObfuscated())) {
+		if (fromOfficial ? minecraftVersion.canBeMergedAsObfuscated() : minecraftVersion.canBeMerged()) {
 			workQueue.submit(MapJar.class, parameters -> {
 				parameters.getOverwrite().set(keratin.isCacheInvalid());
 				parameters.getInput().set(fromOfficial ? gameJars.getMergedJar(minecraftVersion) : mappedJars.getIntermediaryMergedJar(minecraftVersion));

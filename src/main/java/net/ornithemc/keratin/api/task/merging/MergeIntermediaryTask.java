@@ -17,7 +17,7 @@ public abstract class MergeIntermediaryTask extends MinecraftTask implements Mer
 
 		MappingsCache mappings = files.getGlobalCache().getMappingsCache();
 
-		if (minecraftVersion.canBeMergedLikeAlpha()) {
+		if (!minecraftVersion.hasSharedVersioning() && minecraftVersion.canBeMergedAsMapped()) {
 			workQueue.submit(MergeIntermediary.class, parameters -> {
 				parameters.getOverwrite().set(keratin.isCacheInvalid());
 				parameters.getClient().set(mappings.getClientIntermediaryMappingsFile(minecraftVersion));

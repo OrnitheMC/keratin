@@ -28,7 +28,7 @@ public abstract class MapExceptionsTask extends MappingTask {
 
 		boolean fromOfficial = OFFICIAL.equals(srcNs);
 
-		if (minecraftVersion.canBeMerged() && (!fromOfficial || minecraftVersion.hasSharedObfuscation())) {
+		if (fromOfficial ? minecraftVersion.canBeMergedAsObfuscated() : minecraftVersion.canBeMerged()) {
 			if (minecraftVersion.hasSharedObfuscation() ? (builds.merged() > 0) : (builds.client() > 0 || builds.server() > 0)) {
 				workQueue.submit(MapExceptions.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());

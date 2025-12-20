@@ -33,6 +33,7 @@ import org.gradle.api.tasks.javadoc.Javadoc;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import net.ornithemc.keratin.api.JarType;
 import net.ornithemc.keratin.api.KeratinGradleExtensionAPI;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.PublicationsAPI;
@@ -96,10 +97,14 @@ import net.ornithemc.keratin.api.task.merging.MergeMinecraftJarsTask;
 import net.ornithemc.keratin.api.task.merging.MergeNestsTask;
 import net.ornithemc.keratin.api.task.merging.MergeSignaturesTask;
 import net.ornithemc.keratin.api.task.minecraft.DownloadMinecraftJarsTask;
+import net.ornithemc.keratin.api.task.minecraft.RemoveShadedLibrariesTask;
 import net.ornithemc.keratin.api.task.processing.DownloadExceptionsTask;
 import net.ornithemc.keratin.api.task.processing.DownloadNestsTask;
 import net.ornithemc.keratin.api.task.processing.DownloadSignaturesTask;
 import net.ornithemc.keratin.api.task.processing.ProcessMinecraftTask;
+import net.ornithemc.keratin.api.task.processing.SplitExceptionsTask;
+import net.ornithemc.keratin.api.task.processing.SplitNestsTask;
+import net.ornithemc.keratin.api.task.processing.SplitSignaturesTask;
 import net.ornithemc.keratin.api.task.processing.UpdateBuildsCacheTask;
 import net.ornithemc.keratin.api.task.setup.DownloadNamedMappingsTask;
 import net.ornithemc.keratin.api.task.setup.MakeSetupExceptionsTask;
@@ -481,18 +486,32 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		TaskProvider<?> updateNestsBuilds = tasks.register("updateNestsBuildsCache", UpdateBuildsCacheTask.Nests.class);
 
 		TaskProvider<?> downloadJars = tasks.register("downloadMinecraftJars", DownloadMinecraftJarsTask.class);
-		TaskProvider<?> mergeJars = tasks.register("mergeMinecraftJars", MergeMinecraftJarsTask.class, task -> {
+		TaskProvider<?> removeShadedLibs = tasks.register("removeShadedLibraries", RemoveShadedLibrariesTask.class, task -> {
 			task.dependsOn(downloadJars);
+		});
+		TaskProvider<?> mergeJars = tasks.register("mergeMinecraftJars", MergeMinecraftJarsTask.class, task -> {
+			task.dependsOn(removeShadedLibs);
 			task.getNamespace().set(Mapper.OFFICIAL);
 		});
 
 		TaskProvider<?> downloadExceptions = tasks.register("downloadExceptions", DownloadExceptionsTask.class);
+		TaskProvider<?> splitExceptions = tasks.register("splitExceptions", SplitExceptionsTask.class, task -> {
+			task.dependsOn(downloadExceptions);
+		});
+
 		TaskProvider<?> downloadSignatures = tasks.register("downloadSignatures", DownloadSignaturesTask.class);
+		TaskProvider<?> splitSignatures = tasks.register("splitSignatures", SplitSignaturesTask.class, task -> {
+			task.dependsOn(downloadSignatures);
+		});
+
 		TaskProvider<?> downloadNests = tasks.register("downloadNests", DownloadNestsTask.class);
+		TaskProvider<?> splitNests = tasks.register("splitNests", SplitNestsTask.class, task -> {
+			task.dependsOn(downloadNests);
+		});
 
 		if (selection == TaskSelection.INTERMEDIARY) {
 			Action<GenerateIntermediaryTask> configureIntermediaryTask = task -> {
-				task.dependsOn(mergeJars, downloadNests);
+				task.dependsOn(mergeJars, splitNests);
 				task.getTargetNamespace().set(Mapper.INTERMEDIARY);
 				task.getTargetPackage().set("net/minecraft/unmapped/");
 				task.getNameLength().set(7);
@@ -571,7 +590,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			});
 
 			TaskProvider<?> mapNestsToIntermediary = tasks.register("mapNestsToIntermediary", MapNestsTask.class, task -> {
-				task.dependsOn(downloadNests, fillIntermediary);
+				task.dependsOn(splitNests, fillIntermediary);
 				task.getSourceNamespace().set(Mapper.OFFICIAL);
 				task.getTargetNamespace().set(Mapper.INTERMEDIARY);
 			});
@@ -623,7 +642,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				});
 
 				TaskProvider<?> mapExceptionsToIntermediary = tasks.register("mapExceptionsToIntermediary", MapExceptionsTask.class, task -> {
-					task.dependsOn(downloadExceptions, fillIntermediary);
+					task.dependsOn(splitExceptions, fillIntermediary);
 					task.getSourceNamespace().set(Mapper.OFFICIAL);
 					task.getTargetNamespace().set(Mapper.INTERMEDIARY);
 					
@@ -633,7 +652,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.getNamespace().set(Mapper.INTERMEDIARY);
 				});
 				TaskProvider<?> mapSignaturesToIntermediary = tasks.register("mapSignaturesToIntermediary", MapSignaturesTask.class, task -> {
-					task.dependsOn(downloadSignatures, fillIntermediary);
+					task.dependsOn(splitSignatures, fillIntermediary);
 					task.getSourceNamespace().set(Mapper.OFFICIAL);
 					task.getTargetNamespace().set(Mapper.INTERMEDIARY);
 					
@@ -814,7 +833,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.dependsOn(downloadNamedMappings, mergeIntermediaryJars, mergeIntermediaryNests);
 				});
 				TaskProvider<?> makeSetupJars = tasks.register("makeSetupJars", MakeSetupJarsTask.class, task -> {
-					task.dependsOn(downloadNests, mergeJars);
+					task.dependsOn(splitNests, mergeJars);
 				});
 				TaskProvider<?> mapSetupJars = tasks.register("mapSetupJars", MapSetupJarsTask.class, task -> {
 					task.dependsOn(makeSetupMappings, makeSetupJars);
@@ -824,7 +843,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.dependsOn(makeSetupMappings, makeSetupJars);
 				});
 				TaskProvider<?> makeSourceJars = tasks.register("makeSourceJars", MakeSourceJarsTask.class, task -> {
-					task.dependsOn(makeSetupExceptions, makeSetupSignatures, downloadNests, mergeJars);
+					task.dependsOn(makeSetupExceptions, makeSetupSignatures, splitNests, mergeJars);
 				});
 				TaskProvider<?> mapSourceJars = tasks.register("mapSourceJars", MapSourceJarsTask.class, task -> {
 					task.dependsOn(makeSourceMappings, makeSourceJars);
@@ -1112,36 +1131,36 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		return processorSettings.get(minecraftVersion).withObfuscateLocalVariableNames(true);
 	}
 
-	public Matches findMatches(String sideA, String versionA, String sideB, String versionB) {
+	public Matches findMatches(JarType typeA, String versionA, JarType typeB, String versionB) {
 		File dir = files.getSharedFiles().getMatchesDirectory();
 
 		File file;
 		boolean inverted;
 
-		file = findMatches(dir, sideA, versionA, sideB, versionB);
+		file = findMatches(dir, typeA, versionA, typeB, versionB);
 		inverted = false;
 
 		if (file == null) {
-			file = findMatches(dir, sideB, versionB, sideA, versionA);
+			file = findMatches(dir, typeB, versionB, typeA, versionA);
 			inverted = true;
 		}
 
 		if (file == null) {
-			throw new RuntimeException("no matches from %s %s to %s %s could be found".formatted(sideA, versionA, sideB, versionB));
+			throw new RuntimeException("no matches from %s %s to %s %s could be found".formatted(typeA.getName(), versionA, typeB.getName(), versionB));
 		}
 
 		return new Matches(file, inverted);
 	}
 
-	private File findMatches(File dir, String sideA, String versionA, String sideB, String versionB) {
+	private File findMatches(File dir, JarType typeA, String versionA, JarType typeB, String versionB) {
 		String name;
 
-		if (sideA.equals(sideB)) {
-			dir = new File(dir, sideA);
+		if (typeA == typeB) {
+			dir = new File(dir, typeA.getName());
 			name = "%s#%s.match".formatted(versionA, versionB);
 		} else {
 			dir = new File(dir, "cross");
-			name = "%s-%s#%s-%s.match".formatted(sideA, versionA, sideB, versionB);
+			name = "%s-%s#%s-%s.match".formatted(typeA.getName(), versionA, typeB.getName(), versionB);
 		}
 
 		return findMatches(dir, name);

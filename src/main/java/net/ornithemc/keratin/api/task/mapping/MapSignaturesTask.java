@@ -28,7 +28,7 @@ public abstract class MapSignaturesTask extends MappingTask {
 
 		BuildNumbers builds = keratin.getSignaturesBuilds(minecraftVersion);
 
-		if (minecraftVersion.canBeMerged() && (!fromOfficial || minecraftVersion.hasSharedObfuscation())) {
+		if (fromOfficial ? minecraftVersion.canBeMergedAsObfuscated() : minecraftVersion.canBeMerged()) {
 			if (minecraftVersion.hasSharedObfuscation() ? (builds.merged() > 0) : (builds.client() > 0 || builds.server() > 0)) {
 				workQueue.submit(MapSignatures.class, parameters -> {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());

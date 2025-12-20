@@ -7,6 +7,7 @@ import org.gradle.workers.WorkQueue;
 import net.fabricmc.stitch.util.IntermediaryUtil;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.JarType;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.files.GlobalCache;
@@ -47,7 +48,7 @@ public abstract class GenerateNewIntermediaryTask extends GenerateIntermediaryTa
 
 			IntermediaryUtil.generateMappings(args.build());
 		} else {
-			Matches matches = keratin.findMatches("client", minecraftVersion.client().id(), "server", minecraftVersion.server().id());
+			Matches matches = keratin.findMatches(JarType.CLIENT, minecraftVersion.client().id(), JarType.SERVER, minecraftVersion.server().id());
 
 			IntermediaryUtil.SplitArgsBuilder args = splitArgs(minecraftVersion)
 				.newClientJarFile(gameJars.getClientJar(minecraftVersion))

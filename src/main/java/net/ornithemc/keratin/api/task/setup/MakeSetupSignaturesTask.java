@@ -19,6 +19,7 @@ import io.github.gaming32.signaturechanger.visitor.SigsFileWriter;
 import io.github.gaming32.signaturechanger.visitor.SigsReader;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.JarType;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles;
@@ -56,9 +57,9 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 
 					updateSignatures(
 						fromMinecraftVersion.id(),
-						"merged",
+						JarType.MERGED,
 						minecraftVersion.id(),
-						"merged",
+						JarType.MERGED,
 						fromSigs,
 						setup
 					);
@@ -83,9 +84,9 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 
 						updateSignatures(
 							fromMinecraftVersion.client().id(),
-							"client",
+							JarType.CLIENT,
 							minecraftVersion.client().id(),
-							"client",
+							JarType.CLIENT,
 							fromSigs,
 							setup
 						);
@@ -110,9 +111,9 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 
 						updateSignatures(
 							fromMinecraftVersion.server().id(),
-							"server",
+							JarType.SERVER,
 							minecraftVersion.server().id(),
-							"server",
+							JarType.SERVER,
 							fromSigs,
 							setup
 						);
@@ -124,14 +125,14 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 		}
 	}
 
-	private void updateSignatures(String fromMinecraftVersion, String fromSide, String toMinecraftVersion, String toSide, File from, File to) throws IOException {
+	private void updateSignatures(String fromMinecraftVersion, JarType fromType, String toMinecraftVersion, JarType toType, File from, File to) throws IOException {
 		KeratinGradleExtension keratin = getExtension();
 
 		if (!from.exists()) {
 			throw new RuntimeException("signatures for " + fromMinecraftVersion + " to update from do not exist!");
 		}
 
-		Matches matches = keratin.findMatches(fromSide, fromMinecraftVersion, toSide, toMinecraftVersion);
+		Matches matches = keratin.findMatches(fromType, fromMinecraftVersion, toType, toMinecraftVersion);
 		Remapper mapper = MatchesUtil.makeRemapper(matches.file(), matches.inverted());
 
 		SigsFile fromSigs = new SigsFile();

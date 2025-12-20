@@ -22,7 +22,7 @@ public abstract class MergeExceptionsTask extends MergeTask {
 
 		ExceptionsCache exceptions = files.getGlobalCache().getExceptionsCache();
 
-		if (!minecraftVersion.canBeMergedAsObfuscated()) {
+		if (minecraftVersion.canBeMergedAsMapped()) {
 			BuildNumbers builds = keratin.getExceptionsBuilds(minecraftVersion);
 
 			if (builds.client() > 0 && builds.server() > 0) {
