@@ -9,7 +9,7 @@ import net.ornithemc.keratin.api.manifest.VersionDetails;
 public record MinecraftVersion(String id, VersionDetails client, VersionDetails server) implements Comparable<MinecraftVersion> {
 
 	public static MinecraftVersion parse(KeratinGradleExtension keratin, String s) {
-		String[] parts = s.split("[~]");
+		String[] parts = s.split("[&]");
 		String minecraftClientVersion = parts.length == 2 ? parts[0] : s;
 		String minecraftServerVersion = parts.length == 2 ? parts[1] : s;
 
