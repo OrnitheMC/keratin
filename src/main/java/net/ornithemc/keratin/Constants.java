@@ -17,6 +17,9 @@ public class Constants {
 	public static final String QUILT_MAVEN_NAME = "Quilt";
 	public static final String QUILT_MAVEN_URL = "https://maven.quiltmc.org/repository/release";
 
+	public static final String LEGACY_FABRIC_MAVEN_NAME = "Legacy Fabric";
+	public static final String LEGACY_FABRIC_MAVEN_URL = "https://maven.legacyfabric.net";
+
 	public static final String VINEFLOWER_SNAPSHOTS_MAVEN_NAME = "Vineflower Snapshots";
 	public static final String VINEFLOWER_SNAPSHOTS_MAVEN_URL = "https://s01.oss.sonatype.org/content/repositories/snapshots";
 
