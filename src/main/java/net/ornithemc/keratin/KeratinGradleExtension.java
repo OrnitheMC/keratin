@@ -534,7 +534,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				tasks.getByName("build").dependsOn(tinyV1Jar, tinyV2Jar);
 
 				if (!intermediaryArtifacts.contains(minecraftVersion)) {
-					MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
+					MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion.replace("~", "")), MavenPublication.class, publication -> {
 						publication.setGroupId(this.publications.getGroupId().get());
 						publication.setArtifactId(this.publications.getArtifactId().get());
 						publication.setVersion(minecraftVersion);
@@ -776,7 +776,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					int nextBuild = namedMappingsBuilds.getBuild(minecraftVersion) + 1;
 
 					if (nextBuild > latestBuild) {
-						MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion), MavenPublication.class, publication -> {
+						MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion.replace("~", "")), MavenPublication.class, publication -> {
 							publication.setGroupId(this.publications.getGroupId().get());
 							publication.setArtifactId(this.publications.getArtifactId().get());
 							publication.setVersion("%s+build.%d".formatted(minecraftVersion, nextBuild));
