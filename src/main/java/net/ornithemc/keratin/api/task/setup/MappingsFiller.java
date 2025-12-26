@@ -188,13 +188,24 @@ public interface MappingsFiller {
 			if (typeForBridge.equals(typeForSpecialized)) {
 				return true;
 			}
-			if (typeForBridge.getSort() != typeForSpecialized.getSort()) {
-				return false;
-			}
 
-			switch (typeForBridge.getSort()) {
-			case Type.OBJECT:
-				return areClassesBridgeCompatible(typeForBridge.getInternalName(), typeForSpecialized.getInternalName());
+			int sortForBridge = typeForBridge.getSort();
+	        int sortForSpecialized = typeForSpecialized.getSort();
+
+	        if (sortForBridge != sortForSpecialized && !(sortForBridge == Type.OBJECT && sortForSpecialized == Type.ARRAY)) {
+	            return false;
+	        }
+
+	        switch (sortForBridge) {
+	        case Type.OBJECT:
+	            String clsForBridge = typeForBridge.getInternalName();
+	            String clsForSpecialized = typeForSpecialized.getInternalName();
+
+	            if (sortForSpecialized == Type.ARRAY) {
+	                return "java/lang/Object".equals(clsForBridge);
+	            } else {
+	                return areClassesBridgeCompatible(clsForBridge, clsForSpecialized);
+	            }
 			case Type.ARRAY:
 				if (typeForBridge.getDimensions() != typeForSpecialized.getDimensions()) {
 					return false;
