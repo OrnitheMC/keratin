@@ -32,7 +32,7 @@ public abstract class FillIntermediaryTask extends MinecraftTask {
 		MappingsCache mappings = globalCache.getMappingsCache();
 		LibrariesCache libraries = globalCache.getLibrariesCache();
 
-		if (minecraftVersion.hasSharedObfuscation()) {
+		if (minecraftVersion.canBeMergedAsObfuscated()) {
 			workQueue.submit(FillIntermediary.class, parameters -> {
 				parameters.getOverwrite().set(keratin.isCacheInvalid());
 				parameters.getInputMappings().set(mappings.getMergedIntermediaryMappingsFile(minecraftVersion));
