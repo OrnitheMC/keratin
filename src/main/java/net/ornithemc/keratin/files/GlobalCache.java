@@ -144,29 +144,38 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 		}
 
 		@Override
+		public File getClientJarWithJunk(MinecraftVersion minecraftVersion) {
+			if (!minecraftVersion.hasClient()) {
+				throw new IllegalArgumentException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else {
+				return file("%s-client-with-junk.jar".formatted(minecraftVersion.client().id()));
+			}
+		}
+
+		@Override
+		public File getServerJarWithJunk(MinecraftVersion minecraftVersion) {
+			if (!minecraftVersion.hasServerJar()) {
+				throw new IllegalArgumentException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else {
+				return file("%s-server-with-junk.jar".formatted(minecraftVersion.server().id()));
+			}
+		}
+
+		@Override
+		public File getServerZipWithJunk(MinecraftVersion minecraftVersion) {
+			if (!minecraftVersion.hasServerZip()) {
+				throw new IllegalArgumentException("server zip for Minecraft version " + minecraftVersion.id() + " does not exist!");
+			} else {
+				return file("%s-server-with-junk.zip".formatted(minecraftVersion.server().id()));
+			}
+		}
+
+		@Override
 		public File getClientJar(MinecraftVersion minecraftVersion) {
 			if (!minecraftVersion.hasClient()) {
 				throw new IllegalArgumentException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
 				return file("%s-client.jar".formatted(minecraftVersion.client().id()));
-			}
-		}
-
-		@Override
-		public File getServerJarWithLibraries(MinecraftVersion minecraftVersion) {
-			if (!minecraftVersion.hasServerJar()) {
-				throw new IllegalArgumentException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
-			} else {
-				return file("%s-server-with-libraries.jar".formatted(minecraftVersion.server().id()));
-			}
-		}
-
-		@Override
-		public File getServerZipWithLibraries(MinecraftVersion minecraftVersion) {
-			if (!minecraftVersion.hasServerZip()) {
-				throw new IllegalArgumentException("server zip for Minecraft version " + minecraftVersion.id() + " does not exist!");
-			} else {
-				return file("%s-server-with-libraries.zip".formatted(minecraftVersion.server().id()));
 			}
 		}
 

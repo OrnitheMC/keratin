@@ -16,11 +16,12 @@ import org.gradle.workers.WorkQueue;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.manifest.VersionDetails;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
 import net.ornithemc.keratin.files.KeratinFiles;
 
-public abstract class RemoveShadedLibrariesTask extends MinecraftTask {
+public abstract class StripMinecraftJarsTask extends MinecraftTask {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
@@ -29,30 +30,43 @@ public abstract class RemoveShadedLibrariesTask extends MinecraftTask {
 
 		GameJarsCache gameJars = files.getGlobalCache().getGameJarsCache();
 
-		if (minecraftVersion.hasServer()) {
-			File jarWithLibs = gameJars.getServerJarWithLibraries(minecraftVersion);
-			File jarWithoutLibs = gameJars.getServerJar(minecraftVersion);
+		if (minecraftVersion.hasClient()) {
+			File junkJar = gameJars.getClientJarWithJunk(minecraftVersion);
+			File strippedJar = gameJars.getClientJar(minecraftVersion);
+			String filter = getClassFilter(minecraftVersion.client());
 
-			String filter;
-
-			if (minecraftVersion.server().compareTo("1.5.2") > 0) {
-				// for later versions, mc classes are in default package,
-				// or in net/minecraft/, or in com/mojang/
-				filter = "^((?!/).)*$|^net/minecraft/.*$|^com/mojang/.*$";
-			} else {
-				filter = ".*"; // default filter: allow anything
-			}
-
-			workQueue.submit(CopyWithFilter.class, parameters -> {
+			workQueue.submit(StripJarFilter.class, parameters -> {
 				parameters.getOverwrite().set(keratin.isCacheInvalid());
-				parameters.getInput().set(jarWithLibs);
-				parameters.getOutput().set(jarWithoutLibs);
+				parameters.getInput().set(junkJar);
+				parameters.getOutput().set(strippedJar);
+				parameters.getFilter().set(filter);
+			});
+		}
+		if (minecraftVersion.hasServer()) {
+			File junkJar = gameJars.getServerJarWithJunk(minecraftVersion);
+			File strippedJar = gameJars.getServerJar(minecraftVersion);
+			String filter = getClassFilter(minecraftVersion.server());
+
+			workQueue.submit(StripJarFilter.class, parameters -> {
+				parameters.getOverwrite().set(keratin.isCacheInvalid());
+				parameters.getInput().set(junkJar);
+				parameters.getOutput().set(strippedJar);
 				parameters.getFilter().set(filter);
 			});
 		}
 	}
 
-	public static interface CopyWithFilterParameters extends WorkParameters {
+	private String getClassFilter(VersionDetails minecraftVersion) {
+		if (minecraftVersion.compareTo("1.5.2") > 0) {
+			// for later versions, mc classes are in default package,
+			// or in net/minecraft/, or in com/mojang/
+			return "^((?!/).)*$|^net/minecraft/.*$|^com/mojang/.*$";
+		} else {
+			return ".*"; // default filter: allow anything
+		}
+	}
+
+	public static interface StripJarParameters extends WorkParameters {
 
 		Property<Boolean> getOverwrite();
 
@@ -64,7 +78,7 @@ public abstract class RemoveShadedLibrariesTask extends MinecraftTask {
 
 	}
 
-	public static abstract class CopyWithFilter implements WorkAction<CopyWithFilterParameters> {
+	public static abstract class StripJarFilter implements WorkAction<StripJarParameters> {
 
 		@Override
 		public void execute() {

@@ -45,11 +45,13 @@ public interface GlobalCacheAccess {
 
 		File getDirectory();
 
+		File getClientJarWithJunk(MinecraftVersion minecraftVersion);
+
+		File getServerJarWithJunk(MinecraftVersion minecraftVersion);
+
+		File getServerZipWithJunk(MinecraftVersion minecraftVersion);
+
 		File getClientJar(MinecraftVersion minecraftVersion);
-
-		File getServerJarWithLibraries(MinecraftVersion minecraftVersion);
-
-		File getServerZipWithLibraries(MinecraftVersion minecraftVersion);
 
 		File getServerJar(MinecraftVersion minecraftVersion);
 

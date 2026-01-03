@@ -97,7 +97,7 @@ import net.ornithemc.keratin.api.task.merging.MergeMinecraftJarsTask;
 import net.ornithemc.keratin.api.task.merging.MergeNestsTask;
 import net.ornithemc.keratin.api.task.merging.MergeSignaturesTask;
 import net.ornithemc.keratin.api.task.minecraft.DownloadMinecraftJarsTask;
-import net.ornithemc.keratin.api.task.minecraft.RemoveShadedLibrariesTask;
+import net.ornithemc.keratin.api.task.minecraft.StripMinecraftJarsTask;
 import net.ornithemc.keratin.api.task.processing.DownloadExceptionsTask;
 import net.ornithemc.keratin.api.task.processing.DownloadNestsTask;
 import net.ornithemc.keratin.api.task.processing.DownloadSignaturesTask;
@@ -486,11 +486,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		TaskProvider<?> updateNestsBuilds = tasks.register("updateNestsBuildsCache", UpdateBuildsCacheTask.Nests.class);
 
 		TaskProvider<?> downloadJars = tasks.register("downloadMinecraftJars", DownloadMinecraftJarsTask.class);
-		TaskProvider<?> removeShadedLibs = tasks.register("removeShadedLibraries", RemoveShadedLibrariesTask.class, task -> {
+		TaskProvider<?> stripJars = tasks.register("stripMinecraftJars", StripMinecraftJarsTask.class, task -> {
 			task.dependsOn(downloadJars);
 		});
 		TaskProvider<?> mergeJars = tasks.register("mergeMinecraftJars", MergeMinecraftJarsTask.class, task -> {
-			task.dependsOn(removeShadedLibs);
+			task.dependsOn(stripJars);
 			task.getNamespace().set(Mapper.OFFICIAL);
 		});
 
