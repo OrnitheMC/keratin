@@ -57,7 +57,7 @@ public abstract class StripMinecraftJarsTask extends MinecraftTask {
 	}
 
 	private String getClassFilter(VersionDetails minecraftVersion) {
-		if (minecraftVersion.compareTo("1.5.2") > 0) {
+		if (minecraftVersion.compareTo("1.5.2") > 0 && minecraftVersion.compareTo("2.0.0-april.fools") < 0) {
 			// for later versions, mc classes are in default package,
 			// or in net/minecraft/, or in com/mojang/
 			return "^((?!/).)*$|^net/minecraft/.*$|^com/mojang/.*$";
