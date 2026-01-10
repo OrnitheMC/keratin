@@ -42,7 +42,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 
 		BuildNumbers nestsBuilds = keratin.getNestsBuilds(minecraftVersion);
 
-		if (minecraftVersion.hasSharedObfuscation()) {
+		if (minecraftVersion.canBeMergedAsObfuscated()) {
 			int mappingsBuild = keratin.getNamedMappingsBuild(minecraftVersion.id());
 
 			workQueue.submit(MakeSetupMappings.class, parameters -> {

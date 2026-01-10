@@ -23,6 +23,7 @@ import net.ornithemc.keratin.api.JarType;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SetupFiles;
 import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.matching.Matches;
 import net.ornithemc.keratin.matching.MatchesUtil;
@@ -37,15 +38,16 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 		KeratinGradleExtension keratin = getExtension();
 		KeratinFiles files = keratin.getFiles();
 
-		ExceptionsAndSignaturesDevelopmentFiles excsAndSigs = files.getExceptionsAndSignaturesDevelopmentFiles();
+		ExceptionsAndSignaturesDevelopmentFiles sigsFiles = files.getExceptionsAndSignaturesDevelopmentFiles();
+		SetupFiles setupSigsFiles = sigsFiles.getSetupFiles();
 
 		MinecraftVersion fromMinecraftVersion = getFromMinecraftVersion().isPresent()
 			? MinecraftVersion.parse(keratin, getFromMinecraftVersion().get())
 			: null;
 
 		if (minecraftVersion.hasSharedObfuscation()) {
-			File sigs = excsAndSigs.getMergedSignaturesFile(minecraftVersion);
-			File setup = excsAndSigs.getMergedSignaturesFile(minecraftVersion);
+			File sigs = sigsFiles.getMergedSignaturesFile(minecraftVersion);
+			File setup = setupSigsFiles.getMergedSignaturesFile(minecraftVersion);
 
 			if (sigs.exists()) {
 				Files.copy(sigs, setup);
@@ -53,7 +55,7 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 				if (fromMinecraftVersion == null) {
 					setup.createNewFile();
 				} else if (fromMinecraftVersion.hasSharedObfuscation()) {
-					File fromSigs = excsAndSigs.getMergedSignaturesFile(fromMinecraftVersion);
+					File fromSigs = sigsFiles.getMergedSignaturesFile(fromMinecraftVersion);
 
 					updateSignatures(
 						fromMinecraftVersion.id(),
@@ -69,8 +71,8 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 			}
 		} else {
 			if (minecraftVersion.hasClient()) {
-				File sigs = excsAndSigs.getClientSignaturesFile(minecraftVersion);
-				File setup = excsAndSigs.getClientSignaturesFile(minecraftVersion);
+				File sigs = sigsFiles.getClientSignaturesFile(minecraftVersion);
+				File setup = setupSigsFiles.getClientSignaturesFile(minecraftVersion);
 
 				if (sigs.exists()) {
 					Files.copy(sigs, setup);
@@ -80,7 +82,7 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 					} else if (fromMinecraftVersion.hasSharedObfuscation()) {
 						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
 					} else if (fromMinecraftVersion.hasClient()) {
-						File fromSigs = excsAndSigs.getClientSignaturesFile(fromMinecraftVersion);
+						File fromSigs = sigsFiles.getClientSignaturesFile(fromMinecraftVersion);
 
 						updateSignatures(
 							fromMinecraftVersion.client().id(),
@@ -96,8 +98,8 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 				}
 			}
 			if (minecraftVersion.hasServer()) {
-				File sigs = excsAndSigs.getServerSignaturesFile(minecraftVersion);
-				File setup = excsAndSigs.getServerSignaturesFile(minecraftVersion);
+				File sigs = sigsFiles.getServerSignaturesFile(minecraftVersion);
+				File setup = setupSigsFiles.getServerSignaturesFile(minecraftVersion);
 
 				if (sigs.exists()) {
 					Files.copy(sigs, setup);
@@ -107,7 +109,7 @@ public abstract class MakeSetupSignaturesTask extends MinecraftTask {
 					} else if (fromMinecraftVersion.hasSharedObfuscation()) {
 						throw new RuntimeException("cannot update from <1.3 version to >=1.3 version!");
 					} else if (fromMinecraftVersion.hasServer()) {
-						File fromSigs = excsAndSigs.getServerSignaturesFile(fromMinecraftVersion);
+						File fromSigs = sigsFiles.getServerSignaturesFile(fromMinecraftVersion);
 
 						updateSignatures(
 							fromMinecraftVersion.server().id(),

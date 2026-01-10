@@ -44,7 +44,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 
 		BuildNumbers nestsBuilds = keratin.getNestsBuilds(minecraftVersion);
 
-		if (minecraftVersion.hasSharedObfuscation()) {
+		if (minecraftVersion.canBeMergedAsObfuscated()) {
 			workQueue.submit(MakeSourceJar.class, parameters -> {
 				parameters.getInput().set(gameJars.getMergedJar(minecraftVersion));
 				parameters.getOutput().set(sourceJars.getMergedJar(minecraftVersion));
@@ -104,8 +104,8 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 			File signatures = getParameters().getSignatures().get();
 			File nests = getParameters().getNests().getOrNull();
 
-			File tmp1 = new File(output.getParentFile(), ".tmp1.jar");
-			File tmp2 = new File(output.getParentFile(), ".tmp2.jar");
+			File tmp1 = new File(output.getParentFile(), ".tmp1." + output.getName());
+			File tmp2 = new File(output.getParentFile(), ".tmp2." + output.getName());
 
 			try {
 				File jarIn = input;

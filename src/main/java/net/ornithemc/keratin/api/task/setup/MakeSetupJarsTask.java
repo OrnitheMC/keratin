@@ -25,7 +25,7 @@ public abstract class MakeSetupJarsTask extends MinecraftTask implements Nester 
 
 		BuildNumbers nestsBuilds = keratin.getNestsBuilds(minecraftVersion);
 
-		if (minecraftVersion.hasSharedObfuscation()) {
+		if (minecraftVersion.canBeMergedAsObfuscated()) {
 			workQueue.submit(NestJar.class, parameters -> {
 				parameters.getInputJar().set(gameJars.getMergedJar(minecraftVersion));
 				parameters.getOutputJar().set(setupJars.getMergedJar(minecraftVersion));

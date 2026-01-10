@@ -23,7 +23,7 @@ public abstract class MakeSourceMappingsTask extends MinecraftTask implements Ma
 		SetupFiles setupFiles = excsAndSigs.getSetupFiles();
 		SourceMappings sourceMappings = excsAndSigs.getSourceMappings();
 
-		if (minecraftVersion.hasSharedObfuscation()) {
+		if (minecraftVersion.canBeMergedAsObfuscated()) {
 			workQueue.submit(PatchMappings.class, parameters -> {
 				parameters.getIntermediaryMappings().set(setupFiles.getMergedIntermediaryMappingsFile(minecraftVersion));
 				parameters.getNamedMappings().set(setupFiles.getMergedNamedMappingsFile(minecraftVersion));

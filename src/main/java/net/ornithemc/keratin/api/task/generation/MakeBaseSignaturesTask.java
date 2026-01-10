@@ -20,7 +20,7 @@ public abstract class MakeBaseSignaturesTask extends MinecraftTask implements Si
 		GameJarsCache gameJars = files.getGlobalCache().getGameJarsCache();
 		BuildFiles buildFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getBuildFiles();
 
-		if (minecraftVersion.hasSharedObfuscation()) {
+		if (minecraftVersion.canBeMergedAsObfuscated()) {
 			extractSignatures(
 				gameJars.getMergedJar(minecraftVersion),
 				buildFiles.getBaseMergedSignaturesFile(minecraftVersion)

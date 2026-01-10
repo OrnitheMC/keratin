@@ -27,7 +27,7 @@ public abstract class MakeGeneratedExceptionsTask extends MinecraftTask implemen
 
 		BuildNumbers nestsBuilds = keratin.getNestsBuilds(minecraftVersion);
 
-		if (minecraftVersion.hasSharedObfuscation()) {
+		if (minecraftVersion.canBeMergedAsObfuscated()) {
 			File jar = buildFiles.getGeneratedMergedJar(minecraftVersion);
 			File excs = buildFiles.getGeneratedMergedExceptionsFile(minecraftVersion);
 			File nests = nestsCache.getMergedNestsFile(minecraftVersion, nestsBuilds);

@@ -55,7 +55,7 @@ public interface Nester {
 				File tmp = output;
 
 				while (tmp.exists()) {
-					tmp = new File(tmp.getParentFile(), tmp.getName() + ".tmp");
+					tmp = new File(tmp.getParentFile(), ".tmp." + tmp.getName());
 				}
 
 				Files.copy(input, tmp);

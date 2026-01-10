@@ -22,15 +22,15 @@ public abstract class MapSourceJarsTask extends MinecraftTask implements Mapper 
 		SourceJars sourceJars = files.getExceptionsAndSignaturesDevelopmentFiles().getSourceJars();
 		SourceMappings mappings = files.getExceptionsAndSignaturesDevelopmentFiles().getSourceMappings();
 
-		if (minecraftVersion.hasSharedObfuscation()) {
+		if (minecraftVersion.canBeMergedAsObfuscated()) {
 			workQueue.submit(MapJar.class, parameters -> {
 				parameters.getOverwrite().set(true);
 				parameters.getInput().set(sourceJars.getMergedJar(minecraftVersion));
 				parameters.getOutput().set(sourceJars.getNamedMergedJar(minecraftVersion));
 				parameters.getMappings().set(mappings.getMergedMappingsFile(minecraftVersion));
 				parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
-				parameters.getSourceNamespace().set("official");
-				parameters.getTargetNamespace().set("named");
+				parameters.getSourceNamespace().set(Mapper.OFFICIAL);
+				parameters.getTargetNamespace().set(Mapper.NAMED);
 			});
 		} else {
 			if (minecraftVersion.hasClient()) {
@@ -40,8 +40,8 @@ public abstract class MapSourceJarsTask extends MinecraftTask implements Mapper 
 					parameters.getOutput().set(sourceJars.getNamedClientJar(minecraftVersion));
 					parameters.getMappings().set(mappings.getClientMappingsFile(minecraftVersion));
 					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
-					parameters.getSourceNamespace().set("official");
-					parameters.getTargetNamespace().set("named");
+					parameters.getSourceNamespace().set(Mapper.OFFICIAL);
+					parameters.getTargetNamespace().set(Mapper.NAMED);
 				});
 			}
 			if (minecraftVersion.hasServer()) {
@@ -51,8 +51,8 @@ public abstract class MapSourceJarsTask extends MinecraftTask implements Mapper 
 					parameters.getOutput().set(sourceJars.getNamedServerJar(minecraftVersion));
 					parameters.getMappings().set(mappings.getServerMappingsFile(minecraftVersion));
 					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
-					parameters.getSourceNamespace().set("official");
-					parameters.getTargetNamespace().set("named");
+					parameters.getSourceNamespace().set(Mapper.OFFICIAL);
+					parameters.getTargetNamespace().set(Mapper.NAMED);
 				});
 			}
 		}

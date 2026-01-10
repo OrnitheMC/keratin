@@ -22,7 +22,7 @@ public abstract class MapGeneratedJarsTask extends MinecraftTask implements Mapp
 		SourceMappings mappings = files.getExceptionsAndSignaturesDevelopmentFiles().getSourceMappings();
 		BuildFiles buildFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getBuildFiles();
 
-		if (minecraftVersion.hasSharedObfuscation()) {
+		if (minecraftVersion.canBeMergedAsObfuscated()) {
 			workQueue.submit(MapJar.class, parameters -> {
 				parameters.getOverwrite().set(true);
 				parameters.getInput().set(buildFiles.getNamedGeneratedMergedJar(minecraftVersion));

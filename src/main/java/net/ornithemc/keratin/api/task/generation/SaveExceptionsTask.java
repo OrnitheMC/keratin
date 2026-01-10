@@ -32,7 +32,7 @@ public abstract class SaveExceptionsTask extends MinecraftTask implements Except
 		ExceptionsAndSignaturesDevelopmentFiles excsAndSigs = files.getExceptionsAndSignaturesDevelopmentFiles();
 		BuildFiles buildFiles = excsAndSigs.getBuildFiles();
 
-		if (minecraftVersion.hasSharedObfuscation()) {
+		if (minecraftVersion.canBeMergedAsObfuscated()) {
 			saveExceptions(
 				buildFiles.getBaseMergedExceptionsFile(minecraftVersion),
 				buildFiles.getGeneratedMergedExceptionsFile(minecraftVersion),

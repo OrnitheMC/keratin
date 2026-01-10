@@ -20,7 +20,7 @@ public abstract class MakeBaseExceptionsTask extends MinecraftTask implements Ex
 		GameJarsCache gameJars = files.getGlobalCache().getGameJarsCache();
 		BuildFiles buildFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getBuildFiles();
 
-		if (minecraftVersion.hasSharedObfuscation()) {
+		if (minecraftVersion.canBeMergedAsObfuscated()) {
 			extractExceptions(
 				gameJars.getMergedJar(minecraftVersion),
 				buildFiles.getBaseMergedExceptionsFile(minecraftVersion)

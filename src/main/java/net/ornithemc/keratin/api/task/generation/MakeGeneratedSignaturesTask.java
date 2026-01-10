@@ -27,7 +27,7 @@ public abstract class MakeGeneratedSignaturesTask extends MinecraftTask implemen
 
 		BuildNumbers nestsBuilds = keratin.getNestsBuilds(minecraftVersion);
 
-		if (minecraftVersion.hasSharedObfuscation()) {
+		if (minecraftVersion.canBeMergedAsObfuscated()) {
 			File jar = buildFiles.getGeneratedMergedJar(minecraftVersion);
 			File sigs = buildFiles.getGeneratedMergedSignaturesFile(minecraftVersion);
 			File nests = nestsCache.getMergedNestsFile(minecraftVersion, nestsBuilds);

@@ -35,7 +35,7 @@ public abstract class SaveSignaturesTask extends MinecraftTask implements Except
 		ExceptionsAndSignaturesDevelopmentFiles excsAndSigs = files.getExceptionsAndSignaturesDevelopmentFiles();
 		BuildFiles buildFiles = excsAndSigs.getBuildFiles();
 
-		if (minecraftVersion.hasSharedObfuscation()) {
+		if (minecraftVersion.canBeMergedAsObfuscated()) {
 			saveSignatures(
 				buildFiles.getBaseMergedSignaturesFile(minecraftVersion),
 				buildFiles.getGeneratedMergedSignaturesFile(minecraftVersion),

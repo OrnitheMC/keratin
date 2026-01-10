@@ -27,6 +27,7 @@ import org.objectweb.asm.Type;
 import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.MappingWriter;
+import net.fabricmc.mappingio.adapter.MappingDstNsReorder;
 import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MappingTree.ClassMapping;
 import net.fabricmc.mappingio.tree.MappingTree.MethodArgMapping;
@@ -45,7 +46,7 @@ public interface MappingsFiller {
 
 	static void _propagateMethodMappings(File input, File output, File jar, Collection<File> libraries, String namespace, boolean fillAll) throws IOException {
 		MemoryMappingTree mappings = new MemoryMappingTree();
-		MappingReader.read(input.toPath(), mappings);
+		MappingReader.read(input.toPath(), new MappingDstNsReorder(mappings, List.of(namespace)));
 
 		new MethodMappingPropagator(mappings, namespace, fillAll).run(jar, libraries);
 

@@ -17,7 +17,7 @@ public abstract class SplitGeneratedJarTask extends MinecraftTask implements Jar
 
 		BuildFiles buildFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getBuildFiles();
 
-		if (!minecraftVersion.hasSharedObfuscation() && minecraftVersion.canBeMerged()) {
+		if (minecraftVersion.canBeMergedAsMapped()) {
 			workQueue.submit(SplitJar.class, parameters -> {
 				parameters.getClient().set(buildFiles.getNamedGeneratedClientJar(minecraftVersion));
 				parameters.getServer().set(buildFiles.getNamedGeneratedServerJar(minecraftVersion));

@@ -18,8 +18,9 @@ public abstract class MergeSourceJarsTask extends MinecraftTask implements Merge
 
 		SourceJars sourceJars = files.getExceptionsAndSignaturesDevelopmentFiles().getSourceJars();
 
-		if (!minecraftVersion.hasSharedObfuscation() && minecraftVersion.canBeMerged()) {
+		if (minecraftVersion.canBeMergedAsMapped()) {
 			workQueue.submit(MergeJars.class, parameters -> {
+				parameters.getOverwrite().set(true);
 				parameters.getClient().set(sourceJars.getNamedClientJar(minecraftVersion));
 				parameters.getServer().set(sourceJars.getNamedServerJar(minecraftVersion));
 				parameters.getMerged().set(sourceJars.getNamedMergedJar(minecraftVersion));
