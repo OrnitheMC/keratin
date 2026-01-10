@@ -56,7 +56,7 @@ dependencies {
 	implementation 'net.ornithemc:condor:1.4.5'
 	implementation 'net.ornithemc:exceptor:1.1.0'
 	implementation 'net.ornithemc:preen:1.1.0'
-	implementation 'net.ornithemc:nester:1.4.0'
+	implementation 'net.ornithemc:nester:1.5.0'
 
 	implementation "net.fabricmc.unpick:unpick:2.3.0"
 	implementation "net.fabricmc.unpick:unpick-format-utils:2.3.0"
