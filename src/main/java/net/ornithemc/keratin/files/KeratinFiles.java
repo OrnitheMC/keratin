@@ -11,6 +11,7 @@ public class KeratinFiles extends FileContainer implements KeratinFilesAccess {
 	private final GlobalCache globalCache;
 	private final LocalCache localCache;
 	private final SharedFiles sharedFiles;
+	private final BuildFiles buildFiles;
 	private final IntermediaryDevelopmentFiles intermediaryDevelopmentFiles;
 	private final MappingsDevelopmentFiles mappingsDevelopmentFiles;
 	private final ExceptionsAndSignaturesDevelopmentFiles exceptionsAndSignaturesDevelopmentFiles;
@@ -21,6 +22,7 @@ public class KeratinFiles extends FileContainer implements KeratinFilesAccess {
 		this.globalCache = new GlobalCache(keratin, this);
 		this.localCache = new LocalCache(keratin, this);
 		this.sharedFiles = new SharedFiles(keratin, this);
+		this.buildFiles = new BuildFiles(keratin, this);
 		this.intermediaryDevelopmentFiles = new IntermediaryDevelopmentFiles(keratin, this);
 		this.mappingsDevelopmentFiles = new MappingsDevelopmentFiles(keratin, this);
 		this.exceptionsAndSignaturesDevelopmentFiles = new ExceptionsAndSignaturesDevelopmentFiles(keratin, this);
@@ -30,6 +32,7 @@ public class KeratinFiles extends FileContainer implements KeratinFilesAccess {
 		globalCache.mkdirs();
 		localCache.mkdirs();
 		sharedFiles.mkdirs();
+		buildFiles.mkdirs();
 
 		if (selection == TaskSelection.INTERMEDIARY) {
 			intermediaryDevelopmentFiles.mkdirs();
@@ -55,6 +58,11 @@ public class KeratinFiles extends FileContainer implements KeratinFilesAccess {
 	@Override
 	public SharedFiles getSharedFiles() {
 		return sharedFiles;
+	}
+
+	@Override
+	public BuildFiles getBuildFiles() {
+		return buildFiles;
 	}
 
 	@Override

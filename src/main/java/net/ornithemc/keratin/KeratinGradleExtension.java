@@ -89,6 +89,7 @@ import net.ornithemc.keratin.api.task.mapping.SplitIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.UpdateIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.graph.ExtendGraphTask;
 import net.ornithemc.keratin.api.task.mapping.graph.LoadMappingsFromGraphTask;
+import net.ornithemc.keratin.api.task.mapping.graph.RefreshGraphTask;
 import net.ornithemc.keratin.api.task.mapping.graph.StartGraphTask;
 import net.ornithemc.keratin.api.task.mapping.graph.SaveMappingsIntoGraphTask;
 import net.ornithemc.keratin.api.task.merging.MergeExceptionsTask;
@@ -369,10 +370,22 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		String manifestJson = FileUtils.readFileToString(manifestFile, Charset.defaultCharset());
 
 		versionsManifest = GSON.fromJson(manifestJson, VersionsManifest.class);
-		namedMappingsBuilds = new BuildNumbersCache(this, files.getSharedFiles().getNamedMappingsBuildsJson(), false);
-		exceptionsBuilds = new BuildNumbersCache(this, files.getSharedFiles().getExceptionsBuildsJson(), true);
-		signaturesBuilds = new BuildNumbersCache(this, files.getSharedFiles().getSignaturesBuildsJson(), true);
-		nestsBuilds = new BuildNumbersCache(this, files.getSharedFiles().getNestsBuildsJson(), true);
+		namedMappingsBuilds = new BuildNumbersCache(this,
+			files.getSharedFiles().getNamedMappingsBuildsJson(),
+			files.getLocalCache().getOldNamedMappingsBuildsJson(),
+			false);
+		exceptionsBuilds = new BuildNumbersCache(this,
+			files.getSharedFiles().getExceptionsBuildsJson(),
+			files.getLocalCache().getOldExceptionsBuildsJson(),
+			true);
+		signaturesBuilds = new BuildNumbersCache(this,
+			files.getSharedFiles().getSignaturesBuildsJson(),
+			files.getLocalCache().getOldSignaturesBuildsJson(),
+			true);
+		nestsBuilds = new BuildNumbersCache(this,
+			files.getSharedFiles().getNestsBuildsJson(),
+			files.getLocalCache().getOldNestsBuildsJson(),
+			true);
 
 		configured = true;
 
@@ -714,6 +727,12 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.getClassNamePattern().finalizeValueOnRead();
 				});
 
+				TaskProvider<?> updateNestsBuildsAndGraph = tasks.register("refreshGraph", RefreshGraphTask.class, task -> {
+					task.dependsOn(updateNestsBuilds, processMinecraft);
+					task.getClassNamePattern().convention(classNamePattern);
+					task.getClassNamePattern().finalizeValueOnRead();
+				});
+
 				TaskProvider<?> mapMinecraftToNamed = tasks.register("mapMinecraftToNamed", MapMinecraftTask.class, task -> {
 					task.dependsOn(mergeIntermediaryJars, buildMappings);
 					task.getSourceNamespace().set(Mapper.INTERMEDIARY);
@@ -903,11 +922,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		});
 		tasks.getByName("clean", task -> {
 			task.doFirst(t -> {
-				project.delete(files.getLocalCache().getDirectory());
+				project.delete(files.getBuildFiles().getDirectory());
 			});
 			task.doLast(t -> {
 				try {
-					files.getLocalCache().mkdirs();
+					files.getBuildFiles().mkdirs();
 				} catch (IOException e) {
 					throw new RuntimeException("error creating local cache directory", e);
 				}
@@ -1117,6 +1136,10 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 	public BuildNumbers getSignaturesBuilds(MinecraftVersion minecraftVersion) {
 		return signaturesBuilds.getBuildNumbers(minecraftVersion);
+	}
+
+	public BuildNumbersCache getNestsBuilds() {
+		return nestsBuilds;
 	}
 
 	public BuildNumbers getNestsBuilds(MinecraftVersion minecraftVersion) {

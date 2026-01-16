@@ -29,6 +29,6 @@ public class IntermediaryDevelopmentFiles extends FileContainer implements Inter
 
 	@Override
 	public File getTinyV2MappingsFile(String minecraftVersion) {
-		return files.getLocalCache().file("%s.tiny".formatted(minecraftVersion));
+		return files.getBuildFiles().file("%s.tiny".formatted(minecraftVersion));
 	}
 }

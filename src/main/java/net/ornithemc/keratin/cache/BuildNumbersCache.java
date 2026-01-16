@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
+import com.google.common.io.Files;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -20,18 +21,35 @@ public class BuildNumbersCache {
 	private final File cacheFile;
 	private final boolean respectSplitObfuscation;
 
+	private final BuildNumbersCache oldCache;
+
 	private Map<String, Integer> builds;
 	private Map<MinecraftVersion, BuildNumbers> buildNumbers;
 
-	public BuildNumbersCache(KeratinGradleExtension keratin, File cacheFile, boolean respectSplitObfuscation) {
+	public BuildNumbersCache(KeratinGradleExtension keratin, File cacheFile, File oldCacheFile, boolean respectSplitObfuscation) {
 		this.cacheFile = cacheFile;
 		this.respectSplitObfuscation = respectSplitObfuscation;
+
+		if (oldCacheFile != null) {
+			this.oldCache = new BuildNumbersCache(keratin, oldCacheFile, null, respectSplitObfuscation);
+		} else {
+			this.oldCache = null;
+		}
 
 		this.builds = new HashMap<>();
 		this.buildNumbers = new HashMap<>();
 
 		try {
 			loadFromCache();
+
+			if (this.oldCache != null) {
+				if (this.oldCache.cacheFile.exists()) {
+					this.oldCache.cacheFile.delete();
+				}
+				if (this.cacheFile.exists()) {
+					Files.copy(this.cacheFile, this.oldCache.cacheFile);
+				}
+			}
 		} catch (IOException e) {
 			keratin.getProject().getLogger().lifecycle("error while load build numbers from cache " + cacheFile.getName(), e);
 		}
@@ -54,6 +72,10 @@ public class BuildNumbersCache {
 				}
 			}
 		}
+	}
+
+	public BuildNumbersCache getOldCache() {
+		return oldCache;
 	}
 
 	public int getBuild(String minecraftVersion) {

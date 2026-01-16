@@ -81,4 +81,12 @@ public interface Nester {
 	static void _nestMappings(File input, File output, File nests) throws IOException {
 		MappingUtils.applyNests(Format.TINY_V2, input.toPath(), output.toPath(), nests.toPath());
 	}
+
+	default void unnestMappings(File input, File output, File nests) throws IOException {
+		_unnestMappings(input, output, nests);
+	}
+
+	static void _unnestMappings(File input, File output, File nests) throws IOException {
+		MappingUtils.undoNests(Format.TINY_V2, input.toPath(), output.toPath(), nests.toPath());
+	}
 }

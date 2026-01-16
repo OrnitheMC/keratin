@@ -8,6 +8,8 @@ public interface KeratinFilesAccess {
 
 	SharedFilesAccess getSharedFiles();
 
+	BuildFilesAccess getBuildFiles();
+
 	IntermediaryDevelopmentFilesAccess getIntermediaryDevelopmentFiles();
 
 	MappingsDevelopmentFilesAccess getMappingsDevelopmentFiles();

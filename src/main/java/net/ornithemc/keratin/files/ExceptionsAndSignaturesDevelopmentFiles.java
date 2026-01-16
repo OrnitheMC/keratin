@@ -143,7 +143,7 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 		}
 
 		private File file(String name) {
-			return files.getLocalCache().file(name);
+			return files.getBuildFiles().file(name);
 		}
 
 		@Override
@@ -216,7 +216,7 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 		}
 
 		private File file(String name) {
-			return files.getLocalCache().file(name);
+			return files.getBuildFiles().file(name);
 		}
 
 		@Override
@@ -335,7 +335,7 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 		}
 
 		private File file(String name) {
-			return files.getLocalCache().file(name);
+			return files.getBuildFiles().file(name);
 		}
 
 		@Override
@@ -413,7 +413,7 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 		}
 
 		private File file(String name) {
-			return files.getLocalCache().file(name);
+			return files.getBuildFiles().file(name);
 		}
 
 		@Override
@@ -451,7 +451,7 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 		}
 
 		private File file(String name) {
-			return files.getLocalCache().file(name);
+			return files.getBuildFiles().file(name);
 		}
 
 		@Override

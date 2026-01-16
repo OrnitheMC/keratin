@@ -19,6 +19,26 @@ public class LocalCache extends FileContainer implements FileCache, LocalCacheAc
 
 	@Override
 	public File getDirectory() {
-		return new File(project.getLayout().getBuildDirectory().getAsFile().get(), "%s/gen%d/".formatted(keratin.getLocalCacheDirectory().get(), keratin.getIntermediaryGen().get()));
+		return new File(project.getRootDir(), ".gradle/%s/gen%d/".formatted(keratin.getLocalCacheDirectory().get(), keratin.getIntermediaryGen().get()));
+	}
+
+	@Override
+	public File getOldNamedMappingsBuildsJson() {
+		return file("old-named-mappings-builds.json");
+	}
+
+	@Override
+	public File getOldExceptionsBuildsJson() {
+		return file("old-exceptions-builds.json");
+	}
+
+	@Override
+	public File getOldSignaturesBuildsJson() {
+		return file("old-signatures-builds.json");
+	}
+
+	@Override
+	public File getOldNestsBuildsJson() {
+		return file("old-nests-builds.json");
 	}
 }

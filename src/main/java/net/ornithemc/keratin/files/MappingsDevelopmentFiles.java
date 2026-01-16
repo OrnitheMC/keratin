@@ -73,7 +73,7 @@ public class MappingsDevelopmentFiles extends FileContainer implements MappingsD
 		}
 
 		private File file(String name) {
-			return files.getLocalCache().file(name);
+			return files.getBuildFiles().file(name);
 		}
 
 		@Override

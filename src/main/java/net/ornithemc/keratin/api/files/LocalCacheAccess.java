@@ -6,4 +6,12 @@ public interface LocalCacheAccess {
 
 	File getDirectory();
 
+	File getOldNamedMappingsBuildsJson();
+
+	File getOldExceptionsBuildsJson();
+
+	File getOldSignaturesBuildsJson();
+
+	File getOldNestsBuildsJson();
+
 }
