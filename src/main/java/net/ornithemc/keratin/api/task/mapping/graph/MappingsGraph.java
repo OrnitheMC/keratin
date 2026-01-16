@@ -30,7 +30,7 @@ public interface MappingsGraph {
 		MappingUtils.diffMappings(GRAPH_FORMAT, mappingsA.toPath(), mappingsB.toPath(), diffs.toPath());
 	}
 
-	default void resetGraph(File graphDir, MinecraftVersion rootMinecraftVersion, File rootMinecraftJar, String classNamePattern) throws IOException {
+	default void startGraph(File graphDir, MinecraftVersion rootMinecraftVersion, File rootMinecraftJar, String classNamePattern) throws IOException {
 		File rootMappings = new File(graphDir, "%s.tiny".formatted(rootMinecraftVersion.id()));
 
 		if (graphDir.exists()) {

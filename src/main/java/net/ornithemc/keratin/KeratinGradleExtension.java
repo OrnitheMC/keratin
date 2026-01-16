@@ -89,7 +89,7 @@ import net.ornithemc.keratin.api.task.mapping.SplitIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.UpdateIntermediaryTask;
 import net.ornithemc.keratin.api.task.mapping.graph.ExtendGraphTask;
 import net.ornithemc.keratin.api.task.mapping.graph.LoadMappingsFromGraphTask;
-import net.ornithemc.keratin.api.task.mapping.graph.ResetGraphTask;
+import net.ornithemc.keratin.api.task.mapping.graph.StartGraphTask;
 import net.ornithemc.keratin.api.task.mapping.graph.SaveMappingsIntoGraphTask;
 import net.ornithemc.keratin.api.task.merging.MergeExceptionsTask;
 import net.ornithemc.keratin.api.task.merging.MergeIntermediaryTask;
@@ -703,7 +703,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 				String classNamePattern = "^(net/minecraft/|com/mojang/).*$";
 
-				TaskProvider<?> resetGraph = tasks.register("resetGraph", ResetGraphTask.class, task -> {
+				TaskProvider<?> startGraph = tasks.register("startGraph", StartGraphTask.class, task -> {
 					task.dependsOn(processMinecraft);
 					task.getClassNamePattern().convention(classNamePattern);
 					task.getClassNamePattern().finalizeValueOnRead();

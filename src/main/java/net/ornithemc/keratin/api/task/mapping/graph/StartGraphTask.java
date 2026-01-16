@@ -15,7 +15,7 @@ import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
 import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
 
-public abstract class ResetGraphTask extends MinecraftTask implements MappingsGraph {
+public abstract class StartGraphTask extends MinecraftTask implements MappingsGraph {
 
 	@Internal
 	public abstract Property<String> getClassNamePattern();
@@ -36,6 +36,6 @@ public abstract class ResetGraphTask extends MinecraftTask implements MappingsGr
 		File rootMinecraftJar = processedJars.getProcessedIntermediaryJar(minecraftVersion, processorSettings);
 		String classNamePattern = getClassNamePattern().getOrElse("");
 
-		resetGraph(graphDir, minecraftVersion, rootMinecraftJar, classNamePattern);
+		startGraph(graphDir, minecraftVersion, rootMinecraftJar, classNamePattern);
 	}
 }
