@@ -54,6 +54,10 @@ public abstract class MetaSourcedSingleBuildMavenArtifacts implements MetaSource
 		versions = new HashMap<>();
 		artifacts = new HashMap<>();
 
+		if (!getRepositoryUrl().isPresent()) {
+			return;
+		}
+
 		String metaEndpointUrl = String.format("%s%s",
 			getMetaUrl().get(),
 			getMetaEndpoint().get().formatted(keratin.getIntermediaryGen().get())

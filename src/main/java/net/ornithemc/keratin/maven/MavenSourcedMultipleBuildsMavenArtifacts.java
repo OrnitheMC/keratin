@@ -91,6 +91,10 @@ public abstract class MavenSourcedMultipleBuildsMavenArtifacts implements MavenS
 		versions = new HashMap<>();
 		artifacts = new HashMap<>();
 
+		if (!getRepositoryUrl().isPresent()) {
+			return;
+		}
+
 		String mavenPomUrl = String.format("%s%s/%s/maven-metadata.xml",
 			getRepositoryUrl().get(),
 			getGroupId().get().replace('.', '/'),

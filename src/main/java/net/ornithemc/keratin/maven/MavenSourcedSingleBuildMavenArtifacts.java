@@ -57,6 +57,10 @@ public abstract class MavenSourcedSingleBuildMavenArtifacts implements MavenSour
 		versions = new HashSet<>();
 		artifacts = new HashMap<>();
 
+		if (!getRepositoryUrl().isPresent()) {
+			return;
+		}
+
 		String mavenPomUrl = String.format("%s%s/%s/maven-metadata.xml",
 			getRepositoryUrl().get(),
 			getGroupId().get().replace('.', '/'),
