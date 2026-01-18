@@ -28,7 +28,7 @@ import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 
 public abstract class MavenSourcedMultipleBuildsMavenArtifacts implements MavenSourcedMavenArtifacts, MultipleBuildsMavenArtifacts {
 
-	private static final Pattern VERSION_WITH_BUILD_PATTERN = Pattern.compile("(.+)\\+build\\.(\\d)");
+	private static final Pattern VERSION_WITH_BUILD_PATTERN = Pattern.compile("(.+)\\+build\\.(\\d+)");
 
 	private final KeratinGradleExtension keratin;
 	private Map<String, Set<Integer>> versions;
