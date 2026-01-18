@@ -1,27 +1,21 @@
 package net.ornithemc.keratin.api.task.processing;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Map;
 
 import org.gradle.api.tasks.TaskAction;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.maven.MultipleBuildsMavenArtifacts;
 import net.ornithemc.keratin.api.task.KeratinTask;
-import net.ornithemc.keratin.files.KeratinFiles;
-import net.ornithemc.keratin.files.SharedFiles;
+import net.ornithemc.keratin.cache.BuildNumbersCache;
 
 public abstract class UpdateBuildsCacheTask extends KeratinTask {
 
-	protected void updateCacheFile(File cacheFile, Map<String, Integer> latestBuilds) throws IOException {
-		getProject().getLogger().lifecycle(":updating builds cache " + cacheFile.getName());
+	void updateCache(BuildNumbersCache cache, MultipleBuildsMavenArtifacts artifacts) throws IOException {
+		getProject().getLogger().lifecycle(":updating builds cache " + cache.getFile().getName());
 
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(cacheFile))) {
-			KeratinGradleExtension.GSON.toJson(latestBuilds, bw);
-		}
+		cache.backUp();
+		cache.update(artifacts.getLatestBuilds());
 	}
 
 	public static abstract class NamedMappings extends UpdateBuildsCacheTask {
@@ -29,14 +23,10 @@ public abstract class UpdateBuildsCacheTask extends KeratinTask {
 		@TaskAction
 		public void run() throws IOException {
 			KeratinGradleExtension keratin = getExtension();
-			KeratinFiles files = keratin.getFiles();
-			MultipleBuildsMavenArtifacts namedMappings = keratin.getNamedMappingsArtifacts();
 
-			SharedFiles sharedFiles = files.getSharedFiles();
-
-			updateCacheFile(
-				sharedFiles.getNamedMappingsBuildsJson(),
-				namedMappings.getLatestBuilds()
+			updateCache(
+				keratin.getNamedMappingsBuilds(),
+				keratin.getNamedMappingsArtifacts()
 			);
 		}
 	}
@@ -46,14 +36,10 @@ public abstract class UpdateBuildsCacheTask extends KeratinTask {
 		@TaskAction
 		public void run() throws IOException {
 			KeratinGradleExtension keratin = getExtension();
-			KeratinFiles files = keratin.getFiles();
-			MultipleBuildsMavenArtifacts exceptions = keratin.getExceptionsArtifacts();
 
-			SharedFiles sharedFiles = files.getSharedFiles();
-
-			updateCacheFile(
-				sharedFiles.getExceptionsBuildsJson(),
-				exceptions.getLatestBuilds()
+			updateCache(
+				keratin.getExceptionsBuilds(),
+				keratin.getExceptionsArtifacts()
 			);
 		}
 	}
@@ -63,14 +49,10 @@ public abstract class UpdateBuildsCacheTask extends KeratinTask {
 		@TaskAction
 		public void run() throws IOException {
 			KeratinGradleExtension keratin = getExtension();
-			KeratinFiles files = keratin.getFiles();
-			MultipleBuildsMavenArtifacts signatures = keratin.getSignaturesArtifacts();
 
-			SharedFiles sharedFiles = files.getSharedFiles();
-
-			updateCacheFile(
-				sharedFiles.getSignaturesBuildsJson(),
-				signatures.getLatestBuilds()
+			updateCache(
+				keratin.getSignaturesBuilds(),
+				keratin.getSignaturesArtifacts()
 			);
 		}
 	}
@@ -80,14 +62,10 @@ public abstract class UpdateBuildsCacheTask extends KeratinTask {
 		@TaskAction
 		public void run() throws IOException {
 			KeratinGradleExtension keratin = getExtension();
-			KeratinFiles files = keratin.getFiles();
-			MultipleBuildsMavenArtifacts nests = keratin.getNestsArtifacts();
 
-			SharedFiles sharedFiles = files.getSharedFiles();
-
-			updateCacheFile(
-				sharedFiles.getNestsBuildsJson(),
-				nests.getLatestBuilds()
+			updateCache(
+				keratin.getNestsBuilds(),
+				keratin.getNestsArtifacts()
 			);
 		}
 	}

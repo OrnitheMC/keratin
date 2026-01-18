@@ -372,19 +372,19 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		versionsManifest = GSON.fromJson(manifestJson, VersionsManifest.class);
 		namedMappingsBuilds = new BuildNumbersCache(this,
 			files.getSharedFiles().getNamedMappingsBuildsJson(),
-			files.getLocalCache().getOldNamedMappingsBuildsJson(),
+			files.getLocalCache().getNamedMappingsBuildsJsonBackup(),
 			false);
 		exceptionsBuilds = new BuildNumbersCache(this,
 			files.getSharedFiles().getExceptionsBuildsJson(),
-			files.getLocalCache().getOldExceptionsBuildsJson(),
+			files.getLocalCache().getExceptionsBuildsJsonBackup(),
 			true);
 		signaturesBuilds = new BuildNumbersCache(this,
 			files.getSharedFiles().getSignaturesBuildsJson(),
-			files.getLocalCache().getOldSignaturesBuildsJson(),
+			files.getLocalCache().getSignaturesBuildsJsonBackup(),
 			true);
 		nestsBuilds = new BuildNumbersCache(this,
 			files.getSharedFiles().getNestsBuildsJson(),
-			files.getLocalCache().getOldNestsBuildsJson(),
+			files.getLocalCache().getNestsBuildsJsonBackup(),
 			true);
 
 		configured = true;
@@ -1122,6 +1122,10 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		return versionDetails.get(minecraftVersion);
 	}
 
+	public BuildNumbersCache getNamedMappingsBuilds() {
+		return namedMappingsBuilds;
+	}
+
 	public int getNamedMappingsBuild(String minecraftVersion) {
 		return namedMappingsBuilds.getBuild(minecraftVersion);
 	}
@@ -1130,8 +1134,16 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		return namedMappingsBuilds.getBuildNumbers(minecraftVersion);
 	}
 
+	public BuildNumbersCache getExceptionsBuilds() {
+		return exceptionsBuilds;
+	}
+
 	public BuildNumbers getExceptionsBuilds(MinecraftVersion minecraftVersion) {
 		return exceptionsBuilds.getBuildNumbers(minecraftVersion);
+	}
+
+	public BuildNumbersCache getSignaturesBuilds() {
+		return signaturesBuilds;
 	}
 
 	public BuildNumbers getSignaturesBuilds(MinecraftVersion minecraftVersion) {

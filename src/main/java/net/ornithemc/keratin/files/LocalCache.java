@@ -23,22 +23,22 @@ public class LocalCache extends FileContainer implements FileCache, LocalCacheAc
 	}
 
 	@Override
-	public File getOldNamedMappingsBuildsJson() {
-		return file("old-named-mappings-builds.json");
+	public File getNamedMappingsBuildsJsonBackup() {
+		return file("named-mappings-builds.json.backup");
 	}
 
 	@Override
-	public File getOldExceptionsBuildsJson() {
-		return file("old-exceptions-builds.json");
+	public File getExceptionsBuildsJsonBackup() {
+		return file("exceptions-builds.json.backup");
 	}
 
 	@Override
-	public File getOldSignaturesBuildsJson() {
-		return file("old-signatures-builds.json");
+	public File getSignaturesBuildsJsonBackup() {
+		return file("signatures-builds.json.backup");
 	}
 
 	@Override
-	public File getOldNestsBuildsJson() {
-		return file("old-nests-builds.json");
+	public File getNestsBuildsJsonBackup() {
+		return file("nests-builds.json.backup");
 	}
 }

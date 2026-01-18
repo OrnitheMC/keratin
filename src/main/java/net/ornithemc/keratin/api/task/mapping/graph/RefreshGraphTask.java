@@ -55,7 +55,7 @@ public abstract class RefreshGraphTask extends KeratinTask implements MappingsGr
 
 		loadMappings(graphDir, tmpDir, minecraftVersions);
 		rebuildGraph(graphDir, getClassNamePattern().get());
-		upgradeMappings(graphDir, tmpDir, minecraftVersions, nestsBuilds.getOldCache(), nestsBuilds);
+		upgradeMappings(graphDir, tmpDir, minecraftVersions, nestsBuilds.getBackup(), nestsBuilds);
 
 		FileUtils.forceDelete(tmpDir);
 	}

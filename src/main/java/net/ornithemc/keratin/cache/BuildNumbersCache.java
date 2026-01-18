@@ -1,6 +1,8 @@
 package net.ornithemc.keratin.cache;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -8,7 +10,6 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
-import com.google.common.io.Files;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -21,19 +22,19 @@ public class BuildNumbersCache {
 	private final File cacheFile;
 	private final boolean respectSplitObfuscation;
 
-	private final BuildNumbersCache oldCache;
+	private final BuildNumbersCache backup;
 
 	private Map<String, Integer> builds;
 	private Map<MinecraftVersion, BuildNumbers> buildNumbers;
 
-	public BuildNumbersCache(KeratinGradleExtension keratin, File cacheFile, File oldCacheFile, boolean respectSplitObfuscation) {
+	public BuildNumbersCache(KeratinGradleExtension keratin, File cacheFile, File backupCacheFile, boolean respectSplitObfuscation) {
 		this.cacheFile = cacheFile;
 		this.respectSplitObfuscation = respectSplitObfuscation;
 
-		if (oldCacheFile != null) {
-			this.oldCache = new BuildNumbersCache(keratin, oldCacheFile, null, respectSplitObfuscation);
+		if (backupCacheFile != null) {
+			this.backup = new BuildNumbersCache(keratin, backupCacheFile, null, respectSplitObfuscation);
 		} else {
-			this.oldCache = null;
+			this.backup = null;
 		}
 
 		this.builds = new HashMap<>();
@@ -41,15 +42,6 @@ public class BuildNumbersCache {
 
 		try {
 			loadFromCache();
-
-			if (this.oldCache != null) {
-				if (this.oldCache.cacheFile.exists()) {
-					this.oldCache.cacheFile.delete();
-				}
-				if (this.cacheFile.exists()) {
-					Files.copy(this.cacheFile, this.oldCache.cacheFile);
-				}
-			}
 		} catch (IOException e) {
 			keratin.getProject().getLogger().lifecycle("error while load build numbers from cache " + cacheFile.getName(), e);
 		}
@@ -74,8 +66,29 @@ public class BuildNumbersCache {
 		}
 	}
 
-	public BuildNumbersCache getOldCache() {
-		return oldCache;
+	public void backUp() throws IOException {
+		if (backup != null) {
+			backup.update(builds);
+		}
+	}
+
+	public void update(Map<String, Integer> latestBuilds) throws IOException {
+		builds.clear();
+		buildNumbers.clear();
+
+		builds.putAll(latestBuilds);
+
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(cacheFile))) {
+			KeratinGradleExtension.GSON.toJson(builds, bw);
+		}
+	}
+
+	public File getFile() {
+		return cacheFile;
+	}
+
+	public BuildNumbersCache getBackup() {
+		return backup;
 	}
 
 	public int getBuild(String minecraftVersion) {
