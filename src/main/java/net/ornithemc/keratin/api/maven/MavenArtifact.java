@@ -1,5 +1,8 @@
 package net.ornithemc.keratin.api.maven;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 public record MavenArtifact(String repositoryUrl, String groupId, String artifactId, String version, String classifier, String sha1) {
 
 	public static MavenArtifact of(String maven) {
@@ -30,21 +33,25 @@ public record MavenArtifact(String repositoryUrl, String groupId, String artifac
 		if (sb.charAt(sb.length() - 1) != '/') {
 			sb.append('/');
 		}
-		sb.append(groupId.replace('.', '/'));
+		sb.append(escape(groupId).replace('.', '/'));
 		sb.append('/');
-		sb.append(artifactId);
+		sb.append(escape(artifactId));
 		sb.append('/');
-		sb.append(version);
+		sb.append(escape(version));
 		sb.append('/');
-		sb.append(artifactId);
+		sb.append(escape(artifactId));
 		sb.append('-');
-		sb.append(version);
+		sb.append(escape(version));
 		if (classifier != null) {
 			sb.append('-');
-			sb.append(classifier);
+			sb.append(escape(classifier));
 		}
 		sb.append(".jar");
 
 		return sb.toString();
+	}
+
+	private static String escape(String s) {
+		return URLEncoder.encode(s, StandardCharsets.UTF_8);
 	}
 }
