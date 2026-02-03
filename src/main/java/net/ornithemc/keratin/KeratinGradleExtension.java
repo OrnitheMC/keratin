@@ -550,15 +550,17 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			IntermediaryDevelopmentFiles files = this.files.getIntermediaryDevelopmentFiles();
 
 			for (String minecraftVersion : minecraftVersionIds) {
-				TaskProvider<?> convertMappings = tasks.register("%s_convertMappingsFromTinyV1ToTinyV2".formatted(minecraftVersion), ConvertMappingsFromTinyV1ToTinyV2Task.class, task -> {
+				String minecraftVersionForTasks = sanitizeForTaskName(minecraftVersion);
+
+				TaskProvider<?> convertMappings = tasks.register("%s_convertMappingsFromTinyV1ToTinyV2".formatted(minecraftVersionForTasks), ConvertMappingsFromTinyV1ToTinyV2Task.class, task -> {
 					task.getInput().set(files.getTinyV1MappingsFile(minecraftVersion));
 					task.getOutput().set(files.getTinyV2MappingsFile(minecraftVersion));
 				});
 
-				TaskProvider<BuildMappingsJarTask> tinyV1Jar = tasks.register("%s_tinyV1Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
+				TaskProvider<BuildMappingsJarTask> tinyV1Jar = tasks.register("%s_tinyV1Jar".formatted(minecraftVersionForTasks), BuildMappingsJarTask.class, task -> {
 					task.configure(minecraftVersion, files.getTinyV1MappingsFile(minecraftVersion), "%s-tiny-v1.jar");
 				});
-				TaskProvider<BuildMappingsJarTask> tinyV2Jar = tasks.register("%s_tinyV2Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
+				TaskProvider<BuildMappingsJarTask> tinyV2Jar = tasks.register("%s_tinyV2Jar".formatted(minecraftVersionForTasks), BuildMappingsJarTask.class, task -> {
 					task.dependsOn(convertMappings);
 					task.configure(minecraftVersion, files.getTinyV2MappingsFile(minecraftVersion), "%s-tiny-v2.jar");
 				});
@@ -566,7 +568,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				tasks.getByName("build").dependsOn(tinyV1Jar, tinyV2Jar);
 
 				if (!intermediaryArtifacts.contains(minecraftVersion)) {
-					MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion.replace("~", "")), MavenPublication.class, publication -> {
+					MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersionForTasks), MavenPublication.class, publication -> {
 						publication.setGroupId(this.publications.getGroupId().get());
 						publication.setArtifactId(this.publications.getArtifactId().get());
 						publication.setVersion(minecraftVersion);
@@ -775,7 +777,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				BuildFiles files = this.files.getMappingsDevelopmentFiles().getBuildFiles();
 
 				for (String minecraftVersion : minecraftVersionIds) {
-					TaskProvider<Javadoc> javadoc = tasks.register("%s_javadoc".formatted(minecraftVersion), Javadoc.class, task -> {
+					String minecraftVersionForTasks = sanitizeForTaskName(minecraftVersion);
+
+					TaskProvider<Javadoc> javadoc = tasks.register("%s_javadoc".formatted(minecraftVersionForTasks), Javadoc.class, task -> {
 						task.dependsOn(genFakeSource);
 						task.setFailOnError(false);
 						task.setMaxMemory("2G");
@@ -784,24 +788,24 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 						task.setDestinationDir(files.getJavadocDirectory(minecraftVersion));
 					});
 
-					TaskProvider<?> mergedTinyV1Jar = tasks.register("%s_mergedTinyV1Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
+					TaskProvider<?> mergedTinyV1Jar = tasks.register("%s_mergedTinyV1Jar".formatted(minecraftVersionForTasks), BuildMappingsJarTask.class, task -> {
 						task.dependsOn(buildMappings, buildUnpickDefinitions);
 						task.configure(minecraftVersion, files.getMergedTinyV1MappingsFile(minecraftVersion), files.getUnpickDefinitionsFile(minecraftVersion), "%s-merged-tiny-v1.jar");
 					});
-					TaskProvider<?> tinyV2Jar = tasks.register("%s_tinyV2Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
+					TaskProvider<?> tinyV2Jar = tasks.register("%s_tinyV2Jar".formatted(minecraftVersionForTasks), BuildMappingsJarTask.class, task -> {
 						task.dependsOn(buildMappings, buildUnpickDefinitions);
 						task.configure(minecraftVersion, files.getTinyV2MappingsFile(minecraftVersion), files.getUnpickDefinitionsFile(minecraftVersion), "%s-tiny-v2.jar");
 					});
-					TaskProvider<?> mergedTinyV2Jar = tasks.register("%s_mergedTinyV2Jar".formatted(minecraftVersion), BuildMappingsJarTask.class, task -> {
+					TaskProvider<?> mergedTinyV2Jar = tasks.register("%s_mergedTinyV2Jar".formatted(minecraftVersionForTasks), BuildMappingsJarTask.class, task -> {
 						task.dependsOn(buildMappings, buildUnpickDefinitions);
 						task.configure(minecraftVersion, files.getMergedTinyV2MappingsFile(minecraftVersion), files.getUnpickDefinitionsFile(minecraftVersion), "%s-merged-tiny-v2.jar");
 					});
-					TaskProvider<?> compressTinyV1 = tasks.register("%s_compressTinyV1".formatted(minecraftVersion), CompressMappingsTask.class, task -> {
+					TaskProvider<?> compressTinyV1 = tasks.register("%s_compressTinyV1".formatted(minecraftVersionForTasks), CompressMappingsTask.class, task -> {
 						task.dependsOn(buildMappings);
 						task.getMappings().set(files.getMergedTinyV1MappingsFile(minecraftVersion));
 						task.getCompressedMappings().set(files.getCompressedMergedTinyV1MappingsFile(minecraftVersion));
 					});
-					TaskProvider<?> javadocJar = tasks.register("%s_javadocJar".formatted(minecraftVersion), Jar.class, task -> {
+					TaskProvider<?> javadocJar = tasks.register("%s_javadocJar".formatted(minecraftVersionForTasks), Jar.class, task -> {
 						task.dependsOn(javadoc);
 						task.from(javadoc.get().getDestinationDir());
 						task.getArchiveFileName().set("%s-javadoc.jar".formatted(minecraftVersion));
@@ -814,7 +818,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					int nextBuild = namedMappingsBuilds.getBuild(minecraftVersion) + 1;
 
 					if (nextBuild > latestBuild) {
-						MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersion.replace("~", "")), MavenPublication.class, publication -> {
+						MavenPublication mavenPublication = publications.create("%s_mavenJava".formatted(minecraftVersionForTasks), MavenPublication.class, publication -> {
 							publication.setGroupId(this.publications.getGroupId().get());
 							publication.setArtifactId(this.publications.getArtifactId().get());
 							publication.setVersion("%s+build.%d".formatted(minecraftVersion, nextBuild));
@@ -932,6 +936,10 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				}
 			});
 		});
+	}
+
+	private String sanitizeForTaskName(String s) {
+		return s.replace(' ', '_').replace("~", "");
 	}
 
 	public void checkAccess(String obj) {
