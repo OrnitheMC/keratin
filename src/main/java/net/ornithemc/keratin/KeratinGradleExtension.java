@@ -259,7 +259,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			artifacts.getMetaUrl().set(Constants.META_URL);
 			artifacts.getMetaEndpoint().set(Constants.FEATHER_ENDPOINT);
 			artifacts.getRepositoryUrl().set(Constants.MAVEN_URL);
-			artifacts.getClassifier().set("mergedv2");
+			artifacts.getClassifier().set("v2");
 		});
 		this.metaSourcedExceptionsArtifacts(artifacts -> {
 			artifacts.getMetaUrl().set(Constants.META_URL);
