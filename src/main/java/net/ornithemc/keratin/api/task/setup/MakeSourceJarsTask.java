@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Internal;
 import org.gradle.workers.WorkAction;
 import org.gradle.workers.WorkParameters;
 import org.gradle.workers.WorkQueue;
@@ -29,6 +30,8 @@ import net.ornithemc.keratin.files.GlobalCache.NestsCache;
 import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class MakeSourceJarsTask extends MinecraftTask {
+	@Internal
+	public abstract Property<Boolean> getDisableLvtPatch();
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) throws Exception {
@@ -41,6 +44,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 		LibrariesCache libraries = globalCache.getLibrariesCache();
 		SetupFiles setupFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getSetupFiles();
 		SourceJars sourceJars = files.getExceptionsAndSignaturesDevelopmentFiles().getSourceJars();
+		boolean disableLvtPatch = getDisableLvtPatch().getOrElse(false);
 
 		BuildNumbers nestsBuilds = keratin.getNestsBuilds(minecraftVersion);
 
@@ -52,6 +56,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 				parameters.getExceptions().set(setupFiles.getMergedExceptionsFile(minecraftVersion));
 				parameters.getSignatures().set(setupFiles.getMergedSignaturesFile(minecraftVersion));
 				parameters.getNests().set(nests.getMergedNestsFile(minecraftVersion, nestsBuilds));
+				parameters.getDisableLvtPatch().set(disableLvtPatch);
 			});
 		} else {
 			if (minecraftVersion.hasClient()) {
@@ -62,6 +67,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 					parameters.getExceptions().set(setupFiles.getClientExceptionsFile(minecraftVersion));
 					parameters.getSignatures().set(setupFiles.getClientSignaturesFile(minecraftVersion));
 					parameters.getNests().set(nests.getClientNestsFile(minecraftVersion, nestsBuilds));
+					parameters.getDisableLvtPatch().set(disableLvtPatch);
 				});
 			}
 			if (minecraftVersion.hasServer()) {
@@ -72,6 +78,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 					parameters.getExceptions().set(setupFiles.getServerExceptionsFile(minecraftVersion));
 					parameters.getSignatures().set(setupFiles.getServerSignaturesFile(minecraftVersion));
 					parameters.getNests().set(nests.getServerNestsFile(minecraftVersion, nestsBuilds));
+					parameters.getDisableLvtPatch().set(disableLvtPatch);
 				});
 			}
 		}
@@ -91,6 +98,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 
 		Property<File> getNests();
 
+		Property<Boolean> getDisableLvtPatch();
 	}
 
 	public static abstract class MakeSourceJar implements WorkAction<SourceJarParameters>, Condor, Exceptor, SignaturePatcher, Nester {
@@ -103,6 +111,7 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 			File exceptions = getParameters().getExceptions().get();
 			File signatures = getParameters().getSignatures().get();
 			File nests = getParameters().getNests().getOrNull();
+			boolean disableLvtPatch = getParameters().getDisableLvtPatch().get();
 
 			File tmp1 = new File(output.getParentFile(), ".tmp1." + output.getName());
 			File tmp2 = new File(output.getParentFile(), ".tmp2." + output.getName());
@@ -111,14 +120,16 @@ public abstract class MakeSourceJarsTask extends MinecraftTask {
 				File jarIn = input;
 				File jarOut = tmp1;
 
-				lvtPatchJar(
-					jarIn,
-					jarOut,
-					libraries,
-					true
-				);
+				if (!disableLvtPatch) {
+					lvtPatchJar(
+							jarIn,
+							jarOut,
+							libraries,
+							true
+					);
 
-				jarIn = jarOut;
+					jarIn = jarOut;
+				}
 				jarOut = tmp2;
 
 				exceptionsPatchJar(
