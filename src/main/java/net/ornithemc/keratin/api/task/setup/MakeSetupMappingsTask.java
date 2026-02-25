@@ -23,6 +23,7 @@ import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
 import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
 import net.ornithemc.keratin.files.GlobalCache.MappingsCache;
 import net.ornithemc.keratin.files.GlobalCache.NestsCache;
+import net.ornithemc.mappingutils.MappingUtils;
 import net.ornithemc.keratin.files.KeratinFiles;
 
 public abstract class MakeSetupMappingsTask extends MinecraftTask {
@@ -46,6 +47,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 			int mappingsBuild = keratin.getNamedMappingsBuild(minecraftVersion.id());
 
 			workQueue.submit(MakeSetupMappings.class, parameters -> {
+				parameters.getBrokenInnerClasses().set(minecraftVersion.hasBrokenInnerClasses());
 				parameters.getInputMappings().set(mappings.getMergedIntermediaryMappingsFile(minecraftVersion));
 				parameters.getOutputMappings().set(setupFiles.getMergedIntermediaryMappingsFile(minecraftVersion));
 				parameters.getJar().set(gameJars.getMergedJar(minecraftVersion));
@@ -54,6 +56,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 				parameters.getNestsFile().set(nests.getMergedNestsFile(minecraftVersion, nestsBuilds));
 			});
 			workQueue.submit(MakeSetupMappings.class, parameters -> {
+				parameters.getBrokenInnerClasses().set(false);
 				parameters.getInputMappings().set(mappings.getNamedMappingsFile(minecraftVersion.id(), mappingsBuild));
 				parameters.getOutputMappings().set(setupFiles.getMergedNamedMappingsFile(minecraftVersion));
 				parameters.getJar().set(mappedJars.getIntermediaryMergedJar(minecraftVersion));
@@ -66,6 +69,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 				int mappingsBuild = keratin.getNamedMappingsBuild(minecraftVersion.client().id());
 
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
+					parameters.getBrokenInnerClasses().set(minecraftVersion.hasBrokenInnerClasses());
 					parameters.getInputMappings().set(mappings.getClientIntermediaryMappingsFile(minecraftVersion));
 					parameters.getOutputMappings().set(setupFiles.getClientIntermediaryMappingsFile(minecraftVersion));
 					parameters.getJar().set(gameJars.getClientJar(minecraftVersion));
@@ -74,6 +78,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 					parameters.getNestsFile().set(nests.getClientNestsFile(minecraftVersion, nestsBuilds));
 				});
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
+					parameters.getBrokenInnerClasses().set(false);
 					parameters.getInputMappings().set(mappings.getNamedMappingsFile(minecraftVersion.client().id(), mappingsBuild));
 					parameters.getOutputMappings().set(setupFiles.getClientNamedMappingsFile(minecraftVersion));
 					parameters.getJar().set(mappedJars.getIntermediaryClientJar(minecraftVersion));
@@ -86,6 +91,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 				int mappingsBuild = keratin.getNamedMappingsBuild(minecraftVersion.server().id());
 
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
+					parameters.getBrokenInnerClasses().set(minecraftVersion.hasBrokenInnerClasses());
 					parameters.getInputMappings().set(mappings.getServerIntermediaryMappingsFile(minecraftVersion));
 					parameters.getOutputMappings().set(setupFiles.getServerIntermediaryMappingsFile(minecraftVersion));
 					parameters.getJar().set(gameJars.getServerJar(minecraftVersion));
@@ -94,6 +100,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 					parameters.getNestsFile().set(nests.getServerNestsFile(minecraftVersion, nestsBuilds));
 				});
 				workQueue.submit(MakeSetupMappings.class, parameters -> {
+					parameters.getBrokenInnerClasses().set(false);
 					parameters.getInputMappings().set(mappings.getNamedMappingsFile(minecraftVersion.server().id(), mappingsBuild));
 					parameters.getOutputMappings().set(setupFiles.getServerNamedMappingsFile(minecraftVersion));
 					parameters.getJar().set(mappedJars.getIntermediaryServerJar(minecraftVersion));
@@ -106,6 +113,8 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 	}
 
 	public interface SetupMappingsParameters extends WorkParameters {
+
+		Property<Boolean> getBrokenInnerClasses();
 
 		Property<File> getInputMappings();
 
@@ -125,6 +134,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 
 		@Override
 		public void execute() {
+			
 			File jar = getParameters().getJar().get();
 			Collection<File> libraries = getParameters().getLibraries().get();
 			File input = getParameters().getInputMappings().get();
@@ -145,10 +155,14 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 			}
 
 			if (nests != null) {
+				MappingUtils.parseInnerClasses = !getParameters().getBrokenInnerClasses().get();
+
 				try {
 					nestMappings(output, output, nests);
 				} catch (IOException e) {
-					throw new RuntimeException("error while running nester", e);
+					throw new RuntimeException("error while running nester " + getParameters().getBrokenInnerClasses().get(), e);
+				} finally {
+					MappingUtils.parseInnerClasses = true;
 				}
 			}
 		}
