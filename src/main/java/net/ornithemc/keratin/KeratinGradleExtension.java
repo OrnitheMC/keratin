@@ -530,6 +530,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				task.getNameLength().set(7);
 
 				task.configureMinecraftVersion(minecraftVersion -> {
+					// default obfuscation pattern: no uppercase letters
+					task.getObfuscationPatterns().add("^[^A-Z]*$");
+
 					// very old versions are only partially obfuscated
 					// so we provide a very strict obfuscation pattern
 					if (minecraftVersion.hasClient()) {
@@ -540,6 +543,12 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 						} else if (minecraftVersion.client().compareTo("0.31.0") < 0) { // classic
 							task.getObfuscationPatterns().add("^(?:(?!com/mojang/minecraft/MinecraftApplet$).)*");
 						}
+					}
+
+					// some versions have inner class attributes stripped
+					// but class names that still use the $ convention
+					if (minecraftVersion.hasBrokenInnerClasses()) {
+						task.getObfuscationPatterns().add("^.*\\$.*$");
 					}
 				});
 			};

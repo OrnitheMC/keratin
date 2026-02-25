@@ -6,6 +6,7 @@ import org.gradle.api.tasks.Internal;
 
 import net.fabricmc.stitch.util.IntermediaryUtil;
 
+import net.ornithemc.keratin.api.DevelopmentPhase;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 
@@ -56,6 +57,8 @@ public abstract class GenerateIntermediaryTask extends MinecraftTask {
 				options.serverHash(minecraftVersion.server().downloads().server().sha1());
 			else
 				options.serverHash(minecraftVersion.server().downloads().server_zip().sha1());
+		if (minecraftVersion.isIn(DevelopmentPhase.CLASSIC))
+			options.inheritUnobfuscatedNames(true);
 
 		return options;
 	}
