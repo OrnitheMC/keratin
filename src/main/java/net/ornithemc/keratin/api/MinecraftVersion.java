@@ -6,12 +6,23 @@ import net.ornithemc.keratin.Constants;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.manifest.VersionDetails;
 
-public record MinecraftVersion(String id, VersionDetails client, VersionDetails server) implements Comparable<MinecraftVersion> {
+public record MinecraftVersion(String id, DevelopmentPhase developmentPhase, VersionDetails client, VersionDetails server) implements Comparable<MinecraftVersion> {
 
 	public static MinecraftVersion parse(KeratinGradleExtension keratin, String s) {
 		String[] parts = s.split("[&]");
 		String minecraftClientVersion = parts.length == 2 ? parts[0] : s;
 		String minecraftServerVersion = parts.length == 2 ? parts[1] : s;
+
+		DevelopmentPhase developmentPhase = switch (s.charAt(0)) {
+			case 'r' -> DevelopmentPhase.PRE_CLASSIC;
+			case 'c' -> DevelopmentPhase.CLASSIC;
+			case 'i' -> s.charAt(2) == '-' // in- vs inf
+							? DevelopmentPhase.INDEV
+							: DevelopmentPhase.INFDEV;
+			case 'a' -> DevelopmentPhase.ALPHA;
+			case 'b' -> DevelopmentPhase.BETA;
+			default  -> DevelopmentPhase.RELEASE;
+		};
 
 		VersionDetails clientDetails = keratin.getVersionDetails(minecraftClientVersion);
 		VersionDetails serverDetails = keratin.getVersionDetails(minecraftServerVersion);
@@ -35,13 +46,25 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 		clientDetails = clientDetails.client() ? clientDetails : null;
 		serverDetails = serverDetails.server() ? serverDetails : null;
 
-		MinecraftVersion minecraftVersion = new MinecraftVersion(s, clientDetails, serverDetails);
+		MinecraftVersion minecraftVersion = new MinecraftVersion(s, developmentPhase, clientDetails, serverDetails);
 
 		if (minecraftVersion.hasSharedObfuscation() && !minecraftVersion.hasSharedVersioning()) {
 			throw new RuntimeException("Minecraft version " + minecraftVersion.id + " has shared obfuscation but not shared versioning - how?");
 		}
 
 		return minecraftVersion;
+	}
+
+	public boolean isIn(DevelopmentPhase phase) {
+		return developmentPhase == phase;
+	}
+
+	public boolean isBefore(DevelopmentPhase phase) {
+		return developmentPhase.compareTo(phase) < 0;
+	}
+
+	public boolean isAfter(DevelopmentPhase phase) {
+		return developmentPhase.compareTo(phase) > 0;
 	}
 
 	public String clientKey() {
