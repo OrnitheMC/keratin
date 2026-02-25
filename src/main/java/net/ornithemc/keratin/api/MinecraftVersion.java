@@ -124,9 +124,7 @@ public record MinecraftVersion(String id, VersionDetails client, VersionDetails 
 		// we just hard-code these checks because the alternative is to download
 		// the all the jars and check them manually, and just... no
 		return client != null &&
-			((client.compareTo(Constants.SEMVER_c0_0_14a) >= 0 && client.compareTo(Constants.SEMVER_INDEV) < 0)
-				// c0.0.13a-launcher is the odd one out, dunno what's up with that
-				|| client.id().equals(Constants.VERSION_c0_0_13a_launcher));
+			((client.compareTo(Constants.SEMVER_c0_0_14a) >= 0 && client.compareTo(Constants.SEMVER_INDEV) < 0));
 	}
 
 	public boolean hasCommonSide(MinecraftVersion o) {

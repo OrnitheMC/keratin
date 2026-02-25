@@ -537,7 +537,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 							task.getObfuscationPatterns().add("^(?:(?!com/mojang/rubydung/RubyDung$).)*");
 						} else if (minecraftVersion.client().compareTo("0.0.0") < 0) { // late pre-classic
 							task.getObfuscationPatterns().add("^(?:(?!com/mojang/minecraft/RubyDung$).)*");
-						} else if (minecraftVersion.client().compareTo("0.31.0") < 0) {
+						} else if (minecraftVersion.client().compareTo("0.31.0") < 0) { // classic
 							task.getObfuscationPatterns().add("^(?:(?!com/mojang/minecraft/MinecraftApplet$).)*");
 						}
 					}
