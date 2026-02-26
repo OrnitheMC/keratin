@@ -33,6 +33,7 @@ import org.gradle.api.tasks.javadoc.Javadoc;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import net.ornithemc.keratin.api.DevelopmentPhase;
 import net.ornithemc.keratin.api.JarType;
 import net.ornithemc.keratin.api.KeratinGradleExtensionAPI;
 import net.ornithemc.keratin.api.MinecraftVersion;
@@ -542,6 +543,10 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 							task.getObfuscationPatterns().add("^(?:(?!com/mojang/minecraft/RubyDung$).)*");
 						} else if (minecraftVersion.client().compareTo("0.31.0") < 0) { // classic
 							task.getObfuscationPatterns().add("^(?:(?!com/mojang/minecraft/MinecraftApplet$).)*");
+						}
+
+						if (minecraftVersion.isBefore(DevelopmentPhase.INDEV)) {
+							task.getTargetPackage().set("com/mojang/minecraft/unmapped/");
 						}
 					}
 
