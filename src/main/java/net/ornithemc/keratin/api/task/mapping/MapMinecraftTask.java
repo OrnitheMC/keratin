@@ -38,7 +38,7 @@ public abstract class MapMinecraftTask extends MappingTask {
 				parameters.getOverwrite().set(keratin.isCacheInvalid());
 				parameters.getInput().set(fromOfficial ? gameJars.getMergedJar(minecraftVersion) : mappedJars.getIntermediaryMergedJar(minecraftVersion));
 				parameters.getOutput().set(fromOfficial ? mappedJars.getIntermediaryMergedJar(minecraftVersion) : buildFiles.getNamedJar(minecraftVersion.id()));
-				parameters.getMappings().set(fromOfficial ? mappings.getMergedIntermediaryMappingsFile(minecraftVersion) : buildFiles.getMappingsFile(minecraftVersion));
+				parameters.getMappings().set(fromOfficial ? mappings.getMergedIntermediaryMappingsFile(minecraftVersion) : buildFiles.getCompletedMappingsFile(minecraftVersion));
 				parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 				parameters.getSourceNamespace().set(srcNs);
 				parameters.getTargetNamespace().set(dstNs);
@@ -49,7 +49,7 @@ public abstract class MapMinecraftTask extends MappingTask {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getInput().set(fromOfficial ? gameJars.getClientJar(minecraftVersion) : mappedJars.getIntermediaryClientJar(minecraftVersion));
 					parameters.getOutput().set(fromOfficial ? mappedJars.getIntermediaryClientJar(minecraftVersion) : buildFiles.getNamedJar(minecraftVersion.client().id()));
-					parameters.getMappings().set(fromOfficial ? mappings.getClientIntermediaryMappingsFile(minecraftVersion) : buildFiles.getMappingsFile(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? mappings.getClientIntermediaryMappingsFile(minecraftVersion) : buildFiles.getCompletedMappingsFile(minecraftVersion));
 					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion.client().id()));
 					parameters.getSourceNamespace().set(srcNs);
 					parameters.getTargetNamespace().set(dstNs);
@@ -60,7 +60,7 @@ public abstract class MapMinecraftTask extends MappingTask {
 					parameters.getOverwrite().set(keratin.isCacheInvalid());
 					parameters.getInput().set(fromOfficial ? gameJars.getServerJar(minecraftVersion) : mappedJars.getIntermediaryServerJar(minecraftVersion));
 					parameters.getOutput().set(fromOfficial ? mappedJars.getIntermediaryServerJar(minecraftVersion) : buildFiles.getNamedJar(minecraftVersion.server().id()));
-					parameters.getMappings().set(fromOfficial ? mappings.getServerIntermediaryMappingsFile(minecraftVersion) : buildFiles.getMappingsFile(minecraftVersion));
+					parameters.getMappings().set(fromOfficial ? mappings.getServerIntermediaryMappingsFile(minecraftVersion) : buildFiles.getCompletedMappingsFile(minecraftVersion));
 					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion.server().id()));
 					parameters.getSourceNamespace().set(srcNs);
 					parameters.getTargetNamespace().set(dstNs);
