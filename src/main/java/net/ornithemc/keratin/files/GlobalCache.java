@@ -154,7 +154,7 @@ public class GlobalCache extends FileContainer implements FileCache, GlobalCache
 
 		@Override
 		public File getServerJarWithJunk(MinecraftVersion minecraftVersion) {
-			if (!minecraftVersion.hasServerJar()) {
+			if (!minecraftVersion.hasServer()) {
 				throw new IllegalArgumentException("server jar for Minecraft version " + minecraftVersion.id() + " does not exist!");
 			} else {
 				return file("%s-server-with-junk.jar".formatted(minecraftVersion.server().id()));
