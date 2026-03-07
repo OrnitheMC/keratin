@@ -79,15 +79,6 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 			if (!fromClient || !fromServer) {
 				throw new RuntimeException("updating intermediary to a client+server version requires both a client and server to update from!");
 			}
-		} else {
-			for (MinecraftVersion fromMinecraftVersion : fromMinecraftVersions) {
-				if (minecraftVersion.hasClient() && !fromMinecraftVersion.hasClient()) {
-					throw new RuntimeException("updating intermediary to a client-only version requires a client to update from!");
-				}
-				if (minecraftVersion.hasServer() && !fromMinecraftVersion.hasServer()) {
-					throw new RuntimeException("updating intermediary to a server-only version requires a client to update from!");
-				}
-			}
 		}
 
 		BuildNumbers nestsBuilds = keratin.getNestsBuilds(minecraftVersion);
@@ -128,18 +119,33 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 						.addOldJarFile(gameJars.getMergedJar(fromMinecraftVersion))
 						.addOldNests(nests.getMergedNestsFile(fromMinecraftVersion, fromNestsBuilds));
 				} else {
-					if (minecraftVersion.hasClient() && fromMinecraftVersion.hasClient()) {
-						m = keratin.findMatches(JarType.CLIENT, fromMinecraftVersion.client().id(), JarType.CLIENT, minecraftVersion.client().id());
+					JarType fromJar = null;
 
+					if (minecraftVersion.hasClient()) {
+						if (fromMinecraftVersion.hasClient()) {
+							m = keratin.findMatches(fromJar = JarType.CLIENT, fromMinecraftVersion.client().id(), JarType.CLIENT, minecraftVersion.client().id());
+						}
+						if (fromMinecraftVersion.hasServer()) {
+							m = keratin.findMatches(fromJar = JarType.SERVER, fromMinecraftVersion.server().id(), JarType.CLIENT, minecraftVersion.client().id());
+						}
+					}
+					if (minecraftVersion.hasServer()) {
+						if (fromMinecraftVersion.hasServer()) {
+							m = keratin.findMatches(fromJar = JarType.SERVER, fromMinecraftVersion.server().id(), JarType.SERVER, minecraftVersion.server().id());
+						}
+						if (fromMinecraftVersion.hasClient()) {
+							m = keratin.findMatches(fromJar = JarType.CLIENT, fromMinecraftVersion.client().id(), JarType.SERVER, minecraftVersion.server().id());
+						}
+					}
+
+					if (fromJar == JarType.CLIENT) {
 						args
 							.addOldJarFile(gameJars.getClientJar(fromMinecraftVersion))
 							.addOldNests(fromMinecraftVersion.canBeMerged()
 								? nests.getMergedNestsFile(fromMinecraftVersion, fromNestsBuilds)
 								: nests.getClientNestsFile(fromMinecraftVersion, fromNestsBuilds));
 					}
-					if (minecraftVersion.hasServer() && fromMinecraftVersion.hasServer()) {
-						m = keratin.findMatches(JarType.SERVER, fromMinecraftVersion.server().id(), JarType.SERVER, minecraftVersion.server().id());
-
+					if (fromJar == JarType.SERVER) {
 						args
 							.addOldJarFile(gameJars.getServerJar(fromMinecraftVersion))
 							.addOldNests(fromMinecraftVersion.canBeMerged()
