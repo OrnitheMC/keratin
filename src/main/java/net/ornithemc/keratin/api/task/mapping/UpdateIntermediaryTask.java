@@ -141,14 +141,14 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 					if (fromJar == JarType.CLIENT) {
 						args
 							.addOldJarFile(gameJars.getClientJar(fromMinecraftVersion))
-							.addOldNests(fromMinecraftVersion.canBeMerged()
+							.addOldNests(fromMinecraftVersion.hasSharedObfuscation()
 								? nests.getMergedNestsFile(fromMinecraftVersion, fromNestsBuilds)
 								: nests.getClientNestsFile(fromMinecraftVersion, fromNestsBuilds));
 					}
 					if (fromJar == JarType.SERVER) {
 						args
 							.addOldJarFile(gameJars.getServerJar(fromMinecraftVersion))
-							.addOldNests(fromMinecraftVersion.canBeMerged()
+							.addOldNests(fromMinecraftVersion.hasSharedObfuscation()
 								? nests.getMergedNestsFile(fromMinecraftVersion, fromNestsBuilds)
 								: nests.getServerNestsFile(fromMinecraftVersion, fromNestsBuilds));
 					}
@@ -194,82 +194,75 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 				args.clientServerMatchesFile(m.file(), m.inverted());
 			}
 
-			if (fromMinecraftVersions.size() == 1 && fromMinecraftVersions.get(0).hasSharedObfuscation()) {
-				MinecraftVersion fromMinecraftVersion = fromMinecraftVersions.get(0);
-				BuildNumbers fromNestsBuilds = keratin.getNestsBuilds(fromMinecraftVersion);
+			MinecraftVersion fromClientVersion = null;
+			MinecraftVersion fromServerVersion = null;
+			boolean useMergedJarForFromVersion = false;
 
-				args
-					.oldJarFile(gameJars.getMergedJar(fromMinecraftVersion))
-					.oldNests(nests.getMergedNestsFile(fromMinecraftVersion, fromNestsBuilds))
-					.oldCheckSerializable(fromMinecraftVersion.usesSerializableForLevelSaving())
-					.oldIntermediaryFile(intermediary.getTinyV1MappingsFile(fromMinecraftVersion.id()));
+			if (fromMinecraftVersions.size() == 1) {
+				MinecraftVersion fromMinecraftVersion = fromMinecraftVersions.get(0);
+
+				if (minecraftVersion.hasClient() && fromMinecraftVersion.hasClient()) {
+					fromClientVersion = fromMinecraftVersion;
+				}
+				if (minecraftVersion.hasServer() && fromMinecraftVersion.hasServer()) {
+					fromServerVersion = fromMinecraftVersion;
+				}
+
+				useMergedJarForFromVersion = fromMinecraftVersion.canBeMergedAsObfuscated();
+			}
+			if (fromMinecraftVersions.size() == 2) {
+				MinecraftVersion fromMinecraftVersion0 = fromMinecraftVersions.get(0);
+				MinecraftVersion fromMinecraftVersion1 = fromMinecraftVersions.get(1);
 
 				if (minecraftVersion.hasClient()) {
-					Matches m = keratin.findMatches(JarType.MERGED, fromMinecraftVersion.id(), JarType.CLIENT, minecraftVersion.client().id());
-					args.clientMatchesFile(m.file(), m.inverted());
+					if (fromMinecraftVersion0.hasClient() && fromMinecraftVersion1.hasServer()) {
+						fromClientVersion = fromMinecraftVersion0;
+					}
+					if (fromMinecraftVersion1.hasClient() && fromMinecraftVersion0.hasServer()) {
+						fromClientVersion = fromMinecraftVersion1;
+					}
 				}
 				if (minecraftVersion.hasServer()) {
-					Matches m = keratin.findMatches(JarType.MERGED, fromMinecraftVersion.id(), JarType.SERVER, minecraftVersion.server().id());
-					args.serverMatchesFile(m.file(), m.inverted());
-				}
-			} else {
-				MinecraftVersion fromClientVersion = null;
-				MinecraftVersion fromServerVersion = null;
-
-				if (fromMinecraftVersions.size() == 1) {
-					MinecraftVersion fromMinecraftVersion = fromMinecraftVersions.get(0);
-
-					if (minecraftVersion.hasClient() && fromMinecraftVersion.hasClient()) {
-						fromClientVersion = fromMinecraftVersion;
+					if (fromMinecraftVersion0.hasServer() && fromMinecraftVersion1.hasClient()) {
+						fromServerVersion = fromMinecraftVersion0;
 					}
-					if (minecraftVersion.hasServer() && fromMinecraftVersion.hasServer()) {
-						fromServerVersion = fromMinecraftVersion;
+					if (fromMinecraftVersion1.hasServer() && fromMinecraftVersion0.hasClient()) {
+						fromServerVersion = fromMinecraftVersion1;
 					}
 				}
-				if (fromMinecraftVersions.size() == 2) {
-					MinecraftVersion fromMinecraftVersion0 = fromMinecraftVersions.get(0);
-					MinecraftVersion fromMinecraftVersion1 = fromMinecraftVersions.get(1);
+			}
 
-					if (minecraftVersion.hasClient()) {
-						if (fromMinecraftVersion0.hasClient() && fromMinecraftVersion1.hasServer()) {
-							fromClientVersion = fromMinecraftVersion0;
-						}
-						if (fromMinecraftVersion1.hasClient() && fromMinecraftVersion0.hasServer()) {
-							fromClientVersion = fromMinecraftVersion1;
-						}
-					}
-					if (minecraftVersion.hasServer()) {
-						if (fromMinecraftVersion0.hasServer() && fromMinecraftVersion1.hasClient()) {
-							fromServerVersion = fromMinecraftVersion0;
-						}
-						if (fromMinecraftVersion1.hasServer() && fromMinecraftVersion0.hasClient()) {
-							fromServerVersion = fromMinecraftVersion1;
-						}
-					}
-				}
+			if (fromClientVersion != null) {
+				BuildNumbers fromNestsBuilds = keratin.getNestsBuilds(fromClientVersion);
+				JarType fromJar = useMergedJarForFromVersion ? JarType.MERGED : JarType.CLIENT;
+				Matches m = keratin.findMatches(fromJar, fromClientVersion.client().id(), JarType.CLIENT, minecraftVersion.client().id());
 
-				if (fromClientVersion != null) {
-					BuildNumbers fromNestsBuilds = keratin.getNestsBuilds(fromClientVersion);
-					Matches m = keratin.findMatches(JarType.CLIENT, fromClientVersion.client().id(), JarType.CLIENT, minecraftVersion.client().id());
+				args
+					.oldClientJarFile(useMergedJarForFromVersion
+						? gameJars.getMergedJar(fromClientVersion)
+						: gameJars.getClientJar(fromClientVersion))
+					.oldClientNests(fromClientVersion.hasSharedObfuscation()
+						? nests.getMergedNestsFile(fromClientVersion, fromNestsBuilds)
+						: nests.getClientNestsFile(fromClientVersion, fromNestsBuilds))
+					.oldClientCheckSerializable(fromClientVersion.usesSerializableForLevelSaving())
+					.oldClientIntermediaryFile(intermediary.getTinyV1MappingsFile(fromClientVersion.client().id()))
+					.clientMatchesFile(m.file(), m.inverted());
+			}
+			if (fromServerVersion != null) {
+				BuildNumbers fromNestsBuilds = keratin.getNestsBuilds(fromServerVersion);
+				JarType fromJar = useMergedJarForFromVersion ? JarType.MERGED : JarType.SERVER;
+				Matches m = keratin.findMatches(fromJar, fromServerVersion.server().id(), JarType.SERVER, minecraftVersion.server().id());
 
-					args
-						.oldClientJarFile(gameJars.getClientJar(fromClientVersion))
-						.oldClientNests(nests.getClientNestsFile(fromClientVersion, fromNestsBuilds))
-						.oldClientCheckSerializable(fromClientVersion.usesSerializableForLevelSaving())
-						.oldClientIntermediaryFile(intermediary.getTinyV1MappingsFile(fromClientVersion.client().id()))
-						.clientMatchesFile(m.file(), m.inverted());
-				}
-				if (fromServerVersion != null) {
-					BuildNumbers fromNestsBuilds = keratin.getNestsBuilds(fromServerVersion);
-					Matches m = keratin.findMatches(JarType.SERVER, fromServerVersion.server().id(), JarType.SERVER, minecraftVersion.server().id());
-
-					args
-						.oldServerJarFile(gameJars.getServerJar(fromServerVersion))
-						.oldServerNests(nests.getServerNestsFile(fromServerVersion, fromNestsBuilds))
-						.oldServerCheckSerializable(fromServerVersion.usesSerializableForLevelSaving())
-						.oldServerIntermediaryFile(intermediary.getTinyV1MappingsFile(fromServerVersion.server().id()))
-						.serverMatchesFile(m.file(), m.inverted());
-				}
+				args
+					.oldServerJarFile(useMergedJarForFromVersion
+						? gameJars.getMergedJar(fromServerVersion)
+						: gameJars.getServerJar(fromServerVersion))
+					.oldServerNests(fromServerVersion.hasSharedObfuscation()
+						? nests.getMergedNestsFile(fromServerVersion, fromNestsBuilds)
+						: nests.getServerNestsFile(fromServerVersion, fromNestsBuilds))
+					.oldServerCheckSerializable(fromServerVersion.usesSerializableForLevelSaving())
+					.oldServerIntermediaryFile(intermediary.getTinyV1MappingsFile(fromServerVersion.server().id()))
+					.serverMatchesFile(m.file(), m.inverted());
 			}
 
 			IntermediaryUtil.generateMappings(args.build());
