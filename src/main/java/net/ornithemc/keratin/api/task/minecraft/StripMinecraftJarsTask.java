@@ -1,13 +1,15 @@
 package net.ornithemc.keratin.api.task.minecraft;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.util.Enumeration;
 import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.gradle.api.provider.Property;
 import org.gradle.workers.WorkAction;
@@ -103,8 +105,13 @@ public abstract class StripMinecraftJarsTask extends MinecraftTask {
 				byte[] buffer = new byte[4096];
 				int read = 0;
 
-				try (JarInputStream jis = new JarInputStream(new FileInputStream(input))) {
-					for (JarEntry entry; (entry = jis.getNextJarEntry()) != null; ) {
+				// JarInputStream was used before, but it could not read b1.3-demo
+				// ZipFile did manage to read that jar properly so we're using that
+				try (ZipFile jar = new ZipFile(input)) {
+					Enumeration<? extends ZipEntry> entries = jar.entries();
+
+					while (entries.hasMoreElements()) {
+						ZipEntry entry = entries.nextElement();
 						String fileName = entry.getName();
 
 						if (!fileName.endsWith(".class")) {
@@ -119,8 +126,10 @@ public abstract class StripMinecraftJarsTask extends MinecraftTask {
 
 						jos.putNextEntry(new JarEntry(entry.getName()));
 
-						while ((read = jis.read(buffer)) > 0) {
-							jos.write(buffer, 0, read);
+						try (InputStream is = jar.getInputStream(entry)) {
+							while ((read = is.read(buffer)) > 0) {
+								jos.write(buffer, 0, read);
+							}
 						}
 
 						jos.flush();
