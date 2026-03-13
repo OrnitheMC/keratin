@@ -1,7 +1,7 @@
 package net.ornithemc.keratin.api.maven;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public record MavenArtifact(String repositoryUrl, String groupId, String artifactId, String version, String classifier, String sha1) {
 
@@ -27,31 +27,41 @@ public record MavenArtifact(String repositoryUrl, String groupId, String artifac
 	}
 
 	public String url() {
+		URI base = URI.create(repositoryUrl);
+
+		String scheme = base.getScheme();
+		String host = base.getHost();
+		String path = base.getPath();
+
 		StringBuilder sb = new StringBuilder();
 
-		sb.append(repositoryUrl);
-		if (sb.charAt(sb.length() - 1) != '/') {
-			sb.append('/');
+		if (path != null) {
+			sb.append(path);
 		}
-		sb.append(escape(groupId).replace('.', '/'));
 		sb.append('/');
-		sb.append(escape(artifactId));
+		sb.append(groupId.replace('.', '/'));
 		sb.append('/');
-		sb.append(escape(version));
+		sb.append(artifactId);
 		sb.append('/');
-		sb.append(escape(artifactId));
+		sb.append(version);
+		sb.append('/');
+		sb.append(artifactId);
 		sb.append('-');
-		sb.append(escape(version));
+		sb.append(version);
 		if (classifier != null) {
 			sb.append('-');
-			sb.append(escape(classifier));
+			sb.append(classifier);
 		}
 		sb.append(".jar");
 
-		return sb.toString();
-	}
+		path = sb.toString();
 
-	private static String escape(String s) {
-		return URLEncoder.encode(s, StandardCharsets.UTF_8);
+		try {
+			// this feels super hacky and dumb but seemingly there's
+			// no utility in the JDK for encoding url path segments???
+			return new URI(scheme, host, path, null).toString();
+		} catch (URISyntaxException e) {
+			throw new IllegalStateException("unable to construct valid url", e);
+		}
 	}
 }
