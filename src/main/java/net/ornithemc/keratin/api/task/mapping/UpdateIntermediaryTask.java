@@ -125,7 +125,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 						if (fromMinecraftVersion.hasClient()) {
 							m = keratin.findMatches(fromJar = JarType.CLIENT, fromMinecraftVersion.client().id(), JarType.CLIENT, minecraftVersion.client().id());
 						}
-						if (fromMinecraftVersion.hasServer()) {
+						if (m == null && fromMinecraftVersion.hasServer()) {
 							m = keratin.findMatches(fromJar = JarType.SERVER, fromMinecraftVersion.server().id(), JarType.CLIENT, minecraftVersion.client().id());
 						}
 					}
@@ -133,7 +133,7 @@ public abstract class UpdateIntermediaryTask extends GenerateIntermediaryTask {
 						if (fromMinecraftVersion.hasServer()) {
 							m = keratin.findMatches(fromJar = JarType.SERVER, fromMinecraftVersion.server().id(), JarType.SERVER, minecraftVersion.server().id());
 						}
-						if (fromMinecraftVersion.hasClient()) {
+						if (m == null && fromMinecraftVersion.hasClient()) {
 							m = keratin.findMatches(fromJar = JarType.CLIENT, fromMinecraftVersion.client().id(), JarType.SERVER, minecraftVersion.server().id());
 						}
 					}
