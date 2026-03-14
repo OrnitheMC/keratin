@@ -527,7 +527,6 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			Action<GenerateIntermediaryTask> configureIntermediaryTask = task -> {
 				task.dependsOn(mergeJars, splitNests);
 				task.getTargetNamespace().set(Mapper.INTERMEDIARY);
-				task.getTargetPackage().set("net/minecraft/unmapped/");
 				task.getNameLength().set(7);
 
 				task.configureMinecraftVersion(minecraftVersion -> {
@@ -544,10 +543,14 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 						} else if (minecraftVersion.client().compareTo("0.31.0") < 0) { // classic
 							task.getObfuscationPatterns().add("^(?:(?!com/mojang/minecraft/MinecraftApplet$).)*");
 						}
+					}
 
-						if (minecraftVersion.isBefore(DevelopmentPhase.INDEV)) {
-							task.getTargetPackage().set("com/mojang/minecraft/unmapped/");
-						}
+					// com/mojang/minecraft/ was used up to Classic
+					// net/minecraft/ was used in Indev and later
+					if (minecraftVersion.isAfter(DevelopmentPhase.CLASSIC)) {
+						task.getTargetPackage().set("net/minecraft/unmapped/");
+					} else {
+						task.getTargetPackage().set("com/mojang/minecraft/unmapped/");
 					}
 
 					// some versions have inner class attributes stripped
