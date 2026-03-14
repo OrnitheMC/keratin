@@ -57,12 +57,14 @@ public interface Mapper extends TaskAware {
 			File output = getParameters().getOutput().get();
 			File mappings = getParameters().getMappings().get();
 
+			boolean setParseInners = getParameters().getBrokenInnerClasses().isPresent();
+
 			try {
 				if (KeratinGradleExtension.validateOutput(output, overwrite)) {
 					return;
 				}
 
-				if (getParameters().getBrokenInnerClasses().isPresent()) {
+				if (setParseInners) {
 					MappingUtils.parseInnerClasses = !getParameters().getBrokenInnerClasses().get();
 				}
 
@@ -70,7 +72,9 @@ public interface Mapper extends TaskAware {
 			} catch (IOException e) {
 				throw new UncheckedIOException("error while running mapper", e);
 			} finally {
-				MappingUtils.parseInnerClasses = true;
+				if (setParseInners) {
+					MappingUtils.parseInnerClasses = true;
+				}
 			}
 		}
 
