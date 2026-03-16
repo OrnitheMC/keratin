@@ -289,11 +289,15 @@ public interface MappingsFiller {
 			String method = methodName + methodDescriptor;
 			String specializedMethod = bridgeMethods.get(method);
 
-			if (methods.contains(method) && (fillAll || specialized)) {
-				ClassMapping classMapping = mappings.getClass(className);
+			if (methods.contains(method)) {
 				MethodMapping methodMapping = mappings.getMethod(className, methodName, methodDescriptor);
+	
+				boolean fillMapping = (fillAll || specialized || methodMapping != null);
+				boolean mappingChanged = (methodMapping == null || !Objects.equals(methodDstName, methodMapping.getDstName(namespace)));
 
-				if (methodMapping == null || !Objects.equals(methodDstName, methodMapping.getDstName(namespace))) {
+				if (fillMapping && mappingChanged) {
+					ClassMapping classMapping = mappings.getClass(className);
+
 					mappings.visitClass(className);
 					if (classMapping == null) {
 						mappings.visitDstName(MappedElementKind.CLASS, namespace, className);

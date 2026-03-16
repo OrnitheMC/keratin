@@ -11,6 +11,12 @@ import org.gradle.workers.WorkAction;
 import org.gradle.workers.WorkParameters;
 import org.gradle.workers.WorkQueue;
 
+import net.fabricmc.mappingio.MappingReader;
+import net.fabricmc.mappingio.MappingWriter;
+import net.fabricmc.mappingio.adapter.MappingDstNsReorder;
+import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;
+import net.fabricmc.mappingio.format.MappingFormat;
+import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.fabricmc.nameproposal.MappingNameCompleter;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
@@ -85,6 +91,18 @@ public abstract class CompleteMappingsTask extends MinecraftTask {
 			}
 
 			try {
+				MemoryMappingTree mappingTree = new MemoryMappingTree();
+				MappingReader.read(completedMappings.toPath(), mappingTree);
+				MappingReader.read(intermediary.toPath(), new MappingSourceNsSwitch(mappingTree, Mapper.INTERMEDIARY));
+
+				try (MappingWriter writer = MappingWriter.create(completedMappings.toPath(), MappingFormat.TINY_2_FILE)) {
+					mappingTree.accept(new MappingDstNsReorder(writer, Mapper.NAMED));
+				}
+			} catch (IOException e) {
+				throw new UncheckedIOException("error while joining mappings with intermediary", e);
+			}
+
+			try {
 				fillSpecializedMethodMappings(
 					completedMappings,
 					completedMappings,
@@ -94,6 +112,17 @@ public abstract class CompleteMappingsTask extends MinecraftTask {
 				);
 			} catch (IOException e) {
 				throw new UncheckedIOException("error while running mappings filler", e);
+			}
+
+			try {
+				MemoryMappingTree mappingTree = new MemoryMappingTree();
+				MappingReader.read(completedMappings.toPath(), mappingTree);
+
+				try (MappingWriter writer = MappingWriter.create(completedMappings.toPath(), MappingFormat.TINY_2_FILE)) {
+					mappingTree.accept(new MappingSourceNsSwitch(new MappingSourceNsSwitch(writer, Mapper.INTERMEDIARY), Mapper.NAMED, true));
+				}
+			} catch (IOException e) {
+				throw new UncheckedIOException("error while dropping empty mappings", e);
 			}
 		}
 	}
