@@ -30,6 +30,8 @@ public interface MappingsDevelopmentFilesAccess {
 
 		File getCompletedMappingsFile(MinecraftVersion minecraftVersion);
 
+		File getCompletedProcessedMappingsFile(MinecraftVersion minecraftVersion);
+
 		File getNamedNestsFile(MinecraftVersion minecraftVersion);
 	
 		File getProcessedUnpickDefinitionsFile(MinecraftVersion minecraftVersion);

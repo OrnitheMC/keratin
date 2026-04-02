@@ -768,7 +768,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.getForDecompile().set(true);
 				});
 
-				TaskProvider<?> buildProcessedMappings = tasks.register("buildProcessedMappings", BuildProcessedMappingsTask.class);
+				TaskProvider<?> buildProcessedMappings = tasks.register("buildProcessedMappings", BuildProcessedMappingsTask.class, task -> {
+					task.dependsOn(processMinecraftForDecompile);
+				});
 
 				TaskProvider<?> mapProcessedMinecraftToNamedForDecompile = tasks.register("mapProcessedMinecraftToNamedForDecompile", MapProcessedMinecraftTask.class, task -> {
 					task.dependsOn(unpickMinecraftForDecompile, buildProcessedMappings);

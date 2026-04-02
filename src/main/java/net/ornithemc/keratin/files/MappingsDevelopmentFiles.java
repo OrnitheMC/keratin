@@ -92,6 +92,11 @@ public class MappingsDevelopmentFiles extends FileContainer implements MappingsD
 		}
 
 		@Override
+		public File getCompletedProcessedMappingsFile(MinecraftVersion minecraftVersion) {
+			return file("%s-completed-processed-named.tiny".formatted(minecraftVersion.id()));
+		}
+
+		@Override
 		public File getNamedNestsFile(MinecraftVersion minecraftVersion) {
 			return file("%s-named.nest".formatted(minecraftVersion.id()));
 		}
