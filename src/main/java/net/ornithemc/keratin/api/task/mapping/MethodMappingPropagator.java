@@ -1,4 +1,4 @@
-package net.ornithemc.keratin.api.task.setup;
+package net.ornithemc.keratin.api.task.mapping;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,7 +34,7 @@ import net.fabricmc.mappingio.tree.MappingTree.MethodArgMapping;
 import net.fabricmc.mappingio.tree.MappingTree.MethodMapping;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
-public interface MappingsFiller {
+public interface MethodMappingPropagator {
 
 	default void fillMethodMappings(File input, File output, File jar, Collection<File> libraries, String namespace) throws IOException {
 		_propagateMethodMappings(input, output, jar, libraries, namespace, true);
@@ -48,14 +48,14 @@ public interface MappingsFiller {
 		MemoryMappingTree mappings = new MemoryMappingTree();
 		MappingReader.read(input.toPath(), new MappingDstNsReorder(mappings, List.of(namespace)));
 
-		new MethodMappingPropagator(mappings, namespace, fillAll).run(jar, libraries);
+		new MethodMapper(mappings, namespace, fillAll).run(jar, libraries);
 
 		try (MappingWriter writer = MappingWriter.create(output.toPath(), MappingFormat.TINY_2_FILE)) {
 			mappings.accept(writer);
 		}
 	}
 
-	class MethodMappingPropagator {
+	class MethodMapper {
 
 		private final MemoryMappingTree mappings;
 		private final int namespace;
@@ -68,7 +68,7 @@ public interface MappingsFiller {
 		private final Map<String, Set<String>> methodsByClass;
 		private final Map<String, Map<String, String>> bridgeMethodsByClass;
 
-		public MethodMappingPropagator(MemoryMappingTree mappings, String dstNs, boolean fillAll) throws IOException {
+		public MethodMapper(MemoryMappingTree mappings, String dstNs, boolean fillAll) throws IOException {
 			this.mappings = mappings;
 			this.namespace = this.mappings.getNamespaceId(dstNs);
 			this.named = "named".equals(dstNs);
@@ -339,15 +339,15 @@ public interface MappingsFiller {
 
 			private final boolean main;
 
+			private String className;
+			private Set<String> methods;
+			private Map<String, String> bridgeMethods;
+
 			public ClassParser(int api, boolean main) {
 				super(api);
 
 				this.main = main;
 			}
-
-			private String className;
-			private Set<String> methods;
-			private Map<String, String> bridgeMethods;
 
 			@Override
 			public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {

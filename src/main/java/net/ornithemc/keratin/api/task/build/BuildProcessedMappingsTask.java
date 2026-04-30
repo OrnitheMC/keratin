@@ -23,9 +23,9 @@ import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.settings.ProcessorSettings;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
+import net.ornithemc.keratin.api.task.mapping.MethodMappingPropagator;
 import net.ornithemc.keratin.api.task.mapping.graph.MappingsGraph;
 import net.ornithemc.keratin.api.task.mapping.graph.Validators;
-import net.ornithemc.keratin.api.task.setup.MappingsFiller;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
 import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
 import net.ornithemc.keratin.files.GlobalCache;
@@ -77,7 +77,7 @@ public abstract class BuildProcessedMappingsTask extends MinecraftTask {
 
 	}
 
-	public static abstract class BuildProcessedMappings implements WorkAction<BuildParameters>, MappingsGraph, MappingsFiller {
+	public static abstract class BuildProcessedMappings implements WorkAction<BuildParameters>, MappingsGraph, MethodMappingPropagator {
 
 		@Override
 		public void execute() {

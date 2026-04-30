@@ -13,7 +13,6 @@ import org.gradle.workers.WorkQueue;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
-import net.ornithemc.keratin.api.task.setup.MappingsFiller;
 import net.ornithemc.keratin.files.GlobalCache;
 import net.ornithemc.keratin.files.GlobalCache.GameJarsCache;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
@@ -76,7 +75,7 @@ public abstract class FillIntermediaryTask extends MinecraftTask {
 
 	}
 
-	public static abstract class FillIntermediary implements WorkAction<FillIntermediaryParameters>, MappingsFiller {
+	public static abstract class FillIntermediary implements WorkAction<FillIntermediaryParameters>, MethodMappingPropagator {
 
 		@Override
 		public void execute() {

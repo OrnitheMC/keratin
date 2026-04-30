@@ -23,7 +23,7 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
-import net.ornithemc.keratin.api.task.setup.MappingsFiller;
+import net.ornithemc.keratin.api.task.mapping.MethodMappingPropagator;
 import net.ornithemc.keratin.files.GlobalCache;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
 import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
@@ -69,7 +69,7 @@ public abstract class CompleteMappingsTask extends MinecraftTask {
 
 	}
 
-	public static abstract class CompleteMappings implements WorkAction<BuildParameters>, MappingsFiller {
+	public static abstract class CompleteMappings implements WorkAction<BuildParameters>, MethodMappingPropagator {
 
 		@Override
 		public void execute() {

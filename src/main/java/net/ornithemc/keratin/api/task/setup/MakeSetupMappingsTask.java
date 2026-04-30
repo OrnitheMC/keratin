@@ -15,6 +15,7 @@ import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.settings.BuildNumbers;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
+import net.ornithemc.keratin.api.task.mapping.MethodMappingPropagator;
 import net.ornithemc.keratin.api.task.processing.Nester;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SetupFiles;
 import net.ornithemc.keratin.files.GlobalCache;
@@ -130,7 +131,7 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 
 	}
 
-	public static abstract class MakeSetupMappings implements WorkAction<SetupMappingsParameters>, MappingsFiller, Nester {
+	public static abstract class MakeSetupMappings implements WorkAction<SetupMappingsParameters>, MethodMappingPropagator, Nester {
 
 		@Override
 		public void execute() {
