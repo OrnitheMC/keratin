@@ -22,6 +22,7 @@ import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.settings.ProcessorSettings;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.api.task.mapping.LambdaMethodMapper;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
 import net.ornithemc.keratin.api.task.mapping.MethodMappingPropagator;
 import net.ornithemc.keratin.api.task.mapping.graph.MappingsGraph;
@@ -77,7 +78,7 @@ public abstract class BuildProcessedMappingsTask extends MinecraftTask {
 
 	}
 
-	public static abstract class BuildProcessedMappings implements WorkAction<BuildParameters>, MappingsGraph, MethodMappingPropagator {
+	public static abstract class BuildProcessedMappings implements WorkAction<BuildParameters>, MappingsGraph, MethodMappingPropagator, LambdaMethodMapper {
 
 		@Override
 		public void execute() {
@@ -104,6 +105,17 @@ public abstract class BuildProcessedMappingsTask extends MinecraftTask {
 				);
 			} catch (IOException e) {
 				throw new UncheckedIOException("error while running mappings filler", e);
+			}
+
+			try {
+				fillLambdaMethodMappings(
+					output,
+					output,
+					jar,
+					Mapper.NAMED
+				);
+			} catch (IOException e) {
+				throw new UncheckedIOException("error while running lambda method mapper", e);
 			}
 
 			try {

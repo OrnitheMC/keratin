@@ -22,6 +22,7 @@ import net.fabricmc.nameproposal.MappingNameCompleter;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.api.task.mapping.LambdaMethodMapper;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
 import net.ornithemc.keratin.api.task.mapping.MethodMappingPropagator;
 import net.ornithemc.keratin.files.GlobalCache;
@@ -69,7 +70,7 @@ public abstract class CompleteMappingsTask extends MinecraftTask {
 
 	}
 
-	public static abstract class CompleteMappings implements WorkAction<BuildParameters>, MethodMappingPropagator {
+	public static abstract class CompleteMappings implements WorkAction<BuildParameters>, MethodMappingPropagator, LambdaMethodMapper {
 
 		@Override
 		public void execute() {
@@ -112,6 +113,17 @@ public abstract class CompleteMappingsTask extends MinecraftTask {
 				);
 			} catch (IOException e) {
 				throw new UncheckedIOException("error while running mappings filler", e);
+			}
+
+			try {
+				fillLambdaMethodMappings(
+					completedMappings,
+					completedMappings,
+					jar,
+					Mapper.NAMED
+				);
+			} catch (IOException e) {
+				throw new UncheckedIOException("error while running lambda method mapper", e);
 			}
 
 			try {
