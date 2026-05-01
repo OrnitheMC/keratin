@@ -83,7 +83,7 @@ public interface LambdaMethodMapper {
 				Map<String, List<String>> lambdaMethods = e.getValue();
 
 				ClassMapping cls = mappings.getClass(className);
-				String mappedClassName = cls.getDstName(namespace);
+				String mappedClassName = cls == null ? null : cls.getDstName(namespace);
 
 				int nextLambdaIndex = 0;
 
