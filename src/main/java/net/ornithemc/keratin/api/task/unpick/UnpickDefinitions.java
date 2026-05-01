@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
 
 import org.gradle.api.provider.Property;
 import org.gradle.workers.WorkAction;
@@ -30,7 +29,7 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
-import net.ornithemc.keratin.util.Patterns;
+import net.ornithemc.keratin.api.MinecraftVersionPredicate;
 import net.ornithemc.mappingutils.MappingUtils;
 
 public interface UnpickDefinitions {
@@ -96,51 +95,10 @@ public interface UnpickDefinitions {
 						line = line.substring(3);
 						line = line.trim();
 
-						Matcher mcVersionRange = Patterns.OPTIONAL_MC_VERSION_RANGE.matcher(line);
+						MinecraftVersionPredicate predicate = MinecraftVersionPredicate.Parser.parse(keratin, line);
 
-						if (mcVersionRange.matches()) {
-							String versionA = mcVersionRange.group(1);
-							String versionB = mcVersionRange.group(2);
-
-							MinecraftVersion minecraftVersionA = (versionA == null) ? null : keratin.getMinecraftVersion(versionA);
-							MinecraftVersion minecraftVersionB = (versionB == null) ? null : keratin.getMinecraftVersion(versionB);
-
-							for (int i = 0; i < minecraftVersions.length; i++) {
-								MinecraftVersion minecraftVersion = minecraftVersions[i];
-
-								// if neither of two versions has shared versioning
-								// a common side must exist for comparison to be possible
-								if (!minecraftVersion.hasSharedVersioning()) {
-									if (minecraftVersionA != null && !minecraftVersionA.hasSharedVersioning() && !minecraftVersion.hasCommonSide(minecraftVersionA)) {
-										acceptsLines[i] = false;
-									}
-									if (minecraftVersionB != null && !minecraftVersionB.hasSharedVersioning() && !minecraftVersion.hasCommonSide(minecraftVersionB)) {
-										acceptsLines[i] = false;
-									}
-								}
-		
-								if (acceptsLines[i]) {
-									// skip this check if one of the above already failed
-									if ((minecraftVersionA != null && minecraftVersion.compareTo(minecraftVersionA) < 0)
-										|| (minecraftVersionB != null && minecraftVersion.compareTo(minecraftVersionB) > 0)) {
-										acceptsLines[i] = false; // mc version is not contained in the version range
-									}
-								}
-							}
-						} else {
-							try {
-								MinecraftVersion version = keratin.getMinecraftVersion(line);
-
-								for (int i = 0; i < minecraftVersions.length; i++) {
-									MinecraftVersion minecraftVersion = minecraftVersions[i];
-									
-									if (minecraftVersion.compareTo(version) != 0) {
-										acceptsLines[i] = false;
-									}
-								}
-							} catch (Exception e) {
-								// ignore : this line may just be a comment?
-							}
+						for (int i = 0; i < minecraftVersions.length; i++) {
+							acceptsLines[i] = predicate.test(minecraftVersions[i]);
 						}
 					}
 
