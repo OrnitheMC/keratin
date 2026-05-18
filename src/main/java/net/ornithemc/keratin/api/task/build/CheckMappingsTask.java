@@ -1,6 +1,8 @@
 package net.ornithemc.keratin.api.task.build;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 
 import org.gradle.api.provider.Property;
 import org.gradle.workers.WorkAction;
@@ -12,6 +14,7 @@ import cuchaz.enigma.command.CheckMappingsCommand;
 import net.ornithemc.keratin.KeratinGradleExtension;
 import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.api.task.mapping.Mapper;
 import net.ornithemc.keratin.files.GlobalCache.MappedJarsCache;
 import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles.BuildFiles;
@@ -20,7 +23,6 @@ public abstract class CheckMappingsTask extends MinecraftTask {
 
 	@Override
 	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
-
 		getProject().getLogger().lifecycle(":checking mappings for Minecraft " + minecraftVersion.id());
 
 		KeratinGradleExtension keratin = getExtension();
@@ -43,19 +45,31 @@ public abstract class CheckMappingsTask extends MinecraftTask {
 
 	}
 
-	public static abstract class CheckMappings implements WorkAction<BuildParameters> {
+	public static abstract class CheckMappings implements WorkAction<BuildParameters>, FieldMappingChecker {
 
 		@Override
 		public void execute() {
 			File jar = getParameters().getJar().get();
 			File mappings = getParameters().getMappings().get();
 
+			// we don't actually care about package access errors
+//			try {
+//				new CheckMappingsCommand().run(new String[] {
+//					jar.getAbsolutePath(),
+//					mappings.getAbsolutePath()
+//				});
+//			} catch (Exception e) {
+//				throw new RuntimeException("error while checking package access", e);
+//			}
+
 			try {
-				new CheckMappingsCommand().run(new String[] {
-					jar.getAbsolutePath(),
-					mappings.getAbsolutePath()
-				});
-			} catch (Exception e) {
+				checkFieldMappings(
+					mappings,
+					jar,
+					Mapper.NAMED
+				);
+			} catch (IOException e) {
+				throw new UncheckedIOException("error while checking field mappings", e);
 			}
 		}
 	}
