@@ -12,11 +12,11 @@ import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
 
 public abstract class BuildMappingsJarTask extends Jar {
 
-	public void configure(String minecraftVersion, File mappings, String archiveFileNameFormat) {
-		configure(minecraftVersion, mappings, null, archiveFileNameFormat);
+	public void configure(String minecraftVersion, String mappingName, File mappings, String archiveFileNameFormat) {
+		configure(minecraftVersion, mappingName, mappings, null, archiveFileNameFormat);
 	}
 
-	public void configure(String minecraftVersion, File mappings, File unpickDefinitions, String archiveFileNameFormat) {
+	public void configure(String minecraftVersion, String mappingName, File mappings, File unpickDefinitions, String archiveFileNameFormat) {
 		Project project = getProject();
 		KeratinGradleExtension keratin = KeratinGradleExtension.get(project);
 
@@ -47,6 +47,7 @@ public abstract class BuildMappingsJarTask extends Jar {
 		manifest(manifest -> {
 			manifest.attributes(Map.of(
 				"Minecraft-Version", minecraftVersion,
+				"Mapping-Name", mappingName,
 				"Calamus-Generation", keratin.getIntermediaryGen().get()
 			));
 		});

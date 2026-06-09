@@ -155,6 +155,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	private final Property<String> versionsManifestUrl;
 	private final ListProperty<String> minecraftVersions;
 	private final Property<Integer> intermediaryGen;
+	private final Property<String> mappingName;
 
 	private final Versioned<String, MinecraftVersion> minecraftVersionsById;
 	private final Versioned<String, VersionInfo> versionInfos;
@@ -197,6 +198,8 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		this.intermediaryGen = this.project.getObjects().property(Integer.class);
 		this.intermediaryGen.convention(1);
 		this.intermediaryGen.finalizeValueOnRead();
+		this.mappingName = this.project.getObjects().property(String.class);
+		this.mappingName.finalizeValueOnRead();
 
 		this.minecraftVersionsById = new Versioned<>(minecraftVersionId -> {
 			return MinecraftVersion.parse(this, minecraftVersionId);
@@ -313,6 +316,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 	@Override
 	public Property<Integer> getIntermediaryGen() {
 		return intermediaryGen;
+	}
+
+	@Override
+	public Property<String> getMappingName() {
+		return mappingName;
 	}
 
 	private void findMinecraftVersions(TaskSelection selection, Set<MinecraftVersion> minecraftVersions) throws IOException {
@@ -464,9 +472,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 		publications.getGroupId().convention(project.provider(() -> "net.ornithemc"));
 
 		if (selection == TaskSelection.INTERMEDIARY) {
+			mappingName.convention("Calamus-Gen%d".formatted(intermediaryGen.get()));
 			publications.getArtifactId().convention(project.provider(() -> "calamus-intermediary-gen%d".formatted(intermediaryGen.get())));
 		}
 		if (selection == TaskSelection.MAPPINGS) {
+			mappingName.convention("Feather-Gen%d".formatted(intermediaryGen.get()));
 			publications.getArtifactId().convention(project.provider(() -> "feather-gen%d".formatted(intermediaryGen.get())));
 		}
 
@@ -575,11 +585,11 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				});
 
 				TaskProvider<BuildMappingsJarTask> tinyV1Jar = tasks.register("%s_tinyV1Jar".formatted(minecraftVersionForTasks), BuildMappingsJarTask.class, task -> {
-					task.configure(minecraftVersion, files.getTinyV1MappingsFile(minecraftVersion), "%s-tiny-v1.jar");
+					task.configure(minecraftVersion, this.mappingName.get(), files.getTinyV1MappingsFile(minecraftVersion), "%s-tiny-v1.jar");
 				});
 				TaskProvider<BuildMappingsJarTask> tinyV2Jar = tasks.register("%s_tinyV2Jar".formatted(minecraftVersionForTasks), BuildMappingsJarTask.class, task -> {
 					task.dependsOn(convertMappings);
-					task.configure(minecraftVersion, files.getTinyV2MappingsFile(minecraftVersion), "%s-tiny-v2.jar");
+					task.configure(minecraftVersion, this.mappingName.get(), files.getTinyV2MappingsFile(minecraftVersion), "%s-tiny-v2.jar");
 				});
 
 				tasks.getByName("build").dependsOn(tinyV1Jar, tinyV2Jar);
@@ -809,15 +819,15 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 
 					TaskProvider<?> mergedTinyV1Jar = tasks.register("%s_mergedTinyV1Jar".formatted(minecraftVersionForTasks), BuildMappingsJarTask.class, task -> {
 						task.dependsOn(buildMappings, buildUnpickDefinitions);
-						task.configure(minecraftVersion, files.getMergedTinyV1MappingsFile(minecraftVersion), files.getUnpickDefinitionsFile(minecraftVersion), "%s-merged-tiny-v1.jar");
+						task.configure(minecraftVersion, this.mappingName.get(), files.getMergedTinyV1MappingsFile(minecraftVersion), files.getUnpickDefinitionsFile(minecraftVersion), "%s-merged-tiny-v1.jar");
 					});
 					TaskProvider<?> tinyV2Jar = tasks.register("%s_tinyV2Jar".formatted(minecraftVersionForTasks), BuildMappingsJarTask.class, task -> {
 						task.dependsOn(buildMappings, buildUnpickDefinitions);
-						task.configure(minecraftVersion, files.getTinyV2MappingsFile(minecraftVersion), files.getUnpickDefinitionsFile(minecraftVersion), "%s-tiny-v2.jar");
+						task.configure(minecraftVersion, this.mappingName.get(), files.getTinyV2MappingsFile(minecraftVersion), files.getUnpickDefinitionsFile(minecraftVersion), "%s-tiny-v2.jar");
 					});
 					TaskProvider<?> mergedTinyV2Jar = tasks.register("%s_mergedTinyV2Jar".formatted(minecraftVersionForTasks), BuildMappingsJarTask.class, task -> {
 						task.dependsOn(buildMappings, buildUnpickDefinitions);
-						task.configure(minecraftVersion, files.getMergedTinyV2MappingsFile(minecraftVersion), files.getUnpickDefinitionsFile(minecraftVersion), "%s-merged-tiny-v2.jar");
+						task.configure(minecraftVersion, this.mappingName.get(), files.getMergedTinyV2MappingsFile(minecraftVersion), files.getUnpickDefinitionsFile(minecraftVersion), "%s-merged-tiny-v2.jar");
 					});
 					TaskProvider<?> compressTinyV1 = tasks.register("%s_compressTinyV1".formatted(minecraftVersionForTasks), CompressMappingsTask.class, task -> {
 						task.dependsOn(buildMappings);

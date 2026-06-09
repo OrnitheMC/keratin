@@ -24,6 +24,8 @@ public interface KeratinGradleExtensionAPI {
 
 	Property<Integer> getIntermediaryGen();
 
+	Property<String> getMappingName();
+
 	void tasks(TaskSelection selection) throws Exception;
 
 	KeratinFilesAccess getFiles();
