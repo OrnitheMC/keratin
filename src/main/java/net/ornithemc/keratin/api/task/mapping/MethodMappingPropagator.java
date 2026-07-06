@@ -153,7 +153,7 @@ public interface MethodMappingPropagator {
 
 		private boolean methodExistsInSuperClasses(String className, String method) {
 			for (String superClass : getSuperClasses(className)) {
-				Set<String> methods = methodsByClass.get(className);
+				Set<String> methods = methodsByClass.getOrDefault(superClass, Collections.emptySet());
 
 				if (methods.contains(method) || methodExistsInSuperClasses(superClass, method)) {
 					return true;
@@ -257,12 +257,12 @@ public interface MethodMappingPropagator {
 						for (MethodArgMapping a : methodMapping.getArgs()) {
 							String argDstName = a.getDstName(namespace);
 
-							if (argDstName != null && argDstName.startsWith("p_")) {
+							if (argDstName != null) {
 								while (a.getLvIndex() > methodArgDstNames.size()) {
 									methodArgDstNames.add(null);
 								}
 
-								methodArgDstNames.add(a.getDstName(namespace));
+								methodArgDstNames.add(argDstName);
 							}
 						}
 					}
@@ -295,15 +295,18 @@ public interface MethodMappingPropagator {
 				boolean fillMapping = (fillAll || specialized || methodMapping != null);
 				boolean mappingChanged = (methodMapping == null || !Objects.equals(methodDstName, methodMapping.getDstName(namespace)));
 
-				if (fillMapping && mappingChanged) {
+				if (fillMapping) {
 					ClassMapping classMapping = mappings.getClass(className);
 
 					mappings.visitClass(className);
 					if (classMapping == null) {
 						mappings.visitDstName(MappedElementKind.CLASS, namespace, className);
 					}
+
 					mappings.visitMethod(methodName, methodDescriptor);
-					mappings.visitDstName(MappedElementKind.METHOD, namespace, methodDstName);
+					if (mappingChanged) {
+						mappings.visitDstName(MappedElementKind.METHOD, namespace, methodDstName);
+					}
 
 					for (int lvIndex = 0; lvIndex < methodArgDstNames.size(); lvIndex++) {
 						String methodArgDstName = methodArgDstNames.get(lvIndex);
@@ -357,12 +360,16 @@ public interface MethodMappingPropagator {
 					jarClasses.add(name);
 				}
 
-				superClasses.computeIfAbsent(name, key -> new HashSet<>()).add(superName);
+				if (superName != null) {
+					superClasses.computeIfAbsent(name, key -> new HashSet<>()).add(superName);
+				}
 				for (String itf : interfaces) {
 					superClasses.computeIfAbsent(name, key -> new HashSet<>()).add(itf);
 				}
 
-				subClasses.computeIfAbsent(superName, key -> new HashSet<>()).add(name);
+				if (superName != null) {
+					subClasses.computeIfAbsent(superName, key -> new HashSet<>()).add(name);
+				}
 				for (String itf : interfaces) {
 					subClasses.computeIfAbsent(itf, key -> new HashSet<>()).add(name);
 				}
