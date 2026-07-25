@@ -50,6 +50,8 @@ public interface Mapper extends TaskAware {
 
 	abstract class MapperAction implements WorkAction<MapperParameters> {
 
+		private static final Object LOCK = new Object();
+
 		@Override
 		public void execute() {
 			boolean overwrite = getParameters().getOverwrite().get();
@@ -57,25 +59,39 @@ public interface Mapper extends TaskAware {
 			File output = getParameters().getOutput().get();
 			File mappings = getParameters().getMappings().get();
 
-			boolean setParseInners = getParameters().getBrokenInnerClasses().isPresent();
+			Boolean brokenInnerClasses = getParameters().getBrokenInnerClasses().getOrNull();
 
+			if (shouldSynchronize()) {
+				synchronized (LOCK) {
+					guardRun(overwrite, input, output, mappings, brokenInnerClasses);
+				}
+			} else {
+				guardRun(overwrite, input, output, mappings, brokenInnerClasses);
+			}
+		}
+
+		private void guardRun(boolean overwrite, File input, File output, File mappings, Boolean brokenInnerClasses) {
 			try {
 				if (KeratinGradleExtension.validateOutput(output, overwrite)) {
 					return;
 				}
 
-				if (setParseInners) {
-					MappingUtils.parseInnerClasses = !getParameters().getBrokenInnerClasses().get();
+				if (brokenInnerClasses != null) {
+					MappingUtils.parseInnerClasses = !brokenInnerClasses;
 				}
 
 				run(input, output, mappings);
 			} catch (IOException e) {
 				throw new UncheckedIOException("error while running mapper", e);
 			} finally {
-				if (setParseInners) {
+				if (brokenInnerClasses != null) {
 					MappingUtils.parseInnerClasses = true;
 				}
 			}
+		}
+
+		boolean shouldSynchronize() {
+			return true;
 		}
 
 		abstract void run(File input, File output, File mappings) throws IOException;
@@ -83,6 +99,11 @@ public interface Mapper extends TaskAware {
 	}
 
 	abstract class MapJar extends MapperAction {
+
+		@Override
+		boolean shouldSynchronize() {
+			return false;
+		}
 
 		@Override
 		void run(File input, File output, File mappings) throws IOException {
