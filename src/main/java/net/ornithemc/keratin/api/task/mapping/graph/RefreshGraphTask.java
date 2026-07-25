@@ -28,6 +28,7 @@ import net.ornithemc.keratin.files.GlobalCache.NestsCache;
 import net.ornithemc.keratin.files.GlobalCache.ProcessedJarsCache;
 import net.ornithemc.keratin.files.KeratinFiles;
 import net.ornithemc.keratin.files.MappingsDevelopmentFiles;
+import net.ornithemc.mappingutils.MappingUtils;
 import net.ornithemc.mappingutils.PropagationDirection;
 import net.ornithemc.mappingutils.io.Format;
 import net.ornithemc.mappingutils.io.diff.graph.Version;
@@ -167,17 +168,41 @@ public abstract class RefreshGraphTask extends KeratinTask implements MappingsGr
 				if (oldNests == null) {
 					Files.copy(oldMappings, notNestedMappings);
 				} else {
-					Nester._unnestMappings(oldMappings, notNestedMappings, oldNests);
+					unnestMappings(minecraftVersion, oldMappings, notNestedMappings, oldNests);
 				}
 
 				if (nests == null) {
 					Files.copy(notNestedMappings, mappings);
 				} else {
-					Nester._nestMappings(notNestedMappings, mappings, nests);
+					nestMappings(minecraftVersion, notNestedMappings, mappings, nests);
 				}
 			}
 
 			saveMappings(minecraftVersion.id(), graphDir, mappings, Format.TINY_V2, Validators.insertDummyMappings(), PropagationDirection.NONE);
+		}
+	}
+
+	private static void nestMappings(MinecraftVersion minecraftVersion, File input, File output, File nests) throws IOException {
+		MappingUtils.parseInnerClasses = !minecraftVersion.hasBrokenInnerClasses();
+
+		try {
+			Nester._nestMappings(input, output, nests);
+		} catch (IOException e) {
+			throw new IOException("error while nesting mappings for " + minecraftVersion.id(), e);
+		} finally {
+			MappingUtils.parseInnerClasses = true;
+		}
+	}
+
+	private static void unnestMappings(MinecraftVersion minecraftVersion, File input, File output, File nests) throws IOException {
+		MappingUtils.parseInnerClasses = !minecraftVersion.hasBrokenInnerClasses();
+
+		try {
+			Nester._unnestMappings(input, output, nests);
+		} catch (IOException e) {
+			throw new IOException("error while unnesting mappings for " + minecraftVersion.id(), e);
+		} finally {
+			MappingUtils.parseInnerClasses = true;
 		}
 	}
 }
