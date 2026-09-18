@@ -76,7 +76,7 @@ public abstract class MetaSourcedSingleBuildMavenArtifacts implements MetaSource
 
 						String version = gameVersion;
 						if (!"*".equals(environment)) {
-							gameVersion += "-" + environment;
+							version += "-" + environment;
 						}
 
 						versions.put(version, maven);

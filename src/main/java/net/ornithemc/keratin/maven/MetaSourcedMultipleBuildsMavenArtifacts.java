@@ -107,7 +107,7 @@ public abstract class MetaSourcedMultipleBuildsMavenArtifacts implements MetaSou
 
 						String version = gameVersion;
 						if (!"*".equals(environment)) {
-							gameVersion += "-" + environment;
+							version += "-" + environment;
 						}
 
 						versions.computeIfAbsent(version, key -> new HashMap<>()).put(build, maven);
