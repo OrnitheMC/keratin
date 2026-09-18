@@ -100,9 +100,15 @@ public abstract class MetaSourcedMultipleBuildsMavenArtifacts implements MetaSou
 				for (JsonElement jsonEntry : jsonArray) {
 					if (jsonEntry.isJsonObject()) {
 						JsonObject json = jsonEntry.getAsJsonObject();
-						String version = json.get("gameVersion").getAsString();
+						String gameVersion = json.get("gameVersion").getAsString();
+						String environment = json.get("environment").getAsString();
 						int build = json.get("build").getAsInt();
 						String maven = json.get("maven").getAsString();
+
+						String version = gameVersion;
+						if (!"*".equals(environment)) {
+							gameVersion += "-" + environment;
+						}
 
 						versions.computeIfAbsent(version, key -> new HashMap<>()).put(build, maven);
 					}

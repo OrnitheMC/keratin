@@ -70,8 +70,14 @@ public abstract class MetaSourcedSingleBuildMavenArtifacts implements MetaSource
 				for (JsonElement jsonEntry : jsonArray) {
 					if (jsonEntry.isJsonObject()) {
 						JsonObject json = jsonEntry.getAsJsonObject();
-						String version = json.get("version").getAsString();
+						String gameVersion = json.get("gameVersion").getAsString();
+						String environment = json.get("environment").getAsString();
 						String maven = json.get("maven").getAsString();
+
+						String version = gameVersion;
+						if (!"*".equals(environment)) {
+							gameVersion += "-" + environment;
+						}
 
 						versions.put(version, maven);
 					}
