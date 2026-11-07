@@ -120,7 +120,7 @@ public interface MappingsPatcher {
 		MappingReader.read(namedFile.toPath(), mappingsIn);
 
 		MemoryMappingTree mappingsOut = new MemoryMappingTree();
-		mappingsIn.accept(new MappingNsCompleter(new MappingSourceNsSwitch(new ForwardingMappingVisitor(mappingsOut) {
+		mappingsIn.accept(new MappingNsCompleter(new ForwardingMappingVisitor(new MappingSourceNsSwitch(mappingsOut, Mapper.OFFICIAL, true)) {
 
 			private List<String> newDstIndices = new ArrayList<>();
 
@@ -173,7 +173,7 @@ public interface MappingsPatcher {
 
 				super.visitDstName(targetKind, namespace, name);
 			}
-		}, Mapper.OFFICIAL, true), Map.of(Mapper.NAMED, Mapper.INTERMEDIARY)));
+		}, Map.of(Mapper.NAMED, Mapper.INTERMEDIARY)));
 
 		try (MappingWriter writer = MappingWriter.create(outFile.toPath(), MappingFormat.TINY_2_FILE)) {
 			mappingsOut.accept(writer);

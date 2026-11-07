@@ -28,7 +28,7 @@ public abstract class MakeSourceMappingsTask extends MinecraftTask implements Ma
 				parameters.getIntermediaryMappings().set(setupFiles.getMergedIntermediaryMappingsFile(minecraftVersion));
 				parameters.getNamedMappings().set(setupFiles.getMergedNamedMappingsFile(minecraftVersion));
 				parameters.getMappings().set(sourceMappings.getMergedMappingsFile(minecraftVersion));
-				parameters.getJar().set(setupJars.getMergedJar(minecraftVersion));
+				parameters.getJar().set(setupJars.getIntermediaryMergedJar(minecraftVersion));
 			});
 		} else {
 			if (minecraftVersion.hasClient()) {
@@ -36,7 +36,9 @@ public abstract class MakeSourceMappingsTask extends MinecraftTask implements Ma
 					parameters.getIntermediaryMappings().set(setupFiles.getClientIntermediaryMappingsFile(minecraftVersion));
 					parameters.getNamedMappings().set(setupFiles.getClientNamedMappingsFile(minecraftVersion));
 					parameters.getMappings().set(sourceMappings.getClientMappingsFile(minecraftVersion));
-					parameters.getJar().set(setupJars.getClientJar(minecraftVersion));
+					parameters.getJar().set(minecraftVersion.canBeMergedAsMapped()
+						? setupJars.getIntermediaryMergedJar(minecraftVersion)
+						: setupJars.getIntermediaryClientJar(minecraftVersion));
 				});
 			}
 			if (minecraftVersion.hasServer()) {
@@ -44,7 +46,9 @@ public abstract class MakeSourceMappingsTask extends MinecraftTask implements Ma
 					parameters.getIntermediaryMappings().set(setupFiles.getServerIntermediaryMappingsFile(minecraftVersion));
 					parameters.getNamedMappings().set(setupFiles.getServerNamedMappingsFile(minecraftVersion));
 					parameters.getMappings().set(sourceMappings.getServerMappingsFile(minecraftVersion));
-					parameters.getJar().set(setupJars.getServerJar(minecraftVersion));
+					parameters.getJar().set(minecraftVersion.canBeMergedAsMapped()
+						? setupJars.getIntermediaryMergedJar(minecraftVersion)
+						: setupJars.getIntermediaryServerJar(minecraftVersion));
 				});
 			}
 		}

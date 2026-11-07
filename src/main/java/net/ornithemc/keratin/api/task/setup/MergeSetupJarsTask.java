@@ -1,0 +1,30 @@
+package net.ornithemc.keratin.api.task.setup;
+
+import org.gradle.workers.WorkQueue;
+
+import net.ornithemc.keratin.KeratinGradleExtension;
+import net.ornithemc.keratin.api.MinecraftVersion;
+import net.ornithemc.keratin.api.task.MinecraftTask;
+import net.ornithemc.keratin.api.task.merging.Merger;
+import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SetupJars;
+import net.ornithemc.keratin.files.KeratinFiles;
+
+public abstract class MergeSetupJarsTask extends MinecraftTask implements Merger {
+
+	@Override
+	public void run(WorkQueue workQueue, MinecraftVersion minecraftVersion) {
+		KeratinGradleExtension keratin = getExtension();
+		KeratinFiles files = keratin.getFiles();
+
+		SetupJars sourceJars = files.getExceptionsAndSignaturesDevelopmentFiles().getSetupJars();
+
+		if (minecraftVersion.canBeMergedAsMapped()) {
+			workQueue.submit(MergeJars.class, parameters -> {
+				parameters.getOverwrite().set(true);
+				parameters.getClient().set(sourceJars.getIntermediaryClientJar(minecraftVersion));
+				parameters.getServer().set(sourceJars.getIntermediaryServerJar(minecraftVersion));
+				parameters.getMerged().set(sourceJars.getIntermediaryMergedJar(minecraftVersion));
+			});
+		}
+	}
+}

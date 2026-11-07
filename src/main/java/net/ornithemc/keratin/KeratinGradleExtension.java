@@ -118,6 +118,7 @@ import net.ornithemc.keratin.api.task.setup.MakeSourceMappingsTask;
 import net.ornithemc.keratin.api.task.setup.MakeSourceTask;
 import net.ornithemc.keratin.api.task.setup.MapSetupJarsTask;
 import net.ornithemc.keratin.api.task.setup.MapSourceJarsTask;
+import net.ornithemc.keratin.api.task.setup.MergeSetupJarsTask;
 import net.ornithemc.keratin.api.task.setup.MergeSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.ProcessSourceJarsTask;
 import net.ornithemc.keratin.api.task.setup.SetUpSourceTask;
@@ -890,9 +891,12 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 				TaskProvider<?> mapSetupJars = tasks.register("mapSetupJars", MapSetupJarsTask.class, task -> {
 					task.dependsOn(makeSetupMappings, makeSetupJars);
 				});
+				TaskProvider<?> mergeSetupJars = tasks.register("mergeSetupJars", MergeSetupJarsTask.class, task -> {
+					task.dependsOn(mapSetupJars);
+				});
 
 				TaskProvider<?> makeSourceMappings = tasks.register("makeSourceMappings", MakeSourceMappingsTask.class, task -> {
-					task.dependsOn(makeSetupMappings, makeSetupJars);
+					task.dependsOn(mergeSetupJars);
 				});
 				TaskProvider<?> makeSourceJars = tasks.register("makeSourceJars", MakeSourceJarsTask.class, task -> {
 					task.dependsOn(makeSetupExceptions, makeSetupSignatures, splitNests, mergeJars);

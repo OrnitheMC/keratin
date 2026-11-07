@@ -82,10 +82,14 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 					parameters.getBrokenInnerClasses().set(false);
 					parameters.getInputMappings().set(mappings.getNamedMappingsFile(minecraftVersion.client().id(), mappingsBuild));
 					parameters.getOutputMappings().set(setupFiles.getClientNamedMappingsFile(minecraftVersion));
-					parameters.getJar().set(mappedJars.getIntermediaryClientJar(minecraftVersion));
+					parameters.getJar().set(minecraftVersion.canBeMergedAsMapped()
+						? mappedJars.getIntermediaryMergedJar(minecraftVersion)
+						: mappedJars.getIntermediaryClientJar(minecraftVersion));
 					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 					parameters.getTargetNamespace().set(Mapper.NAMED);
-					parameters.getNestsFile().set(nests.getIntermediaryClientNestsFile(minecraftVersion, nestsBuilds));
+					parameters.getNestsFile().set(minecraftVersion.canBeMergedAsMapped()
+						? nests.getIntermediaryMergedNestsFile(minecraftVersion, nestsBuilds)
+						: nests.getIntermediaryClientNestsFile(minecraftVersion, nestsBuilds));
 				});
 			}
 			if (minecraftVersion.hasServer()) {
@@ -104,10 +108,14 @@ public abstract class MakeSetupMappingsTask extends MinecraftTask {
 					parameters.getBrokenInnerClasses().set(false);
 					parameters.getInputMappings().set(mappings.getNamedMappingsFile(minecraftVersion.server().id(), mappingsBuild));
 					parameters.getOutputMappings().set(setupFiles.getServerNamedMappingsFile(minecraftVersion));
-					parameters.getJar().set(mappedJars.getIntermediaryServerJar(minecraftVersion));
+					parameters.getJar().set(minecraftVersion.canBeMergedAsMapped()
+						? mappedJars.getIntermediaryMergedJar(minecraftVersion)
+						: mappedJars.getIntermediaryServerJar(minecraftVersion));
 					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 					parameters.getTargetNamespace().set(Mapper.NAMED);
-					parameters.getNestsFile().set(nests.getIntermediaryServerNestsFile(minecraftVersion, nestsBuilds));
+					parameters.getNestsFile().set(minecraftVersion.canBeMergedAsMapped()
+						? nests.getIntermediaryMergedNestsFile(minecraftVersion, nestsBuilds)
+						: nests.getIntermediaryServerNestsFile(minecraftVersion, nestsBuilds));
 				});
 			}
 		}
