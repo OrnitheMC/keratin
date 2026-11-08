@@ -1,4 +1,4 @@
-package net.ornithemc.keratin.api.task.setup;
+package net.ornithemc.keratin.api.task.generation;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,10 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
-
-import org.gradle.api.provider.Property;
-import org.gradle.workers.WorkAction;
-import org.gradle.workers.WorkParameters;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -30,42 +26,13 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 import net.ornithemc.keratin.api.task.mapping.Mapper;
 
-public interface MappingsPatcher {
+public interface AnonymousClassReindexer {
 
-	interface MappingsPatcherParameters extends WorkParameters {
-
-		Property<File> getIntermediaryMappings();
-
-		Property<File> getNamedMappings();
-
-		Property<File> getMappings();
-
-		Property<File> getJar();
-
+	default void reindexAnonymousClasses(File jarFile, File mappingsInFile, File mappingsOutFile, String namespace) throws IOException {
+		_reindexAnonymousClasses(jarFile, mappingsInFile, mappingsOutFile, namespace);
 	}
 
-	abstract class PatchMappings implements WorkAction<MappingsPatcherParameters>, MappingsPatcher {
-
-		@Override
-		public void execute() {
-			File intermediary = getParameters().getIntermediaryMappings().get();
-			File named = getParameters().getNamedMappings().get();
-			File out = getParameters().getMappings().get();
-			File jar = getParameters().getJar().get();
-
-			try {
-				patchMappings(jar, intermediary, named, out);
-			} catch (IOException e) {
-				throw new RuntimeException("error while running mappings patcher", e);
-			}
-		}
-	}
-
-	default void patchMappings(File jarFile, File intermediaryFile, File namedFile, File outFile) throws IOException {
-		_patchMappings(jarFile, intermediaryFile, namedFile, outFile);
-	}
-
-	static void _patchMappings(File jarFile, File intermediaryFile, File namedFile, File outFile) throws IOException {
+	static void _reindexAnonymousClasses(File jarFile, File mappingsInFile, File mappingsOutFile, String namespace) throws IOException {
 		Map<String, String> newIndices = new HashMap<>();
 
 		try (JarInputStream js = new JarInputStream(new FileInputStream(jarFile))) {
@@ -115,12 +82,13 @@ public interface MappingsPatcher {
 			}
 		}
 
+		String sourceNs = MappingReader.getNamespaces(mappingsInFile.toPath()).get(0);
+
 		MemoryMappingTree mappingsIn = new MemoryMappingTree();
-		MappingReader.read(intermediaryFile.toPath(), new MappingSourceNsSwitch(mappingsIn, Mapper.INTERMEDIARY));
-		MappingReader.read(namedFile.toPath(), mappingsIn);
+		MappingReader.read(mappingsInFile.toPath(), new MappingSourceNsSwitch(mappingsIn, namespace));
 
 		MemoryMappingTree mappingsOut = new MemoryMappingTree();
-		mappingsIn.accept(new MappingNsCompleter(new ForwardingMappingVisitor(new MappingSourceNsSwitch(mappingsOut, Mapper.OFFICIAL, true)) {
+		mappingsIn.accept(new MappingNsCompleter(new ForwardingMappingVisitor(new MappingSourceNsSwitch(mappingsOut, sourceNs, true)) {
 
 			private List<String> newDstIndices = new ArrayList<>();
 
@@ -175,7 +143,7 @@ public interface MappingsPatcher {
 			}
 		}, Map.of(Mapper.NAMED, Mapper.INTERMEDIARY)));
 
-		try (MappingWriter writer = MappingWriter.create(outFile.toPath(), MappingFormat.TINY_2_FILE)) {
+		try (MappingWriter writer = MappingWriter.create(mappingsOutFile.toPath(), MappingFormat.TINY_2_FILE)) {
 			mappingsOut.accept(writer);
 		}
 	}

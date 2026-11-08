@@ -509,6 +509,33 @@ public class ExceptionsAndSignaturesDevelopmentFiles extends FileContainer imple
 		}
 
 		@Override
+		public File getClientMappingsFile(MinecraftVersion minecraftVersion) {
+			if (!minecraftVersion.hasClient()) {
+				throw new IllegalArgumentException("client mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasServer() && minecraftVersion.hasSharedObfuscation()) {
+				throw new IllegalArgumentException("client mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
+			} else {
+				return file("%s-generated-client.tiny".formatted(minecraftVersion.client().id()));
+			}
+		}
+
+		@Override
+		public File getServerMappingsFile(MinecraftVersion minecraftVersion) {
+			if (!minecraftVersion.hasServer()) {
+				throw new IllegalArgumentException("server mappings for Minecraft version " + minecraftVersion.id() + " do not exist!");
+			} else if (minecraftVersion.hasClient() && minecraftVersion.hasSharedObfuscation()) {
+				throw new IllegalArgumentException("server mappings for Minecraft version " + minecraftVersion.id() + " do not exist: please use the merged mappings!");
+			} else {
+				return file("%s-generated-server.tiny".formatted(minecraftVersion.server().id()));
+			}
+		}
+
+		@Override
+		public File getMergedMappingsFile(MinecraftVersion minecraftVersion) {
+			return file("%s-generated-merged.tiny".formatted(minecraftVersion.id()));
+		}
+
+		@Override
 		public File getGeneratedClientJar(MinecraftVersion minecraftVersion) {
 			if (!minecraftVersion.hasClient()) {
 				throw new IllegalArgumentException("client jar for Minecraft version " + minecraftVersion.id() + " does not exist!");

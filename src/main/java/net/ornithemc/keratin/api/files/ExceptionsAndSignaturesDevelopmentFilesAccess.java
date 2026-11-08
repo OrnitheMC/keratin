@@ -118,6 +118,12 @@ public interface ExceptionsAndSignaturesDevelopmentFilesAccess {
 
 		File getBaseMergedSignaturesFile(MinecraftVersion minecraftVersion);
 
+		File getClientMappingsFile(MinecraftVersion minecraftVersion);
+
+		File getServerMappingsFile(MinecraftVersion minecraftVersion);
+
+		File getMergedMappingsFile(MinecraftVersion minecraftVersion);
+
 		File getGeneratedClientJar(MinecraftVersion minecraftVersion);
 
 		File getGeneratedServerJar(MinecraftVersion minecraftVersion);

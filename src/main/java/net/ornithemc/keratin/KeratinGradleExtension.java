@@ -68,6 +68,7 @@ import net.ornithemc.keratin.api.task.generation.MakeBaseExceptionsTask;
 import net.ornithemc.keratin.api.task.generation.MakeBaseSignaturesTask;
 import net.ornithemc.keratin.api.task.generation.MakeGeneratedExceptionsTask;
 import net.ornithemc.keratin.api.task.generation.MakeGeneratedJarsTask;
+import net.ornithemc.keratin.api.task.generation.MakeGeneratedMappingsTask;
 import net.ornithemc.keratin.api.task.generation.MakeGeneratedSignaturesTask;
 import net.ornithemc.keratin.api.task.generation.MapGeneratedJarsTask;
 import net.ornithemc.keratin.api.task.generation.SaveExceptionsTask;
@@ -925,6 +926,9 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.dependsOn(mergeJars);
 				});
 
+				TaskProvider<?> makeGeneratedMappings = tasks.register("makeGeneratedMappings", MakeGeneratedMappingsTask.class, task -> {
+					task.dependsOn(mergeSetupJars, makeSourceMappings);
+				});
 				TaskProvider<?> makeGeneratedJars = tasks.register("makeGeneratedJars", MakeGeneratedJarsTask.class, task -> {
 					task.dependsOn("build");
 				});
@@ -932,7 +936,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 					task.dependsOn(makeGeneratedJars);
 				});
 				TaskProvider<?> mapGeneratedJars = tasks.register("mapGeneratedJars", MapGeneratedJarsTask.class, task -> {
-					task.dependsOn(makeSourceMappings, splitGeneratedJar);
+					task.dependsOn(makeGeneratedMappings, splitGeneratedJar);
 				});
 
 				TaskProvider<?> makeGeneratedExceptions = tasks.register("makeGeneratedExceptions", MakeGeneratedExceptionsTask.class, task -> {
