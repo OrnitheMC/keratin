@@ -468,7 +468,7 @@ public class KeratinGradleExtension implements KeratinGradleExtensionAPI {
 			Configuration decompileClasspath = configurations.register(Configurations.DECOMPILE_CLASSPATH).get();
 
 			dependencies.add(Configurations.IMPLEMENTATION, "net.fabricmc:fabric-loader:0.15.11");
-			dependencies.add(decompileClasspath.getName(), "org.vineflower:vineflower:1.11.1");
+			dependencies.add(decompileClasspath.getName(), "org.vineflower:vineflower:1.12.0");
 		}
 
 		publications.getGroupId().convention(project.provider(() -> "net.ornithemc"));
