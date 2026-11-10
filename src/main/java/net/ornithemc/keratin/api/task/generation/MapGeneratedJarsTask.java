@@ -7,7 +7,6 @@ import net.ornithemc.keratin.api.MinecraftVersion;
 import net.ornithemc.keratin.api.task.MinecraftTask;
 import net.ornithemc.keratin.api.task.mapping.Mapper;
 import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.BuildFiles;
-import net.ornithemc.keratin.files.ExceptionsAndSignaturesDevelopmentFiles.SourceMappings;
 import net.ornithemc.keratin.files.GlobalCache.LibrariesCache;
 import net.ornithemc.keratin.files.KeratinFiles;
 
@@ -19,7 +18,6 @@ public abstract class MapGeneratedJarsTask extends MinecraftTask implements Mapp
 		KeratinFiles files = keratin.getFiles();
 
 		LibrariesCache libraries = files.getGlobalCache().getLibrariesCache();
-		SourceMappings mappings = files.getExceptionsAndSignaturesDevelopmentFiles().getSourceMappings();
 		BuildFiles buildFiles = files.getExceptionsAndSignaturesDevelopmentFiles().getBuildFiles();
 
 		if (minecraftVersion.canBeMergedAsObfuscated()) {
@@ -27,7 +25,7 @@ public abstract class MapGeneratedJarsTask extends MinecraftTask implements Mapp
 				parameters.getOverwrite().set(true);
 				parameters.getInput().set(buildFiles.getNamedGeneratedMergedJar(minecraftVersion));
 				parameters.getOutput().set(buildFiles.getGeneratedMergedJar(minecraftVersion));
-				parameters.getMappings().set(mappings.getMergedMappingsFile(minecraftVersion));
+				parameters.getMappings().set(buildFiles.getMergedMappingsFile(minecraftVersion));
 				parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 				parameters.getSourceNamespace().set(Mapper.NAMED);
 				parameters.getTargetNamespace().set(Mapper.OFFICIAL);
@@ -38,7 +36,7 @@ public abstract class MapGeneratedJarsTask extends MinecraftTask implements Mapp
 					parameters.getOverwrite().set(true);
 					parameters.getInput().set(buildFiles.getNamedGeneratedClientJar(minecraftVersion));
 					parameters.getOutput().set(buildFiles.getGeneratedClientJar(minecraftVersion));
-					parameters.getMappings().set(mappings.getClientMappingsFile(minecraftVersion));
+					parameters.getMappings().set(buildFiles.getClientMappingsFile(minecraftVersion));
 					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 					parameters.getSourceNamespace().set(Mapper.NAMED);
 					parameters.getTargetNamespace().set(Mapper.OFFICIAL);
@@ -49,7 +47,7 @@ public abstract class MapGeneratedJarsTask extends MinecraftTask implements Mapp
 					parameters.getOverwrite().set(true);
 					parameters.getInput().set(buildFiles.getNamedGeneratedServerJar(minecraftVersion));
 					parameters.getOutput().set(buildFiles.getGeneratedServerJar(minecraftVersion));
-					parameters.getMappings().set(mappings.getServerMappingsFile(minecraftVersion));
+					parameters.getMappings().set(buildFiles.getServerMappingsFile(minecraftVersion));
 					parameters.getLibraries().set(libraries.getLibraries(minecraftVersion));
 					parameters.getSourceNamespace().set(Mapper.NAMED);
 					parameters.getTargetNamespace().set(Mapper.OFFICIAL);
