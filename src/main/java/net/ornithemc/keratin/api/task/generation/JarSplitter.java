@@ -250,11 +250,11 @@ public interface JarSplitter {
 		@Override
 		public void visitOuterClass(String owner, String name, String descriptor) {
 			// anonymous classes do not have the environment annotations,
-			// so we split them based on if their outer class is split
-			if (notClient.contains(owner)) {
+			// so we split them based on if their outer class/method is split
+			if (notClient.contains(owner) || (name != null && descriptor != null && notClient.contains(owner + "." + name + descriptor))) {
 				client = null;
 			}
-			if (notServer.contains(owner)) {
+			if (notServer.contains(owner) || (name != null && descriptor != null && notServer.contains(owner + "." + name + descriptor))) {
 				server = null;
 			}
 
@@ -635,9 +635,11 @@ public interface JarSplitter {
 				private void splitOnSide(String side) {
 					if (!side.equals(CLIENT_SIDE) && c != null) {
 						((ClassNode) client).methods.remove((MethodNode) c);
+						notClient.add(currentClass + "." + name + descriptor);
 					}
 					if (!side.equals(SERVER_SIDE) && s != null) {
 						((ClassNode) server).methods.remove((MethodNode) s);
+						notServer.add(currentClass + "." + name + descriptor);
 					}
 				}
 			};
