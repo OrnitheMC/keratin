@@ -2,6 +2,7 @@ package net.ornithemc.keratin.api.task.setup;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import org.gradle.api.provider.Property;
 import org.gradle.workers.WorkAction;
@@ -10,6 +11,7 @@ import org.gradle.workers.WorkQueue;
 
 import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.MappingWriter;
+import net.fabricmc.mappingio.adapter.MappingNsCompleter;
 import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;
 import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
@@ -79,7 +81,7 @@ public abstract class MakeSourceMappingsTask extends MinecraftTask {
 			try {
 				MemoryMappingTree mappings = new MemoryMappingTree();
 				MappingReader.read(intermediary.toPath(), new MappingSourceNsSwitch(mappings, Mapper.INTERMEDIARY));
-				MappingReader.read(named.toPath(), mappings);
+				MappingReader.read(named.toPath(), new MappingNsCompleter(mappings, Map.of(Mapper.NAMED, Mapper.INTERMEDIARY)));
 
 				try (MappingWriter writer = MappingWriter.create(out.toPath(), MappingFormat.TINY_2_FILE)) {
 					mappings.accept(new MappingSourceNsSwitch(writer, Mapper.OFFICIAL, true));
