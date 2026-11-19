@@ -81,10 +81,10 @@ public abstract class MakeSourceMappingsTask extends MinecraftTask {
 			try {
 				MemoryMappingTree mappings = new MemoryMappingTree();
 				MappingReader.read(intermediary.toPath(), new MappingSourceNsSwitch(mappings, Mapper.INTERMEDIARY));
-				MappingReader.read(named.toPath(), new MappingNsCompleter(mappings, Map.of(Mapper.NAMED, Mapper.INTERMEDIARY)));
+				MappingReader.read(named.toPath(), mappings);
 
 				try (MappingWriter writer = MappingWriter.create(out.toPath(), MappingFormat.TINY_2_FILE)) {
-					mappings.accept(new MappingSourceNsSwitch(writer, Mapper.OFFICIAL, true));
+					mappings.accept(new MappingSourceNsSwitch(new MappingNsCompleter(writer, Map.of(Mapper.NAMED, Mapper.INTERMEDIARY)), Mapper.OFFICIAL, true));
 				}
 			} catch (IOException e) {
 				throw new RuntimeException("error merging intermediary and named mappings mappings", e);
